@@ -1,0 +1,8 @@
+<!DOCTYPE RCC>
+<RCC version="1.0">
+    <qresource>
+        <file alias="settings.svg">icons/sliders-solid.svg</file>
+        <file alias="play.svg">icons/play-solid.svg</file>
+        <file alias="stop.svg">icons/stop-solid.svg</file>
+    </qresource>
+</RCC>
