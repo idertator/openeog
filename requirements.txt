@@ -4,3 +4,5 @@ PySide6-Essentials
 PySide6-stubs
 
 numpy
+scipy
+scikit-learn

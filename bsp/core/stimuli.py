@@ -7,6 +7,16 @@ def horizontal_saccadic_stimulus(
     saccades: int,
     variability: float = 0.05,
 ) -> ndarray:
+    """Generate a horizontal saccadic stimulus
+
+    Args:
+        length (int): Length of the stimulus
+        saccades (int): Number of saccades
+        variability (float, optional): Variability of the saccades. Defaults to 0.05.
+
+    Returns:
+        ndarray: Horizontal saccadic stimulus
+    """
     fixations_count = saccades + 3
     center = length / fixations_count
     delta = int(center * variability)

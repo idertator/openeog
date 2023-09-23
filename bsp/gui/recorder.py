@@ -4,8 +4,7 @@ from numpy import uint16, zeros
 from PySide6.QtCore import QObject, QThreadPool, Signal
 
 from bsp.adc import BSPAdquirer
-from bsp.core.models import Study, Test, TestType
-from bsp.core.stimuli import horizontal_saccadic_stimulus
+from bsp.core import Study, Test, TestType, horizontal_saccadic_stimulus
 
 from .plotter import Plotter
 from .screens import ScreensManager
@@ -14,6 +13,12 @@ from .stimulator import Stimulator
 
 
 class Recorder(QObject):
+    CALIBRATION_SACCADES = 10
+    CALIBRATION_SAMPLES = 20000
+
+    SACCADIC_SAMPLES = 40000
+    SACCADES_COUNT = 20
+
     started = Signal()
     stopped = Signal()
     finished = Signal()
@@ -68,67 +73,67 @@ class Recorder(QObject):
                 "test_type": TestType.HorizontalCalibration,
                 "angle": 30,
                 "horizontal_stimuli": horizontal_saccadic_stimulus(
-                    length=20000,
-                    saccades=10,
+                    length=self.CALIBRATION_SAMPLES,
+                    saccades=self.CALIBRATION_SACCADES,
                 ),
-                "horizontal_channel": zeros(30000, dtype=uint16),
-                "vertical_stimuli": zeros(30000, dtype=uint16),
-                "vertical_channel": zeros(30000, dtype=uint16),
+                "horizontal_channel": zeros(self.CALIBRATION_SAMPLES, dtype=uint16),
+                "vertical_stimuli": zeros(self.CALIBRATION_SAMPLES, dtype=uint16),
+                "vertical_channel": zeros(self.CALIBRATION_SAMPLES, dtype=uint16),
             },
             {
                 "test_type": TestType.HorizontalSaccadicTest,
                 "angle": 10,
                 "horizontal_stimuli": horizontal_saccadic_stimulus(
-                    length=40000,
-                    saccades=20,
+                    length=self.SACCADIC_SAMPLES,
+                    saccades=self.SACCADES_COUNT,
                 ),
-                "horizontal_channel": zeros(60000, dtype=uint16),
-                "vertical_stimuli": zeros(60000, dtype=uint16),
-                "vertical_channel": zeros(60000, dtype=uint16),
+                "horizontal_channel": zeros(self.SACCADIC_SAMPLES, dtype=uint16),
+                "vertical_stimuli": zeros(self.SACCADIC_SAMPLES, dtype=uint16),
+                "vertical_channel": zeros(self.SACCADIC_SAMPLES, dtype=uint16),
             },
             {
                 "test_type": TestType.HorizontalSaccadicTest,
                 "angle": 20,
                 "horizontal_stimuli": horizontal_saccadic_stimulus(
-                    length=40000,
-                    saccades=20,
+                    length=self.SACCADIC_SAMPLES,
+                    saccades=self.SACCADES_COUNT,
                 ),
-                "horizontal_channel": zeros(60000, dtype=uint16),
-                "vertical_stimuli": zeros(60000, dtype=uint16),
-                "vertical_channel": zeros(60000, dtype=uint16),
+                "horizontal_channel": zeros(self.SACCADIC_SAMPLES, dtype=uint16),
+                "vertical_stimuli": zeros(self.SACCADIC_SAMPLES, dtype=uint16),
+                "vertical_channel": zeros(self.SACCADIC_SAMPLES, dtype=uint16),
             },
             {
                 "test_type": TestType.HorizontalSaccadicTest,
                 "angle": 30,
                 "horizontal_stimuli": horizontal_saccadic_stimulus(
-                    length=40000,
-                    saccades=20,
+                    length=self.SACCADIC_SAMPLES,
+                    saccades=self.SACCADES_COUNT,
                 ),
-                "horizontal_channel": zeros(60000, dtype=uint16),
-                "vertical_stimuli": zeros(60000, dtype=uint16),
-                "vertical_channel": zeros(60000, dtype=uint16),
+                "horizontal_channel": zeros(self.SACCADIC_SAMPLES, dtype=uint16),
+                "vertical_stimuli": zeros(self.SACCADIC_SAMPLES, dtype=uint16),
+                "vertical_channel": zeros(self.SACCADIC_SAMPLES, dtype=uint16),
             },
             {
                 "test_type": TestType.HorizontalSaccadicTest,
                 "angle": 60,
                 "horizontal_stimuli": horizontal_saccadic_stimulus(
-                    length=40000,
-                    saccades=20,
+                    length=self.SACCADIC_SAMPLES,
+                    saccades=self.SACCADES_COUNT,
                 ),
-                "horizontal_channel": zeros(60000, dtype=uint16),
-                "vertical_stimuli": zeros(60000, dtype=uint16),
-                "vertical_channel": zeros(60000, dtype=uint16),
+                "horizontal_channel": zeros(self.SACCADIC_SAMPLES, dtype=uint16),
+                "vertical_stimuli": zeros(self.SACCADIC_SAMPLES, dtype=uint16),
+                "vertical_channel": zeros(self.SACCADIC_SAMPLES, dtype=uint16),
             },
             {
                 "test_type": TestType.HorizontalCalibration,
                 "angle": 30,
                 "horizontal_stimuli": horizontal_saccadic_stimulus(
-                    length=20000,
-                    saccades=10,
+                    length=self.CALIBRATION_SAMPLES,
+                    saccades=self.CALIBRATION_SACCADES,
                 ),
-                "horizontal_channel": zeros(30000, dtype=uint16),
-                "vertical_stimuli": zeros(30000, dtype=uint16),
-                "vertical_channel": zeros(30000, dtype=uint16),
+                "horizontal_channel": zeros(self.CALIBRATION_SAMPLES, dtype=uint16),
+                "vertical_stimuli": zeros(self.CALIBRATION_SAMPLES, dtype=uint16),
+                "vertical_channel": zeros(self.CALIBRATION_SAMPLES, dtype=uint16),
             },
         ]
         self._current_test = -1

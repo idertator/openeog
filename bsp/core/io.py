@@ -9,6 +9,12 @@ from .models import Study, Test, TestType
 
 
 def save_study(study: Study, filepath: str):
+    """Save a study to a file
+
+    Args:
+        study (Study): Study
+        filepath (str): Filepath
+    """
     with ZipFile(filepath, "w") as zip_file:
         zip_file.writestr("manifest.json", dumps(study.json, indent=4))
 
@@ -26,6 +32,14 @@ def save_study(study: Study, filepath: str):
 
 
 def load_study(filepath: str) -> Study:
+    """Load a study from a file
+
+    Args:
+        filepath (str): Filepath
+
+    Returns:
+        Study: Study
+    """
     with ZipFile(filepath, "r") as zip_file:
         manifest = loads(zip_file.read("manifest.json"))
 
@@ -45,6 +59,6 @@ def load_study(filepath: str) -> Study:
                 )
 
         return Study(
-            recorded_at=datetime.fromtimestamp(manifest["recorded_at"]),
+            datetime.fromtimestamp(manifest["recorded_at"]),
             *tests,
         )

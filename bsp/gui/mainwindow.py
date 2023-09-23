@@ -2,7 +2,7 @@ from PySide6.QtCore import Slot
 from PySide6.QtGui import QAction, QIcon
 from PySide6.QtWidgets import QFileDialog, QMainWindow, QMessageBox
 
-from bsp.core.io import save_study
+from bsp.core import save_study
 
 from . import icons  # noqa
 from .plotter import Plotter
