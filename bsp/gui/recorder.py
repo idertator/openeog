@@ -47,7 +47,7 @@ class Recorder(QObject):
 
     def build_study(self) -> Study:
         return Study(
-            recorded_at=datetime.now(),
+            datetime.now(),
             *[Test(**test) for test in self._tests],
         )
 
@@ -68,7 +68,7 @@ class Recorder(QObject):
                 "test_type": TestType.HorizontalCalibration,
                 "angle": 30,
                 "horizontal_stimuli": horizontal_saccadic_stimulus(
-                    length=30000,
+                    length=20000,
                     saccades=10,
                 ),
                 "horizontal_channel": zeros(30000, dtype=uint16),
@@ -79,7 +79,7 @@ class Recorder(QObject):
                 "test_type": TestType.HorizontalSaccadicTest,
                 "angle": 10,
                 "horizontal_stimuli": horizontal_saccadic_stimulus(
-                    length=60000,
+                    length=40000,
                     saccades=20,
                 ),
                 "horizontal_channel": zeros(60000, dtype=uint16),
@@ -90,7 +90,7 @@ class Recorder(QObject):
                 "test_type": TestType.HorizontalSaccadicTest,
                 "angle": 20,
                 "horizontal_stimuli": horizontal_saccadic_stimulus(
-                    length=60000,
+                    length=40000,
                     saccades=20,
                 ),
                 "horizontal_channel": zeros(60000, dtype=uint16),
@@ -101,7 +101,7 @@ class Recorder(QObject):
                 "test_type": TestType.HorizontalSaccadicTest,
                 "angle": 30,
                 "horizontal_stimuli": horizontal_saccadic_stimulus(
-                    length=60000,
+                    length=40000,
                     saccades=20,
                 ),
                 "horizontal_channel": zeros(60000, dtype=uint16),
@@ -112,7 +112,7 @@ class Recorder(QObject):
                 "test_type": TestType.HorizontalSaccadicTest,
                 "angle": 60,
                 "horizontal_stimuli": horizontal_saccadic_stimulus(
-                    length=60000,
+                    length=40000,
                     saccades=20,
                 ),
                 "horizontal_channel": zeros(60000, dtype=uint16),
@@ -123,7 +123,7 @@ class Recorder(QObject):
                 "test_type": TestType.HorizontalCalibration,
                 "angle": 30,
                 "horizontal_stimuli": horizontal_saccadic_stimulus(
-                    length=30000,
+                    length=20000,
                     saccades=10,
                 ),
                 "horizontal_channel": zeros(30000, dtype=uint16),
@@ -158,14 +158,14 @@ class Recorder(QObject):
             self._adquirer.signals.finished.connect(self.on_adquisition_finished)
 
             self._stimulator.set_message(
-                "{test} at {angle}°".format(
-                    test=test["type"],
+                "{test_type} at {angle}°".format(
+                    test_type=test["test_type"],
                     angle=angle,
                 ),
             )
         else:
-            self.finished.emit()
             self._stimulator.close()
+            self.finished.emit()
 
     def start_test(self):
         self._stimulator.set_ball_angle(0, 0)

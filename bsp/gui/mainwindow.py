@@ -1,6 +1,8 @@
 from PySide6.QtCore import Slot
 from PySide6.QtGui import QAction, QIcon
-from PySide6.QtWidgets import QMainWindow
+from PySide6.QtWidgets import QFileDialog, QMainWindow, QMessageBox
+
+from bsp.core.io import save_study
 
 from . import icons  # noqa
 from .plotter import Plotter
@@ -55,6 +57,7 @@ class MainWindow(QMainWindow):
             plotter=self._plotter,
             parent=self,
         )
+        self._recorder.finished.connect(self.on_recording_finished)
 
     @Slot()
     def on_settings_clicked(self):
@@ -73,3 +76,26 @@ class MainWindow(QMainWindow):
         self._recording = False
         self._stop_action.setEnabled(False)
         self._play_action.setEnabled(True)
+
+    @Slot()
+    def on_recording_finished(self):
+        filepath, _ = QFileDialog.getSaveFileName(
+            self,
+            "Seleccione ruta de almacenamiento del estudio",
+            None,
+            "Estudio EOG del BioSignalPlux (*.bsp)",
+        )
+
+        if filepath:
+            if not filepath.lower().endswith(".bsp"):
+                filepath += ".bsp"
+
+            study = self._recorder.build_study()
+            save_study(study, filepath)
+            QMessageBox.information(
+                self,
+                "Información",
+                "Estudio almacenado satisfactoriamente en {filepath}".format(
+                    filepath=filepath,
+                ),
+            )
