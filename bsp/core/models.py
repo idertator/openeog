@@ -138,11 +138,11 @@ class Saccade(Annotation):
     def json(self) -> dict:
         return {
             **super().json,
-            "latency": self._latency,
-            "duration": self._duration,
-            "amplitude": self._amplitude,
-            "deviation": self._deviation,
-            "peak_velocity": self._peak_velocity,
+            "latency": int(self._latency),
+            "duration": int(self._duration),
+            "amplitude": float(self._amplitude),
+            "deviation": float(self._deviation),
+            "peak_velocity": float(self._peak_velocity),
         }
 
     @property
@@ -184,7 +184,7 @@ class Test:
         self._angle = angle
         self._fs = fs
 
-        self.hor_stimuli = hor_stimuli
+        self._hor_stimuli = hor_stimuli
         self._hor_channel = hor_channel
         self._ver_stimuli = ver_stimuli
         self._ver_channel = ver_channel
@@ -225,9 +225,13 @@ class Test:
 
     @cached_property
     def hor_stimuli(self) -> ndarray:
-        normalized = (self.hor_stimuli - 32768) / 20000
+        normalized = (self._hor_stimuli - 32768) / 20000
         scaled = normalized.astype(single) * (self.angle / 2)
         return scaled
+
+    @property
+    def hor_stimuli_raw(self) -> ndarray:
+        return self._hor_stimuli
 
     @cached_property
     def hor_channel(self) -> ndarray:
@@ -235,17 +239,29 @@ class Test:
         centered = scaled - scaled.mean()
         return denoise(centered)
 
+    @property
+    def hor_channel_raw(self) -> ndarray:
+        return self._hor_channel
+
     @cached_property
     def ver_stimuli(self) -> ndarray:
         normalized = (self._ver_stimuli - 32768) / 20000
         scaled = normalized.astype(single) * (self.angle / 2)
         return scaled
 
+    @property
+    def ver_stimuli_raw(self) -> ndarray:
+        return self._ver_stimuli
+
     @cached_property
     def ver_channel(self) -> ndarray:
         scaled = self._ver_channel.astype(single) * self._hor_calibration
         centered = scaled - scaled.mean()
         return denoise(centered)
+
+    @property
+    def ver_channel_raw(self) -> ndarray:
+        return self._ver_channel
 
     @property
     def hor_annotations(self) -> list[Annotation]:
@@ -318,7 +334,7 @@ class Study:
             initial_calibration = None
             final_calibration = None
             for test in tests:
-                if test.test_type == TestType.horCalibration:
+                if test.test_type == TestType.HorizontalCalibration:
                     if initial_calibration is None:
                         initial_calibration = test
                     final_calibration = test
@@ -339,7 +355,7 @@ class Study:
             initial_calibration = None
             final_calibration = None
             for test in tests:
-                if test.test_type == TestType.verCalibration:
+                if test.test_type == TestType.VerticalCalibration:
                     if initial_calibration is None:
                         initial_calibration = test
                     final_calibration = test
@@ -379,10 +395,10 @@ class Study:
             "version": self.VERSION,
             "recorded_at": self._recorded_at.timestamp(),
             "tests": [test.json for test in self._tests],
-            "hor_calibration": self.hor_calibration,
-            "hor_calibration_diff": self.hor_calibration_diff,
-            "ver_calibration": self.ver_calibration,
-            "ver_calibration_diff": self.ver_calibration_diff,
+            "hor_calibration": float(self._hor_calibration or 1.0),
+            "hor_calibration_diff": float(self._hor_calibration_diff or 1.0),
+            "ver_calibration": float(self._ver_calibration or 1.0),
+            "ver_calibration_diff": float(self._ver_calibration_diff or 1.0),
         }
 
     @property

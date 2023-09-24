@@ -23,10 +23,10 @@ def save_study(study: Study, filepath: str):
             buff = BytesIO()
             savez_compressed(
                 buff,
-                hor_stimuli=test.hor_stimuli,
-                hor_channel=test.hor_channel,
-                ver_stimuli=test.ver_stimuli,
-                ver_channel=test.ver_channel,
+                hor_stimuli=test.hor_stimuli_raw,
+                hor_channel=test.hor_channel_raw,
+                ver_stimuli=test.ver_stimuli_raw,
+                ver_channel=test.ver_channel_raw,
             )
             zip_file.writestr(f"test{idx:02}.npz", buff.getvalue())
 
@@ -61,8 +61,12 @@ def load_study(filepath: str) -> Study:
         return Study(
             recorded_at=datetime.fromtimestamp(manifest["recorded_at"]),
             tests=tests,
-            hor_calibration=manifest.get("hor_calibration", None),
-            hor_calibration_diff=manifest.get("hor_calibration_diff", None),
-            ver_calibration=manifest.get("ver_calibration", None),
-            ver_calibration_diff=manifest.get("ver_calibration_diff", None),
+            hor_calibration=float(manifest.get("hor_calibration", None) or 1.0),
+            hor_calibration_diff=float(
+                manifest.get("hor_calibration_diff", None) or 1.0
+            ),
+            ver_calibration=float(manifest.get("ver_calibration", None) or 1.0),
+            ver_calibration_diff=float(
+                manifest.get("ver_calibration_diff", None) or 1.0
+            ),
         )

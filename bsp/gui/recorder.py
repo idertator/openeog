@@ -58,7 +58,8 @@ class Recorder(QObject):
 
         test: Test
         for test in study:
-            test.annotate()
+            if test.test_type == TestType.HorizontalSaccadicTest:
+                test.annotate()
 
         return study
 
@@ -142,6 +143,7 @@ class Recorder(QObject):
                 "ver_channel": zeros(self.CALIBRATION_SAMPLES, dtype=uint16),
             },
         ]
+
         self._current_test = -1
         self._stimulator.open()
 

@@ -1,9 +1,9 @@
 from dataclasses import dataclass, field
 
 from numpy import mean, std
-from tablib import Dataset, Workbook
+from tablib import Databook, Dataset
 
-from .models import Saccade, Study, Test
+from .models import Saccade, Study, Test, TestType
 
 
 @dataclass
@@ -49,22 +49,22 @@ class _Stats:
     def row(self) -> list[int | float]:
         return [
             self.test,
-            mean(self.latencies),
-            std(self.latencies),
-            mean(self.durations),
-            std(self.durations),
-            mean(self.amplitudes),
-            std(self.amplitudes),
-            mean(self.deviations),
-            std(self.deviations),
-            mean(self.peak_velocities),
-            std(self.peak_velocities),
+            int(mean(self.latencies)),
+            int(std(self.latencies)),
+            int(mean(self.durations)),
+            int(std(self.durations)),
+            float(mean(self.amplitudes)),
+            float(std(self.amplitudes)),
+            float(mean(self.deviations)),
+            float(std(self.deviations)),
+            float(mean(self.peak_velocities)),
+            float(std(self.peak_velocities)),
         ]
 
 
 def _test_dataset(test: Test) -> tuple[Dataset, _Stats]:
     test_name = "{test} {angle}".format(
-        test=test.name,
+        test=test.test_type.name,
         angle=test.angle,
     )
     ds = Dataset(
@@ -150,13 +150,14 @@ def saccadic_report(study: Study, filepath: str):
     stats_list = []
 
     for test in study:
-        ds, stats = _test_dataset(test)
-        tests_list.append(ds)
-        stats_list.append(stats)
+        if test.test_type == TestType.HorizontalSaccadicTest:
+            ds, stats = _test_dataset(test)
+            tests_list.append(ds)
+            stats_list.append(stats)
 
     study_ds = _metadata_dataset(study)
 
-    workbook = Workbook()
+    workbook = Databook()
     workbook.add_sheet(study_ds)
     workbook.add_sheet(_stats_dataset(stats_list))
 
