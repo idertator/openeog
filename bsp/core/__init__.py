@@ -1,3 +1,4 @@
+from .calibration import calibration
 from .denoising import denoise
 from .differentiation import differentiate
 from .impulses import impulses
@@ -9,6 +10,7 @@ __all__ = [
     "Study",
     "Test",
     "TestType",
+    "calibration",
     "denoise",
     "differentiate",
     "horizontal_saccadic_stimulus",

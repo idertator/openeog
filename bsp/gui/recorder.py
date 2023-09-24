@@ -4,7 +4,7 @@ from numpy import uint16, zeros
 from PySide6.QtCore import QObject, QThreadPool, Signal
 
 from bsp.adc import BSPAdquirer
-from bsp.core import Study, Test, TestType, horizontal_saccadic_stimulus
+from bsp.core import Study, Test, TestType, calibration, horizontal_saccadic_stimulus
 
 from .plotter import Plotter
 from .screens import ScreensManager
@@ -52,8 +52,8 @@ class Recorder(QObject):
 
     def build_study(self) -> Study:
         return Study(
-            datetime.now(),
-            *[Test(**test) for test in self._tests],
+            recorded_at=datetime.now(),
+            tests=[Test(**test) for test in self._tests],
         )
 
     @property

@@ -36,7 +36,7 @@ def impulses(channel: ndarray) -> Iterator[tuple[int, int]]:
 
     samples = len(channel)
     for start, end in iterate_clusters():
-        while start > 1 and derived_channel[start] > derived_channel[start - 1]:
+        while start > 0 and derived_channel[start] > derived_channel[start - 1]:
             start -= 1
 
         while end < samples - 1 and derived_channel[end] > derived_channel[end + 1]:

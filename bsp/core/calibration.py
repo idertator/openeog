@@ -2,7 +2,7 @@ from typing import Iterator
 
 from numpy import mean, median, ndarray
 
-from bsp.core import impulses
+from .impulses import impulses
 
 
 def _amplitudes(channel: ndarray) -> Iterator[int]:

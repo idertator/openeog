@@ -14,4 +14,4 @@ def differentiate(channel: ndarray) -> ndarray:
     result = convolve(channel, window, "same") / 5148.0
     result[:5] = 0
     result[-5:] = 0
-    return result
+    return result * 1000.0

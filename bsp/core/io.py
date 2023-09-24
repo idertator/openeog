@@ -59,6 +59,10 @@ def load_study(filepath: str) -> Study:
                 )
 
         return Study(
-            datetime.fromtimestamp(manifest["recorded_at"]),
-            *tests,
+            recorded_at=datetime.fromtimestamp(manifest["recorded_at"]),
+            tests=tests,
+            hor_calibration=manifest.get("hor_calibration", None),
+            hor_calibration_diff=manifest.get("hor_calibration_diff", None),
+            ver_calibration=manifest.get("ver_calibration", None),
+            ver_calibration_diff=manifest.get("ver_calibration_diff", None),
         )
