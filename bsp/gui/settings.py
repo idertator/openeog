@@ -11,6 +11,7 @@ class SettingsDialog(QDialog):
         parent: QWidget = None,
     ):
         super().__init__(parent=parent)
+        self.setWindowTitle("Configuración")
 
         self._screens = screens
 
@@ -33,8 +34,8 @@ class SettingsDialog(QDialog):
         )
 
         layout = QFormLayout()
-        layout.addRow("Device Address", self._device_address)
-        layout.addRow("Stimuli Monitor", self._stimuli_monitor)
+        layout.addRow("Dispositivo", self._device_address)
+        layout.addRow("Pantalla de Estímulo", self._stimuli_monitor)
 
         self.setLayout(layout)
 

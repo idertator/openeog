@@ -20,111 +20,111 @@ class Plotter(QWidget):
         self._signal_pen = QPen(Qt.blue)
         self._stimulus_pen = QPen(Qt.red)
 
-        self._horizontal = QLineSeries()
-        self._horizontal.setUseOpenGL(True)
-        self._horizontal.setPen(self._signal_pen)
+        self._hor = QLineSeries()
+        self._hor.setUseOpenGL(True)
+        self._hor.setPen(self._signal_pen)
 
-        self._horizontal_stimulus = QLineSeries()
-        self._horizontal_stimulus.setUseOpenGL(True)
-        self._horizontal_stimulus.setPen(self._stimulus_pen)
+        self._hor_stimuli = QLineSeries()
+        self._hor_stimuli.setUseOpenGL(True)
+        self._hor_stimuli.setPen(self._stimulus_pen)
 
-        self._horizontal_x = QValueAxis()
-        self._horizontal_x.setRange(0, length)
-        self._horizontal_x.setLabelFormat("%g")
-        self._horizontal_x.setTitleText("Time (ms)")
+        self._hor_x = QValueAxis()
+        self._hor_x.setRange(0, length)
+        self._hor_x.setLabelFormat("%g")
+        self._hor_x.setTitleText("Tiempo (ms)")
 
-        self._horizontal_y = QValueAxis()
-        self._horizontal_y.setRange(0, 2**resolution - 1)
-        self._horizontal_y.setTitleText("Value")
+        self._hor_y = QValueAxis()
+        self._hor_y.setRange(0, 2**resolution - 1)
+        self._hor_y.setTitleText("Valor")
 
-        self._horizontal_chart = QChart()
-        self._horizontal_chart.addSeries(self._horizontal_stimulus)
-        self._horizontal_chart.addSeries(self._horizontal)
-        self._horizontal_chart.setAxisX(self._horizontal_x, self._horizontal)
-        self._horizontal_chart.setAxisX(self._horizontal_x, self._horizontal_stimulus)
-        self._horizontal_chart.setAxisY(self._horizontal_y, self._horizontal)
-        self._horizontal_chart.setAxisY(self._horizontal_y, self._horizontal_stimulus)
-        self._horizontal_chart.legend().hide()
-        self._horizontal_chart.setTitle("Horizontal Channel")
+        self._hor_chart = QChart()
+        self._hor_chart.addSeries(self._hor_stimuli)
+        self._hor_chart.addSeries(self._hor)
+        self._hor_chart.setAxisX(self._hor_x, self._hor)
+        self._hor_chart.setAxisX(self._hor_x, self._hor_stimuli)
+        self._hor_chart.setAxisY(self._hor_y, self._hor)
+        self._hor_chart.setAxisY(self._hor_y, self._hor_stimuli)
+        self._hor_chart.legend().hide()
+        self._hor_chart.setTitle("Canal Horizontal")
 
-        self._horizontal_chart_view = QChartView(self._horizontal_chart)
-        self._horizontal_chart_view.setRenderHint(QPainter.RenderHint.Antialiasing)
+        self._hor_chart_view = QChartView(self._hor_chart)
+        self._hor_chart_view.setRenderHint(QPainter.RenderHint.Antialiasing)
 
-        self._vertical = QLineSeries()
-        self._vertical.setUseOpenGL(True)
-        self._vertical.setPen(self._signal_pen)
+        self._ver = QLineSeries()
+        self._ver.setUseOpenGL(True)
+        self._ver.setPen(self._signal_pen)
 
-        self._vertical_stimulus = QLineSeries()
-        self._vertical_stimulus.setUseOpenGL(True)
-        self._vertical_stimulus.setPen(self._stimulus_pen)
+        self._ver_stimulus = QLineSeries()
+        self._ver_stimulus.setUseOpenGL(True)
+        self._ver_stimulus.setPen(self._stimulus_pen)
 
-        self._vertical_x = QValueAxis()
-        self._vertical_x.setRange(0, length)
-        self._vertical_x.setLabelFormat("%g")
-        self._vertical_x.setTitleText("Time (ms)")
+        self._ver_x = QValueAxis()
+        self._ver_x.setRange(0, length)
+        self._ver_x.setLabelFormat("%g")
+        self._ver_x.setTitleText("Tiempo (ms)")
 
-        self._vertical_y = QValueAxis()
-        self._vertical_y.setRange(0, 2**resolution - 1)
-        self._vertical_y.setTitleText("Value")
+        self._ver_y = QValueAxis()
+        self._ver_y.setRange(0, 2**resolution - 1)
+        self._ver_y.setTitleText("Valor")
 
-        self._vertical_chart = QChart()
-        self._vertical_chart.addSeries(self._vertical)
-        self._vertical_chart.addSeries(self._vertical_stimulus)
-        self._vertical_chart.setAxisX(self._vertical_x, self._vertical)
-        self._vertical_chart.setAxisX(self._vertical_x, self._vertical_stimulus)
-        self._vertical_chart.setAxisY(self._vertical_y, self._vertical)
-        self._vertical_chart.setAxisY(self._vertical_y, self._vertical_stimulus)
-        self._vertical_chart.legend().hide()
-        self._vertical_chart.setTitle("Vertical Channel")
+        self._ver_chart = QChart()
+        self._ver_chart.addSeries(self._ver)
+        self._ver_chart.addSeries(self._ver_stimulus)
+        self._ver_chart.setAxisX(self._ver_x, self._ver)
+        self._ver_chart.setAxisX(self._ver_x, self._ver_stimulus)
+        self._ver_chart.setAxisY(self._ver_y, self._ver)
+        self._ver_chart.setAxisY(self._ver_y, self._ver_stimulus)
+        self._ver_chart.legend().hide()
+        self._ver_chart.setTitle("Canal Vertical")
 
-        self._vertical_chart_view = QChartView(self._vertical_chart)
-        self._vertical_chart_view.setRenderHint(QPainter.RenderHint.Antialiasing)
+        self._ver_chart_view = QChartView(self._ver_chart)
+        self._ver_chart_view.setRenderHint(QPainter.RenderHint.Antialiasing)
 
         self._splitter = QSplitter()
-        self._splitter.addWidget(self._horizontal_chart_view)
-        self._splitter.addWidget(self._vertical_chart_view)
+        self._splitter.addWidget(self._hor_chart_view)
+        self._splitter.addWidget(self._ver_chart_view)
         self._splitter.setOrientation(Qt.Orientations.Vertical)
 
         self._layout = QVBoxLayout()
         self._layout.addWidget(self._splitter)
 
-        self._horizontal_buffer = [QPoint(i, 0) for i in range(length)]
-        self._horizontal_stimulus_buffer = [QPoint(i, 0) for i in range(length)]
-        self._vertical_buffer = [QPoint(i, 0) for i in range(length)]
-        self._vertical_stimulus_buffer = [QPoint(i, 0) for i in range(length)]
+        self._hor_buffer = [QPoint(i, 0) for i in range(length)]
+        self._hor_stimuli_buffer = [QPoint(i, 0) for i in range(length)]
+        self._ver_buffer = [QPoint(i, 0) for i in range(length)]
+        self._ver_stimulus_buffer = [QPoint(i, 0) for i in range(length)]
 
         self.setLayout(self._layout)
 
     def plot_samples(
         self,
-        horizontal: ndarray,
-        horizontal_stimulus: ndarray,
-        vertical: ndarray,
-        vertical_stimulus: ndarray,
+        hor: ndarray,
+        hor_stimuli: ndarray,
+        ver: ndarray,
+        ver_stimulus: ndarray,
     ):
-        length = len(horizontal)
+        length = len(hor)
         start = 0
         if length < self.length:
             start = self.length - length
             for s in range(start):
-                self._horizontal_buffer[s].setY(self._horizontal_buffer[s + length].y())
-                self._horizontal_stimulus_buffer[s].setY(
-                    self._horizontal_stimulus_buffer[s + length].y()
+                self._hor_buffer[s].setY(self._hor_buffer[s + length].y())
+                self._hor_stimuli_buffer[s].setY(
+                    self._hor_stimuli_buffer[s + length].y()
                 )
-                self._vertical_buffer[s].setY(self._vertical_buffer[s + length].y())
-                self._vertical_stimulus_buffer[s].setY(
-                    self._vertical_stimulus_buffer[s + length].y()
+                self._ver_buffer[s].setY(self._ver_buffer[s + length].y())
+                self._ver_stimulus_buffer[s].setY(
+                    self._ver_stimulus_buffer[s + length].y()
                 )
 
         idx = 0
         for s in range(start, self.length):
-            self._horizontal_buffer[s].setY(horizontal[idx])
-            self._horizontal_stimulus_buffer[s].setY(horizontal_stimulus[idx])
-            self._vertical_buffer[s].setY(vertical[idx])
-            self._vertical_stimulus_buffer[s].setY(vertical_stimulus[idx])
+            self._hor_buffer[s].setY(hor[idx])
+            self._hor_stimuli_buffer[s].setY(hor_stimuli[idx])
+            self._ver_buffer[s].setY(ver[idx])
+            self._ver_stimulus_buffer[s].setY(ver_stimulus[idx])
             idx += 1
 
-        self._horizontal.replace(self._horizontal_buffer)
-        self._horizontal_stimulus.replace(self._horizontal_stimulus_buffer)
-        self._vertical.replace(self._vertical_buffer)
-        self._vertical_stimulus.replace(self._vertical_stimulus_buffer)
+        self._hor.replace(self._hor_buffer)
+        self._hor_stimuli.replace(self._hor_stimuli_buffer)
+        self._ver.replace(self._ver_buffer)
+        self._ver_stimulus.replace(self._ver_stimulus_buffer)

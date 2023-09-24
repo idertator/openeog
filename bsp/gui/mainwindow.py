@@ -29,15 +29,15 @@ class MainWindow(QMainWindow):
         self._settings_dialog = SettingsDialog(screens, self)
 
         # Setup actions
-        self._settings_action = QAction(QIcon(":settings.svg"), "&SettingsDialog", self)
+        self._settings_action = QAction(QIcon(":settings.svg"), "&Configuración", self)
         self._settings_action.triggered.connect(self.on_settings_clicked)
         self._toolbar.addAction(self._settings_action)
 
-        self._play_action = QAction(QIcon(":play.svg"), "&Play", self)
+        self._play_action = QAction(QIcon(":play.svg"), "&Grabar", self)
         self._play_action.triggered.connect(self.on_play_clicked)
         self._toolbar.addAction(self._play_action)
 
-        self._stop_action = QAction(QIcon(":stop.svg"), "&Stop", self)
+        self._stop_action = QAction(QIcon(":stop.svg"), "&Parar", self)
         self._stop_action.triggered.connect(self.on_stop_clicked)
         self._stop_action.setEnabled(False)
         self._toolbar.addAction(self._stop_action)

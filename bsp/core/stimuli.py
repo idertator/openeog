@@ -2,12 +2,12 @@ from numpy import int32, ndarray, zeros
 from numpy.random import randint
 
 
-def horizontal_saccadic_stimulus(
+def saccadic_stimuli(
     length: int,
     saccades: int,
     variability: float = 0.05,
 ) -> ndarray:
-    """Generate a horizontal saccadic stimulus
+    """Generate a hor saccadic stimulus
 
     Args:
         length (int): Length of the stimulus
@@ -15,7 +15,7 @@ def horizontal_saccadic_stimulus(
         variability (float, optional): Variability of the saccades. Defaults to 0.05.
 
     Returns:
-        ndarray: Horizontal saccadic stimulus
+        ndarray: Saccadic stimulus
     """
     fixations_count = saccades + 3
     center = length / fixations_count

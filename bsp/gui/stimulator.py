@@ -98,7 +98,7 @@ class Stimulator(QWidget):
         self._subject_distance = self.subject_distance
         self._initialized = False
         self.set_message(
-            "Please sit in front of the screen at a distance of {distance} m".format(
+            "Siente al sujeto a una distancia de {distance}m de la pantalla".format(
                 distance=round(self._subject_distance / 1000.0, 2)
             )
         )
@@ -110,13 +110,13 @@ class Stimulator(QWidget):
 
     def set_ball_angle(
         self,
-        horizontal_angle: float,
-        vertical_angle: float,
+        hor_angle: float,
+        ver_angle: float,
     ):
         self._msg = ""
 
-        delta_h = (tan(radians(horizontal_angle / 2)) * self._subject_distance) * 2
-        delta_v = (tan(radians(vertical_angle / 2)) * self._subject_distance) * 2
+        delta_h = (tan(radians(hor_angle / 2)) * self._subject_distance) * 2
+        delta_v = (tan(radians(ver_angle / 2)) * self._subject_distance) * 2
 
         center = self.rect().center()
 
@@ -135,5 +135,5 @@ class Stimulator(QWidget):
     @property
     def subject_distance(self) -> int:
         """Distance from the subject to the screen in milimeters"""
-        horizontal_distance = self._width * self.MAX_DISTANCE_PERCENTAGE
-        return (horizontal_distance / 2.0) / tan(radians(self.MAX_ANGLE / 2.0))
+        hor_distance = self._width * self.MAX_DISTANCE_PERCENTAGE
+        return (hor_distance / 2.0) / tan(radians(self.MAX_ANGLE / 2.0))

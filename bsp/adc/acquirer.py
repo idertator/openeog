@@ -39,21 +39,21 @@ class BSPAdquirer(QRunnable):
         self._samples = samples
         self._processed = 0
         self._buffer_length = buffer_length
-        self._horizontal = zeros(self._buffer_length, dtype=uint16)
-        self._vertical = zeros(self._buffer_length, dtype=uint16)
+        self._hor = zeros(self._buffer_length, dtype=uint16)
+        self._ver = zeros(self._buffer_length, dtype=uint16)
 
     def send_data(self, n_seq: int, data: list) -> bool:
         idx = n_seq % self._buffer_length
-        self._horizontal[idx] = data[0]
-        self._vertical[idx] = data[1]
+        self._hor[idx] = data[0]
+        self._ver[idx] = data[1]
 
         if idx == self._buffer_length - 1:
             self.signals.available.emit(
-                self._horizontal.copy(),
-                self._vertical.copy(),
+                self._hor.copy(),
+                self._ver.copy(),
             )
-            self._horizontal *= 0
-            self._vertical *= 0
+            self._hor *= 0
+            self._ver *= 0
 
         self._processed += 1
         return self._processed >= self._samples

@@ -4,7 +4,7 @@ from .differentiation import differentiate
 from .impulses import impulses
 from .io import load_study, save_study
 from .models import Study, Test, TestType
-from .stimuli import horizontal_saccadic_stimulus
+from .stimuli import saccadic_stimuli
 
 __all__ = [
     "Study",
@@ -13,8 +13,8 @@ __all__ = [
     "calibration",
     "denoise",
     "differentiate",
-    "horizontal_saccadic_stimulus",
     "impulses",
     "load_study",
+    "saccadic_stimuli",
     "save_study",
 ]

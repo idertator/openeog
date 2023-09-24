@@ -23,10 +23,10 @@ def save_study(study: Study, filepath: str):
             buff = BytesIO()
             savez_compressed(
                 buff,
-                horizontal_stimuli=test.horizontal_stimuli,
-                horizontal_channel=test.horizontal_channel,
-                vertical_stimuli=test.vertical_stimuli,
-                vertical_channel=test.vertical_channel,
+                hor_stimuli=test.hor_stimuli,
+                hor_channel=test.hor_channel,
+                ver_stimuli=test.ver_stimuli,
+                ver_channel=test.ver_channel,
             )
             zip_file.writestr(f"test{idx:02}.npz", buff.getvalue())
 
@@ -51,10 +51,10 @@ def load_study(filepath: str) -> Study:
                     Test(
                         test_type=TestType(test["test_type"]),
                         angle=test["angle"],
-                        horizontal_stimuli=channels["horizontal_stimuli"],
-                        horizontal_channel=channels["horizontal_channel"],
-                        vertical_stimuli=channels["vertical_stimuli"],
-                        vertical_channel=channels["vertical_channel"],
+                        hor_stimuli=channels["hor_stimuli"],
+                        hor_channel=channels["hor_channel"],
+                        ver_stimuli=channels["ver_stimuli"],
+                        ver_channel=channels["ver_channel"],
                     )
                 )
 
@@ -66,3 +66,7 @@ def load_study(filepath: str) -> Study:
             ver_calibration=manifest.get("ver_calibration", None),
             ver_calibration_diff=manifest.get("ver_calibration_diff", None),
         )
+
+
+def saccadic_report(study: Study, filepath: str):
+    pass

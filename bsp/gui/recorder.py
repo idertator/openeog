@@ -4,7 +4,7 @@ from numpy import uint16, zeros
 from PySide6.QtCore import QObject, QThreadPool, Signal
 
 from bsp.adc import BSPAdquirer
-from bsp.core import Study, Test, TestType, calibration, horizontal_saccadic_stimulus
+from bsp.core import Study, Test, TestType, saccadic_stimuli
 
 from .plotter import Plotter
 from .screens import ScreensManager
@@ -51,16 +51,22 @@ class Recorder(QObject):
         self._samples_recorded = 0
 
     def build_study(self) -> Study:
-        return Study(
+        study = Study(
             recorded_at=datetime.now(),
             tests=[Test(**test) for test in self._tests],
         )
 
+        test: Test
+        for test in study:
+            test.annotate()
+
+        return study
+
     @property
-    def current_horizontal_position(self) -> int:
+    def current_hor_position(self) -> int:
         test = self._tests[self._current_test]
         angle = test["angle"] // 2
-        stimuli = test["horizontal_stimuli"]
+        stimuli = test["hor_stimuli"]
 
         if self._samples_recorded < len(stimuli):
             return stimuli[self._samples_recorded] * angle
@@ -72,68 +78,68 @@ class Recorder(QObject):
             {
                 "test_type": TestType.HorizontalCalibration,
                 "angle": 30,
-                "horizontal_stimuli": horizontal_saccadic_stimulus(
+                "hor_stimuli": saccadic_stimuli(
                     length=self.CALIBRATION_SAMPLES,
                     saccades=self.CALIBRATION_SACCADES,
                 ),
-                "horizontal_channel": zeros(self.CALIBRATION_SAMPLES, dtype=uint16),
-                "vertical_stimuli": zeros(self.CALIBRATION_SAMPLES, dtype=uint16),
-                "vertical_channel": zeros(self.CALIBRATION_SAMPLES, dtype=uint16),
+                "hor_channel": zeros(self.CALIBRATION_SAMPLES, dtype=uint16),
+                "ver_stimuli": zeros(self.CALIBRATION_SAMPLES, dtype=uint16),
+                "ver_channel": zeros(self.CALIBRATION_SAMPLES, dtype=uint16),
             },
             {
                 "test_type": TestType.HorizontalSaccadicTest,
                 "angle": 10,
-                "horizontal_stimuli": horizontal_saccadic_stimulus(
+                "hor_stimuli": saccadic_stimuli(
                     length=self.SACCADIC_SAMPLES,
                     saccades=self.SACCADES_COUNT,
                 ),
-                "horizontal_channel": zeros(self.SACCADIC_SAMPLES, dtype=uint16),
-                "vertical_stimuli": zeros(self.SACCADIC_SAMPLES, dtype=uint16),
-                "vertical_channel": zeros(self.SACCADIC_SAMPLES, dtype=uint16),
+                "hor_channel": zeros(self.SACCADIC_SAMPLES, dtype=uint16),
+                "ver_stimuli": zeros(self.SACCADIC_SAMPLES, dtype=uint16),
+                "ver_channel": zeros(self.SACCADIC_SAMPLES, dtype=uint16),
             },
             {
                 "test_type": TestType.HorizontalSaccadicTest,
                 "angle": 20,
-                "horizontal_stimuli": horizontal_saccadic_stimulus(
+                "hor_stimuli": saccadic_stimuli(
                     length=self.SACCADIC_SAMPLES,
                     saccades=self.SACCADES_COUNT,
                 ),
-                "horizontal_channel": zeros(self.SACCADIC_SAMPLES, dtype=uint16),
-                "vertical_stimuli": zeros(self.SACCADIC_SAMPLES, dtype=uint16),
-                "vertical_channel": zeros(self.SACCADIC_SAMPLES, dtype=uint16),
+                "hor_channel": zeros(self.SACCADIC_SAMPLES, dtype=uint16),
+                "ver_stimuli": zeros(self.SACCADIC_SAMPLES, dtype=uint16),
+                "ver_channel": zeros(self.SACCADIC_SAMPLES, dtype=uint16),
             },
             {
                 "test_type": TestType.HorizontalSaccadicTest,
                 "angle": 30,
-                "horizontal_stimuli": horizontal_saccadic_stimulus(
+                "hor_stimuli": saccadic_stimuli(
                     length=self.SACCADIC_SAMPLES,
                     saccades=self.SACCADES_COUNT,
                 ),
-                "horizontal_channel": zeros(self.SACCADIC_SAMPLES, dtype=uint16),
-                "vertical_stimuli": zeros(self.SACCADIC_SAMPLES, dtype=uint16),
-                "vertical_channel": zeros(self.SACCADIC_SAMPLES, dtype=uint16),
+                "hor_channel": zeros(self.SACCADIC_SAMPLES, dtype=uint16),
+                "ver_stimuli": zeros(self.SACCADIC_SAMPLES, dtype=uint16),
+                "ver_channel": zeros(self.SACCADIC_SAMPLES, dtype=uint16),
             },
             {
                 "test_type": TestType.HorizontalSaccadicTest,
                 "angle": 60,
-                "horizontal_stimuli": horizontal_saccadic_stimulus(
+                "hor_stimuli": saccadic_stimuli(
                     length=self.SACCADIC_SAMPLES,
                     saccades=self.SACCADES_COUNT,
                 ),
-                "horizontal_channel": zeros(self.SACCADIC_SAMPLES, dtype=uint16),
-                "vertical_stimuli": zeros(self.SACCADIC_SAMPLES, dtype=uint16),
-                "vertical_channel": zeros(self.SACCADIC_SAMPLES, dtype=uint16),
+                "hor_channel": zeros(self.SACCADIC_SAMPLES, dtype=uint16),
+                "ver_stimuli": zeros(self.SACCADIC_SAMPLES, dtype=uint16),
+                "ver_channel": zeros(self.SACCADIC_SAMPLES, dtype=uint16),
             },
             {
                 "test_type": TestType.HorizontalCalibration,
                 "angle": 30,
-                "horizontal_stimuli": horizontal_saccadic_stimulus(
+                "hor_stimuli": saccadic_stimuli(
                     length=self.CALIBRATION_SAMPLES,
                     saccades=self.CALIBRATION_SACCADES,
                 ),
-                "horizontal_channel": zeros(self.CALIBRATION_SAMPLES, dtype=uint16),
-                "vertical_stimuli": zeros(self.CALIBRATION_SAMPLES, dtype=uint16),
-                "vertical_channel": zeros(self.CALIBRATION_SAMPLES, dtype=uint16),
+                "hor_channel": zeros(self.CALIBRATION_SAMPLES, dtype=uint16),
+                "ver_stimuli": zeros(self.CALIBRATION_SAMPLES, dtype=uint16),
+                "ver_channel": zeros(self.CALIBRATION_SAMPLES, dtype=uint16),
             },
         ]
         self._current_test = -1
@@ -150,7 +156,7 @@ class Recorder(QObject):
             self._samples_recorded = 0
 
             test = self._tests[self._current_test]
-            samples = len(test["horizontal_stimuli"])
+            samples = len(test["hor_stimuli"])
             angle = test["angle"]
 
             self._adquirer = BSPAdquirer(
@@ -163,8 +169,8 @@ class Recorder(QObject):
             self._adquirer.signals.finished.connect(self.on_adquisition_finished)
 
             self._stimulator.set_message(
-                "{test_type} at {angle}°".format(
-                    test_type=test["test_type"],
+                "{test_type} a {angle}°".format(
+                    test_type=test["test_type"].name,
                     angle=angle,
                 ),
             )
@@ -176,35 +182,35 @@ class Recorder(QObject):
         self._stimulator.set_ball_angle(0, 0)
         self._threadpool.start(self._adquirer)
 
-    def on_samples_available(self, horizontal, vertical):
-        samples = len(horizontal)
+    def on_samples_available(self, hor, ver):
+        samples = len(hor)
         start = self._samples_recorded
         end = start + samples
 
         test = self._tests[self._current_test]
-        stimuli_channel = test["horizontal_stimuli"]
+        stimuli_channel = test["hor_stimuli"]
 
         total_length = len(stimuli_channel)
         if end <= total_length:
             stimuli = stimuli_channel[start:end]
-            test["horizontal_channel"][start:end] = horizontal
-            test["vertical_channel"][start:end] = vertical
+            test["hor_channel"][start:end] = hor
+            test["ver_channel"][start:end] = ver
         else:
             dif = end - total_length
             stimuli = stimuli_channel[start:]
-            test["horizontal_channel"][start:] = horizontal[:-dif]
-            test["vertical_channel"][start:] = vertical[:-dif]
+            test["hor_channel"][start:] = hor[:-dif]
+            test["ver_channel"][start:] = ver[:-dif]
 
         stimuli *= 20000
         stimuli += 32768
 
         self._samples_recorded += samples
-        self._stimulator.set_ball_angle(self.current_horizontal_position, 0)
+        self._stimulator.set_ball_angle(self.current_hor_position, 0)
         self._plotter.plot_samples(
-            horizontal=horizontal,
-            horizontal_stimulus=stimuli,
-            vertical=vertical,
-            vertical_stimulus=stimuli,
+            hor=hor,
+            hor_stimuli=stimuli,
+            ver=ver,
+            ver_stimulus=stimuli,
         )
 
     def on_adquisition_finished(self):

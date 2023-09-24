@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from datetime import datetime
 from enum import StrEnum
 from functools import cached_property
@@ -6,12 +8,162 @@ from numpy import ndarray, single
 
 from .calibration import calibration
 from .denoising import denoise
+from .differentiation import differentiate
+from .saccades import saccades
 
 
 class TestType(StrEnum):
-    HorizontalCalibration = "Horizontal Calibration"
-    HorizontalSaccadicTest = "Horizontal Saccadic Test"
-    VerticalCalibration = "Vertical Calibration"
+    HorizontalCalibration = "HorizontalCalibration"
+    HorizontalSaccadicTest = "HorizontalSaccadicTest"
+    VerticalCalibration = "VerticalCalibration"
+
+    @property
+    def name(self) -> str:
+        match self:
+            case TestType.HorizontalCalibration:
+                return "Calibración Horizontal"
+            case TestType.HorizontalSaccadicTest:
+                return "Sacádica"
+            case TestType.VerticalCalibration:
+                return "Calibración Vertical"
+
+        return "Desconocida"
+
+
+class AnnotationType(StrEnum):
+    Fixation = "Fixation"
+    Saccade = "Saccade"
+    Pursuit = "Pursuit"
+
+    @property
+    def name(self) -> str:
+        match self:
+            case AnnotationType.Fixation:
+                return "Fijación"
+            case AnnotationType.Saccade:
+                return "Sácada"
+            case AnnotationType.Pursuit:
+                return "Persecución"
+
+
+class Annotation:
+    def __init__(
+        self,
+        annotation_type: AnnotationType,
+        onset: int,
+        offset: int,
+    ):
+        self._annotation_type = annotation_type
+        self._onset = onset
+        self._offset = offset
+
+    def __str__(self):
+        return "{annotation} from {onset} to {offset}".format(
+            annotation=self._annotation_type.value,
+            onset=self._onset,
+            offset=self._offset,
+        )
+
+    @property
+    def json(self) -> dict:
+        return {
+            "annotation_type": self._annotation_type.value,
+            "onset": self._onset,
+            "offset": self._offset,
+        }
+
+    @property
+    def annotation_type(self) -> AnnotationType:
+        return self._annotation_type
+
+    @property
+    def onset(self) -> int:
+        return self._onset
+
+    @property
+    def offset(self) -> int:
+        return self._offset
+
+
+class Saccade(Annotation):
+    def __init__(
+        self,
+        onset: int,
+        offset: int,
+        latency: int,
+        duration: int,
+        amplitude: float,
+        deviation: float,
+        peak_velocity: float,
+    ):
+        super().__init__(
+            annotation_type=AnnotationType.Saccade,
+            onset=onset,
+            offset=offset,
+        )
+        self._latency = latency
+        self._duration = duration
+        self._amplitude = amplitude
+        self._deviation = deviation
+        self._peak_velocity = peak_velocity
+
+    @classmethod
+    def create(
+        cls,
+        onset: int,
+        offset: int,
+        angle: int,
+        channel: ndarray,
+        stimuli: ndarray,
+        velocities: ndarray,
+    ) -> Saccade:
+        transition = onset
+        while transition > 0 and stimuli[transition - 1] == stimuli[transition]:
+            transition -= 1
+
+        window = channel[onset:offset]
+        amplitude = window.max() - window.min()
+
+        return Saccade(
+            onset=onset,
+            offset=offset,
+            latency=onset - transition,
+            duration=offset - onset,
+            amplitude=amplitude,
+            deviation=amplitude / angle,
+            peak_velocity=velocities[onset:offset].max(),
+        )
+
+    @property
+    def json(self) -> dict:
+        return {
+            **super().json,
+            "latency": self._latency,
+            "duration": self._duration,
+            "amplitude": self._amplitude,
+            "deviation": self._deviation,
+            "peak_velocity": self._peak_velocity,
+        }
+
+    @property
+    def latency(self) -> int:
+        return self._latency
+
+    @property
+    def duration(self) -> int:
+        return self._duration
+
+    @property
+    def amplitude(self) -> float:
+        return self._amplitude
+
+    @property
+    def deviation(self) -> float:
+        return self._deviation
+
+    @property
+    def peak_velocity(self) -> float:
+        return self._peak_velocity
 
 
 class Test:
@@ -19,10 +171,12 @@ class Test:
         self,
         test_type: TestType,
         angle: int,
-        horizontal_stimuli: ndarray,
-        horizontal_channel: ndarray,
-        vertical_stimuli: ndarray,
-        vertical_channel: ndarray,
+        hor_stimuli: ndarray,
+        hor_channel: ndarray,
+        ver_stimuli: ndarray,
+        ver_channel: ndarray,
+        hor_annotations: list[Annotation] = [],
+        ver_annotations: list[Annotation] = [],
         fs: int = 1000,
         **kwargs,
     ):
@@ -30,13 +184,15 @@ class Test:
         self._angle = angle
         self._fs = fs
 
-        self._horizontal_stimuli = horizontal_stimuli
-        self._horizontal_channel = horizontal_channel
-        self._vertical_stimuli = vertical_stimuli
-        self._vertical_channel = vertical_channel
+        self.hor_stimuli = hor_stimuli
+        self._hor_channel = hor_channel
+        self._ver_stimuli = ver_stimuli
+        self._ver_channel = ver_channel
+        self._hor_annotations = hor_annotations
+        self._ver_annotations = ver_annotations
 
-        self._horizontal_calibration: float = 1.0
-        self._vertical_calibration: float = 1.0
+        self._hor_calibration: float = 1.0
+        self._ver_calibration: float = 1.0
 
     def __str__(self):
         return "{test} at {angle}°".format(
@@ -50,7 +206,9 @@ class Test:
             "test_type": self._test_type.value,
             "angle": self._angle,
             "fs": self._fs,
-            "length": len(self._horizontal_stimuli),
+            "length": len(self.hor_stimuli),
+            "hor_annotations": [a.json for a in self._hor_annotations],
+            "ver_annotations": [a.json for a in self._ver_annotations],
         }
 
     @property
@@ -66,44 +224,67 @@ class Test:
         return self._fs
 
     @cached_property
-    def horizontal_stimuli(self) -> ndarray:
-        normalized = (self._horizontal_stimuli - 32768) / 20000
+    def hor_stimuli(self) -> ndarray:
+        normalized = (self.hor_stimuli - 32768) / 20000
         scaled = normalized.astype(single) * (self.angle / 2)
         return scaled
 
     @cached_property
-    def horizontal_channel(self) -> ndarray:
-        scaled = self._horizontal_channel.astype(single) * self._horizontal_calibration
+    def hor_channel(self) -> ndarray:
+        scaled = self._hor_channel.astype(single) * self._hor_calibration
         centered = scaled - scaled.mean()
         return denoise(centered)
 
     @cached_property
-    def vertical_stimuli(self) -> ndarray:
-        normalized = (self._vertical_stimuli - 32768) / 20000
+    def ver_stimuli(self) -> ndarray:
+        normalized = (self._ver_stimuli - 32768) / 20000
         scaled = normalized.astype(single) * (self.angle / 2)
         return scaled
 
     @cached_property
-    def vertical_channel(self) -> ndarray:
-        scaled = self._vertical_channel.astype(single) * self._horizontal_calibration
+    def ver_channel(self) -> ndarray:
+        scaled = self._ver_channel.astype(single) * self._hor_calibration
         centered = scaled - scaled.mean()
         return denoise(centered)
 
     @property
-    def horizontal_calibration(self) -> float:
-        return self._horizontal_calibration
+    def hor_calibration(self) -> float:
+        return self._hor_calibration
 
-    @horizontal_calibration.setter
-    def horizontal_calibration(self, value: float):
-        self._horizontal_calibration = value or 1.0
+    @hor_calibration.setter
+    def hor_calibration(self, value: float):
+        self._hor_calibration = value or 1.0
 
     @property
-    def vertical_calibration(self) -> float:
-        return self._vertical_calibration
+    def ver_calibration(self) -> float:
+        return self._ver_calibration
 
-    @vertical_calibration.setter
-    def vertical_calibration(self, value: float):
-        self._vertical_calibration = value or 1.0
+    @ver_calibration.setter
+    def ver_calibration(self, value: float):
+        self._ver_calibration = value or 1.0
+
+    def annotate(self):
+        """Identify annotations"""
+
+        result = []
+        velocities = abs(differentiate(self.hor_channel))
+
+        for onset, offset in saccades(
+            channel=self.hor_channel,
+            angle=self.angle,
+        ):
+            result.append(
+                Saccade.create(
+                    onset=onset,
+                    offset=offset,
+                    angle=self.angle,
+                    channel=self.hor_channel,
+                    stimuli=self.hor_stimuli,
+                    velocities=velocities,
+                )
+            )
+
+        self._hor_annotations = result
 
 
 class Study:
@@ -125,7 +306,7 @@ class Study:
             initial_calibration = None
             final_calibration = None
             for test in tests:
-                if test.test_type == TestType.HorizontalCalibration:
+                if test.test_type == TestType.horCalibration:
                     if initial_calibration is None:
                         initial_calibration = test
                     final_calibration = test
@@ -134,8 +315,8 @@ class Study:
                 assert initial_calibration.angle == final_calibration.angle
 
             hor_calibration, hor_calibration_diff = calibration(
-                initial=initial_calibration.horizontal_channel,
-                final=final_calibration.horizontal_channel,
+                initial=initial_calibration.hor_channel,
+                final=final_calibration.hor_channel,
                 angle=initial_calibration.angle,
             )
 
@@ -146,7 +327,7 @@ class Study:
             initial_calibration = None
             final_calibration = None
             for test in tests:
-                if test.test_type == TestType.VerticalCalibration:
+                if test.test_type == TestType.verCalibration:
                     if initial_calibration is None:
                         initial_calibration = test
                     final_calibration = test
@@ -155,8 +336,8 @@ class Study:
                 assert initial_calibration.angle == final_calibration.angle
 
                 ver_calibration, ver_calibration_diff = calibration(
-                    initial=initial_calibration.vertical_channel,
-                    final=final_calibration.vertical_channel,
+                    initial=initial_calibration.ver_channel,
+                    final=final_calibration.ver_channel,
                     angle=initial_calibration.angle,
                 )
 
@@ -164,20 +345,20 @@ class Study:
         self._ver_calibration_diff = ver_calibration_diff
 
         for test in tests:
-            test.horizontal_calibration = self._hor_calibration or 1.0
+            test.hor_calibration = self._hor_calibration or 1.0
 
         self._tests = tests
 
-    def __str__(self):
+    def __str__(self) -> str:
         return "Study recorded at {recorded_at} with {num_tests} tests".format(
             recorded_at=self._recorded_at.strftime("%Y-%m-%d %H:%M:%S"),
             num_tests=len(self._tests),
         )
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self._tests)
 
-    def __getitem__(self, index: int):
+    def __getitem__(self, index: int) -> Test:
         return self._tests[index]
 
     @property

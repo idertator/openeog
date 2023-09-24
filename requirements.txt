@@ -6,3 +6,5 @@ PySide6-stubs
 numpy
 scipy
 scikit-learn
+tablib
+tablib[xlsx]
