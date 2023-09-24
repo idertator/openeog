@@ -248,6 +248,18 @@ class Test:
         return denoise(centered)
 
     @property
+    def hor_annotations(self) -> list[Annotation]:
+        return self._hor_annotations
+
+    @property
+    def hor_saccades(self) -> list[Saccade]:
+        return [a for a in self._hor_annotations if isinstance(a, Saccade)]
+
+    @property
+    def ver_annotations(self) -> list[Annotation]:
+        return self._ver_annotations
+
+    @property
     def hor_calibration(self) -> float:
         return self._hor_calibration
 
@@ -376,3 +388,11 @@ class Study:
     @property
     def recorded_at(self) -> datetime:
         return self._recorded_at
+
+    @property
+    def hor_calibration(self) -> float:
+        return self._hor_calibration
+
+    @property
+    def hor_calibration_diff(self) -> float:
+        return self._hor_calibration_diff

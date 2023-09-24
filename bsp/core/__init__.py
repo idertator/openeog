@@ -4,6 +4,7 @@ from .differentiation import differentiate
 from .impulses import impulses
 from .io import load_study, save_study
 from .models import Study, Test, TestType
+from .reports import saccadic_report
 from .stimuli import saccadic_stimuli
 
 __all__ = [

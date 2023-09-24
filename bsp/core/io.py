@@ -66,7 +66,3 @@ def load_study(filepath: str) -> Study:
             ver_calibration=manifest.get("ver_calibration", None),
             ver_calibration_diff=manifest.get("ver_calibration_diff", None),
         )
-
-
-def saccadic_report(study: Study, filepath: str):
-    pass
