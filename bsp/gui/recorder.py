@@ -4,7 +4,7 @@ from numpy import uint16, zeros
 from PySide6.QtCore import QObject, QThreadPool, Signal
 
 from bsp.adc import BSPAdquirer
-from bsp.core import Study, Test, TestType, saccadic_stimuli
+from bsp.core import Study, Test, TestType, pursuit_stimuli, saccadic_stimuli
 
 from .plotter import Plotter
 from .screens import ScreensManager
@@ -18,6 +18,9 @@ class Recorder(QObject):
 
     SACCADIC_SAMPLES = 40000
     SACCADES_COUNT = 20
+
+    PURSUIT_SAMPLES = 40000
+    PURSUIT_VELOCITY = 30
 
     started = Signal()
     stopped = Signal()
@@ -74,7 +77,7 @@ class Recorder(QObject):
 
         return 0
 
-    def start(self):
+    def initialize_saccadic_protocol(self):
         self._tests = [
             {
                 "test_type": TestType.HorizontalCalibration,
@@ -143,6 +146,47 @@ class Recorder(QObject):
                 "ver_channel": zeros(self.CALIBRATION_SAMPLES, dtype=uint16),
             },
         ]
+
+    def initialize_pursuit_protocol(self):
+        self._tests = [
+            {
+                "test_type": TestType.HorizontalCalibration,
+                "angle": 30,
+                "hor_stimuli": saccadic_stimuli(
+                    length=self.CALIBRATION_SAMPLES,
+                    saccades=self.CALIBRATION_SACCADES,
+                ),
+                "hor_channel": zeros(self.CALIBRATION_SAMPLES, dtype=uint16),
+                "ver_stimuli": zeros(self.CALIBRATION_SAMPLES, dtype=uint16),
+                "ver_channel": zeros(self.CALIBRATION_SAMPLES, dtype=uint16),
+            },
+            {
+                "test_type": TestType.HorizontalPursuit,
+                "angle": 60,
+                "hor_stimuli": pursuit_stimuli(
+                    length=self.PURSUIT_SAMPLES,
+                    velocity=self.PURSUIT_VELOCITY,
+                    angle=60,
+                ),
+                "hor_channel": zeros(self.CALIBRATION_SAMPLES, dtype=uint16),
+                "ver_stimuli": zeros(self.CALIBRATION_SAMPLES, dtype=uint16),
+                "ver_channel": zeros(self.CALIBRATION_SAMPLES, dtype=uint16),
+            },
+            {
+                "test_type": TestType.HorizontalCalibration,
+                "angle": 30,
+                "hor_stimuli": saccadic_stimuli(
+                    length=self.CALIBRATION_SAMPLES,
+                    saccades=self.CALIBRATION_SACCADES,
+                ),
+                "hor_channel": zeros(self.CALIBRATION_SAMPLES, dtype=uint16),
+                "ver_stimuli": zeros(self.CALIBRATION_SAMPLES, dtype=uint16),
+                "ver_channel": zeros(self.CALIBRATION_SAMPLES, dtype=uint16),
+            },
+        ]
+
+    def start(self):
+        self.initialize_saccadic_protocol()
 
         self._current_test = -1
         self._stimulator.open()

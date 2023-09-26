@@ -16,16 +16,22 @@ class TestType(StrEnum):
     HorizontalCalibration = "HorizontalCalibration"
     HorizontalSaccadicTest = "HorizontalSaccadicTest"
     VerticalCalibration = "VerticalCalibration"
+    HorizontalPursuit = "HorizontalPursuit"
 
     @property
     def name(self) -> str:
         match self:
             case TestType.HorizontalCalibration:
                 return "Calibración Horizontal"
+
             case TestType.HorizontalSaccadicTest:
                 return "Sacádica"
+
             case TestType.VerticalCalibration:
                 return "Calibración Vertical"
+
+            case TestType.HorizontalPursuit:
+                return "Persecución Horizontal"
 
         return "Desconocida"
 
@@ -40,10 +46,14 @@ class AnnotationType(StrEnum):
         match self:
             case AnnotationType.Fixation:
                 return "Fijación"
+
             case AnnotationType.Saccade:
                 return "Sácada"
+
             case AnnotationType.Pursuit:
                 return "Persecución"
+
+        return "Desconocida"
 
 
 class Annotation:
