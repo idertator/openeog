@@ -1,11 +1,12 @@
 from PySide6.QtCore import Slot
-from PySide6.QtGui import QAction, QIcon
+from PySide6.QtGui import QAction, QIcon, QShowEvent
 from PySide6.QtWidgets import QFileDialog, QMainWindow, QMessageBox
 
 from bsp.core import Protocol, saccadic_report, save_study
 
 from . import resources  # noqa
 from .plotter import Plotter
+from .protocols import ProtocolsDialog
 from .recorder import Recorder
 from .screens import ScreensManager
 from .settings import SettingsDialog
@@ -58,6 +59,12 @@ class MainWindow(QMainWindow):
             parent=self,
         )
         self._recorder.finished.connect(self.on_recording_finished)
+
+        self._protocols_dialog = ProtocolsDialog(self)
+
+    def showEvent(self, event: QShowEvent):
+        self._protocols_dialog.exec()
+        self._recorder.protocol = self._protocols_dialog.protocol
 
     @Slot()
     def on_settings_clicked(self):
