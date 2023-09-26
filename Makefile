@@ -11,4 +11,4 @@ tags::
 	ctags -R .
 
 art:
-	pyside6-rcc res/icons.qrc -o bsp/gui/icons.py
+	pyside6-rcc res/resources.qrc -o bsp/gui/resources.py

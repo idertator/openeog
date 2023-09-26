@@ -4,5 +4,8 @@
         <file alias="settings.svg">icons/sliders-solid.svg</file>
         <file alias="play.svg">icons/play-solid.svg</file>
         <file alias="stop.svg">icons/stop-solid.svg</file>
+
+        <file alias="pursuit.svg">banners/pursuit.svg</file>
+        <file alias="saccades.svg">banners/saccades.svg</file>
     </qresource>
 </RCC>

@@ -2,9 +2,9 @@ from PySide6.QtCore import Slot
 from PySide6.QtGui import QAction, QIcon
 from PySide6.QtWidgets import QFileDialog, QMainWindow, QMessageBox
 
-from bsp.core import saccadic_report, save_study
+from bsp.core import Protocol, saccadic_report, save_study
 
-from . import icons  # noqa
+from . import resources  # noqa
 from .plotter import Plotter
 from .recorder import Recorder
 from .screens import ScreensManager
@@ -92,14 +92,17 @@ class MainWindow(QMainWindow):
 
             study = self._recorder.build_study()
             save_study(study, filepath + ".bsp")
-            saccadic_report(study, filepath + ".xlsx")
 
-            QMessageBox.information(
-                self,
-                "Información",
-                "Estudio almacenado satisfactoriamente en {study_path} y "
-                "reporte sacádico en {report_path}".format(
+            if study.protocol == Protocol.Saccadic:
+                saccadic_report(study, filepath + ".xlsx")
+                msg = """Estudio almacenado satisfactoriamente en {study_path} y
+                      reporte sacádico en {report_path}""".format(
                     study_path=filepath + ".bsp",
                     report_path=filepath + ".xlsx",
-                ),
-            )
+                )
+            else:
+                msg = "Estudio almacenado satisfactoriamente en {study_path}".format(
+                    study_path=filepath + ".bsp",
+                )
+
+            QMessageBox.information(self, "Información", msg)

@@ -12,9 +12,23 @@ from .differentiation import differentiate
 from .saccades import saccades
 
 
+class Protocol(StrEnum):
+    Saccadic = "saccadic"
+    Pursuit = "pursuit"
+
+    @property
+    def name(self) -> str:
+        match self:
+            case Protocol.Saccadic:
+                return "Protocolo Sacádico"
+
+            case Protocol.Pursuit:
+                return "Protocolo de Persecución"
+
+
 class TestType(StrEnum):
     HorizontalCalibration = "HorizontalCalibration"
-    HorizontalSaccadicTest = "HorizontalSaccadicTest"
+    HorizontalSaccadic = "HorizontalSaccadic"
     VerticalCalibration = "VerticalCalibration"
     HorizontalPursuit = "HorizontalPursuit"
 
@@ -24,7 +38,7 @@ class TestType(StrEnum):
             case TestType.HorizontalCalibration:
                 return "Calibración Horizontal"
 
-            case TestType.HorizontalSaccadicTest:
+            case TestType.HorizontalSaccadic:
                 return "Sacádica"
 
             case TestType.VerticalCalibration:
@@ -304,25 +318,26 @@ class Test:
     def annotate(self):
         """Identify annotations"""
 
-        result = []
-        velocities = abs(differentiate(self.hor_channel))
+        if self.test_type == TestType.HorizontalSaccadic:
+            result = []
+            velocities = abs(differentiate(self.hor_channel))
 
-        for onset, offset in saccades(
-            channel=self.hor_channel,
-            angle=self.angle,
-        ):
-            result.append(
-                Saccade.create(
-                    onset=onset,
-                    offset=offset,
-                    angle=self.angle,
-                    channel=self.hor_channel,
-                    stimuli=self.hor_stimuli,
-                    velocities=velocities,
+            for onset, offset in saccades(
+                channel=self.hor_channel,
+                angle=self.angle,
+            ):
+                result.append(
+                    Saccade.create(
+                        onset=onset,
+                        offset=offset,
+                        angle=self.angle,
+                        channel=self.hor_channel,
+                        stimuli=self.hor_stimuli,
+                        velocities=velocities,
+                    )
                 )
-            )
 
-        self._hor_annotations = result
+            self._hor_annotations = result
 
 
 class Study:
@@ -332,6 +347,7 @@ class Study:
         self,
         recorded_at: datetime | None,
         tests: list[Test],
+        protocol: Protocol = Protocol.Saccadic,
         hor_calibration: float | None = None,
         hor_calibration_diff: float | None = None,
         ver_calibration: float | None = None,
@@ -386,6 +402,7 @@ class Study:
             test.hor_calibration = self._hor_calibration or 1.0
 
         self._tests = tests
+        self._protocol = protocol
 
     def __str__(self) -> str:
         return "Study recorded at {recorded_at} with {num_tests} tests".format(
@@ -409,6 +426,7 @@ class Study:
             "hor_calibration_diff": float(self._hor_calibration_diff or 1.0),
             "ver_calibration": float(self._ver_calibration or 1.0),
             "ver_calibration_diff": float(self._ver_calibration_diff or 1.0),
+            "protocol": self._protocol.value,
         }
 
     @property
@@ -422,3 +440,7 @@ class Study:
     @property
     def hor_calibration_diff(self) -> float:
         return self._hor_calibration_diff
+
+    @property
+    def protocol(self) -> Protocol:
+        return self._protocol

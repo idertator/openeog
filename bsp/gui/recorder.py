@@ -61,7 +61,7 @@ class Recorder(QObject):
 
         test: Test
         for test in study:
-            if test.test_type == TestType.HorizontalSaccadicTest:
+            if test.test_type == TestType.HorizontalSaccadic:
                 test.annotate()
 
         return study
@@ -91,7 +91,7 @@ class Recorder(QObject):
                 "ver_channel": zeros(self.CALIBRATION_SAMPLES, dtype=uint16),
             },
             {
-                "test_type": TestType.HorizontalSaccadicTest,
+                "test_type": TestType.HorizontalSaccadic,
                 "angle": 10,
                 "hor_stimuli": saccadic_stimuli(
                     length=self.SACCADIC_SAMPLES,
@@ -102,7 +102,7 @@ class Recorder(QObject):
                 "ver_channel": zeros(self.SACCADIC_SAMPLES, dtype=uint16),
             },
             {
-                "test_type": TestType.HorizontalSaccadicTest,
+                "test_type": TestType.HorizontalSaccadic,
                 "angle": 20,
                 "hor_stimuli": saccadic_stimuli(
                     length=self.SACCADIC_SAMPLES,
@@ -113,7 +113,7 @@ class Recorder(QObject):
                 "ver_channel": zeros(self.SACCADIC_SAMPLES, dtype=uint16),
             },
             {
-                "test_type": TestType.HorizontalSaccadicTest,
+                "test_type": TestType.HorizontalSaccadic,
                 "angle": 30,
                 "hor_stimuli": saccadic_stimuli(
                     length=self.SACCADIC_SAMPLES,
@@ -124,7 +124,7 @@ class Recorder(QObject):
                 "ver_channel": zeros(self.SACCADIC_SAMPLES, dtype=uint16),
             },
             {
-                "test_type": TestType.HorizontalSaccadicTest,
+                "test_type": TestType.HorizontalSaccadic,
                 "angle": 60,
                 "hor_stimuli": saccadic_stimuli(
                     length=self.SACCADIC_SAMPLES,
@@ -133,44 +133,6 @@ class Recorder(QObject):
                 "hor_channel": zeros(self.SACCADIC_SAMPLES, dtype=uint16),
                 "ver_stimuli": zeros(self.SACCADIC_SAMPLES, dtype=uint16),
                 "ver_channel": zeros(self.SACCADIC_SAMPLES, dtype=uint16),
-            },
-            {
-                "test_type": TestType.HorizontalCalibration,
-                "angle": 30,
-                "hor_stimuli": saccadic_stimuli(
-                    length=self.CALIBRATION_SAMPLES,
-                    saccades=self.CALIBRATION_SACCADES,
-                ),
-                "hor_channel": zeros(self.CALIBRATION_SAMPLES, dtype=uint16),
-                "ver_stimuli": zeros(self.CALIBRATION_SAMPLES, dtype=uint16),
-                "ver_channel": zeros(self.CALIBRATION_SAMPLES, dtype=uint16),
-            },
-        ]
-
-    def initialize_pursuit_protocol(self):
-        self._tests = [
-            {
-                "test_type": TestType.HorizontalCalibration,
-                "angle": 30,
-                "hor_stimuli": saccadic_stimuli(
-                    length=self.CALIBRATION_SAMPLES,
-                    saccades=self.CALIBRATION_SACCADES,
-                ),
-                "hor_channel": zeros(self.CALIBRATION_SAMPLES, dtype=uint16),
-                "ver_stimuli": zeros(self.CALIBRATION_SAMPLES, dtype=uint16),
-                "ver_channel": zeros(self.CALIBRATION_SAMPLES, dtype=uint16),
-            },
-            {
-                "test_type": TestType.HorizontalPursuit,
-                "angle": 60,
-                "hor_stimuli": pursuit_stimuli(
-                    length=self.PURSUIT_SAMPLES,
-                    velocity=self.PURSUIT_VELOCITY,
-                    angle=60,
-                ),
-                "hor_channel": zeros(self.CALIBRATION_SAMPLES, dtype=uint16),
-                "ver_stimuli": zeros(self.CALIBRATION_SAMPLES, dtype=uint16),
-                "ver_channel": zeros(self.CALIBRATION_SAMPLES, dtype=uint16),
             },
             {
                 "test_type": TestType.HorizontalCalibration,

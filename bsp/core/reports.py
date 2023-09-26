@@ -150,7 +150,7 @@ def saccadic_report(study: Study, filepath: str):
     stats_list = []
 
     for test in study:
-        if test.test_type == TestType.HorizontalSaccadicTest:
+        if test.test_type == TestType.HorizontalSaccadic:
             ds, stats = _test_dataset(test)
             tests_list.append(ds)
             stats_list.append(stats)

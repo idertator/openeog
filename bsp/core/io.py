@@ -5,7 +5,7 @@ from zipfile import ZipFile
 
 from numpy import load, savez_compressed
 
-from .models import Study, Test, TestType
+from .models import Protocol, Study, Test, TestType
 
 
 def save_study(study: Study, filepath: str):
@@ -47,9 +47,16 @@ def load_study(filepath: str) -> Study:
         for idx, test in enumerate(manifest["tests"]):
             with zip_file.open(f"test{idx:02}.npz") as buff:
                 channels = load(buff)
+
+                test_type = test["test_type"]
+
+                # Small bug currection - Remove in future versions
+                if test_type == "HorizontalSaccadicTest":
+                    test_type = TestType.HorizontalSaccadic.value
+
                 tests.append(
                     Test(
-                        test_type=TestType(test["test_type"]),
+                        test_type=TestType(test_type),
                         angle=test["angle"],
                         hor_stimuli=channels["hor_stimuli"],
                         hor_channel=channels["hor_channel"],
@@ -69,4 +76,5 @@ def load_study(filepath: str) -> Study:
             ver_calibration_diff=float(
                 manifest.get("ver_calibration_diff", None) or 1.0
             ),
+            protocol=Protocol(test.get("protocol", "saccadic")),
         )
