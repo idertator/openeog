@@ -65,7 +65,7 @@ def pursuit_stimuli(
     idx = 0
     half = angle // 2
     left, right = -half, half
-    current = -half
+    current = 0
     delta = speed / 1000.0
 
     while idx < length:

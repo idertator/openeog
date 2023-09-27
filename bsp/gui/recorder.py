@@ -20,7 +20,7 @@ class Recorder(QObject):
     SACCADES_COUNT = 20
 
     PURSUIT_SAMPLES = 40000
-    PURSUIT_VELOCITY = 5
+    PURSUIT_VELOCITY = 20
 
     started = Signal()
     stopped = Signal()
@@ -45,7 +45,7 @@ class Recorder(QObject):
 
         stimulus_screen = self._settings.stimuli_monitor
         refresh_rate = self._screens.refresh_rate(stimulus_screen)
-        self._buffer_length = (1000 // refresh_rate) >> 1
+        self._buffer_length = 1000 // refresh_rate
 
         self._stimulator.started.connect(self.start_test)
         self._stimulator.initialized.connect(self.on_stimulator_initialized)
