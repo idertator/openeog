@@ -14,6 +14,7 @@ class ScreensManager(QObject):
                 "physical_size": screen.physicalSize(),
                 "geometry": screen.geometry(),
                 "rate": int(screen.refreshRate()),
+                "dpi": float(screen.physicalDotsPerInch()),
             }
             for screen in self.app.screens()
         }
@@ -44,6 +45,11 @@ class ScreensManager(QObject):
         if screen in self._screens:
             return self._screens[screen]["rate"]
         return None
+
+    def dpi(self, screen: str) -> float:
+        if screen in self._screens:
+            return self._screens[screen]["dpi"]
+        return 1.0
 
     @Slot()
     def on_screen_added(self, screen: QScreen):

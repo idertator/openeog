@@ -60,11 +60,13 @@ class MainWindow(QMainWindow):
         )
         self._recorder.finished.connect(self.on_recording_finished)
 
-        self._protocols_dialog = ProtocolsDialog(self)
+        self._protocols_dialog = None
 
     def showEvent(self, event: QShowEvent):
-        self._protocols_dialog.exec()
-        self._recorder.protocol = self._protocols_dialog.protocol
+        if not self._protocols_dialog:
+            self._protocols_dialog = ProtocolsDialog(self)
+            self._protocols_dialog.exec()
+            self._recorder.protocol = self._protocols_dialog.protocol
 
     @Slot()
     def on_settings_clicked(self):

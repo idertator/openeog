@@ -1,6 +1,6 @@
 from numpy import ndarray
 from PySide6.QtCharts import QChart, QChartView, QLineSeries, QValueAxis
-from PySide6.QtCore import QPoint, Qt
+from PySide6.QtCore import QPointF, Qt
 from PySide6.QtGui import QPainter, QPen
 from PySide6.QtWidgets import QSplitter, QVBoxLayout, QWidget
 
@@ -88,10 +88,10 @@ class Plotter(QWidget):
         self._layout = QVBoxLayout()
         self._layout.addWidget(self._splitter)
 
-        self._hor_buffer = [QPoint(i, 0) for i in range(length)]
-        self._hor_stimuli_buffer = [QPoint(i, 0) for i in range(length)]
-        self._ver_buffer = [QPoint(i, 0) for i in range(length)]
-        self._ver_stimulus_buffer = [QPoint(i, 0) for i in range(length)]
+        self._hor_buffer = [QPointF(i, 0) for i in range(length)]
+        self._hor_stimuli_buffer = [QPointF(i, 0) for i in range(length)]
+        self._ver_buffer = [QPointF(i, 0) for i in range(length)]
+        self._ver_stimulus_buffer = [QPointF(i, 0) for i in range(length)]
 
         self.setLayout(self._layout)
 
@@ -107,21 +107,25 @@ class Plotter(QWidget):
         if length < self.length:
             start = self.length - length
             for s in range(start):
-                self._hor_buffer[s].setY(self._hor_buffer[s + length].y())
-                self._hor_stimuli_buffer[s].setY(
-                    self._hor_stimuli_buffer[s + length].y()
+                self._hor_buffer[s].setY(
+                    float(self._hor_buffer[s + length].y()),
                 )
-                self._ver_buffer[s].setY(self._ver_buffer[s + length].y())
+                self._hor_stimuli_buffer[s].setY(
+                    float(self._hor_stimuli_buffer[s + length].y()),
+                )
+                self._ver_buffer[s].setY(
+                    float(self._ver_buffer[s + length].y()),
+                )
                 self._ver_stimulus_buffer[s].setY(
-                    self._ver_stimulus_buffer[s + length].y()
+                    float(self._ver_stimulus_buffer[s + length].y()),
                 )
 
         idx = 0
         for s in range(start, self.length):
-            self._hor_buffer[s].setY(hor[idx])
-            self._hor_stimuli_buffer[s].setY(hor_stimuli[idx])
-            self._ver_buffer[s].setY(ver[idx])
-            self._ver_stimulus_buffer[s].setY(ver_stimulus[idx])
+            self._hor_buffer[s].setY(float(hor[idx]))
+            self._hor_stimuli_buffer[s].setY(float(hor_stimuli[idx]))
+            self._ver_buffer[s].setY(float(ver[idx]))
+            self._ver_stimulus_buffer[s].setY(float(ver_stimulus[idx]))
             idx += 1
 
         self._hor.replace(self._hor_buffer)

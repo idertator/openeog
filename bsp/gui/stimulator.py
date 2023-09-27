@@ -35,7 +35,9 @@ class Stimulator(QWidget):
         self._x_scale = float(self.width()) / float(self._width)
         self._y_scale = float(self.height()) / float(self._height)
 
-        self._ball_ratio = ball_ratio * self._x_scale
+        self._dpi_scale = screens.dpi(self._stimuli_screen) / 136
+
+        self._ball_ratio = ball_ratio * self._x_scale * self._dpi_scale
 
         self._msg = ""
         self._ball_position: tuple[int, int] | None = None

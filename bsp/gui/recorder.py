@@ -20,7 +20,7 @@ class Recorder(QObject):
     SACCADES_COUNT = 20
 
     PURSUIT_SAMPLES = 40000
-    PURSUIT_VELOCITY = 30
+    PURSUIT_VELOCITY = 5
 
     started = Signal()
     stopped = Signal()
