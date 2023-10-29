@@ -48,8 +48,6 @@ def load_study(filepath: str) -> Study:
             with zip_file.open(f"test{idx:02}.npz") as buff:
                 channels = load(buff)
 
-                print(channels.keys())
-
                 test_type = test["test_type"]
 
                 # Small bug currection - Remove in future versions

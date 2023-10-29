@@ -6,34 +6,8 @@ from typing import Callable
 from numpy import ndarray, uint16, zeros
 from PySide6.QtCore import QObject, QRunnable, Signal, Slot
 
-osDic = {
-    "Darwin": f"MacOS/Intel{''.join(platform.python_version().split('.')[:2])}",
-    "Linux": "Linux64",
-    "Windows": f"Win{platform.architecture()[0][:2]}_{''.join(platform.python_version().split('.')[:2])}",
-}
-if platform.mac_ver()[0] != "":
-    import subprocess
-    from os import linesep
-
-    p = subprocess.Popen("sw_vers", stdout=subprocess.PIPE)
-    result = p.communicate()[0].decode("utf-8").split(str("\t"))[2].split(linesep)[0]
-    if result.startswith("12."):
-        print("macOS version is Monterrey!")
-        osDic["Darwin"] = "MacOS/Intel310"
-        if (
-            int(platform.python_version().split(".")[0]) <= 3
-            and int(platform.python_version().split(".")[1]) < 10
-        ):
-            print(
-                f"Python version required is ≥ 3.10. Installed is {platform.python_version()}"
-            )
-            exit()
-
-
-EXTERNAL_PATH = join(dirname(__file__), f"external/{osDic[platform.system()]}")
-
+EXTERNAL_PATH = join(dirname(__file__), f"external/{platform.system()}")
 sys.path.append(EXTERNAL_PATH)
-
 
 import plux  # noqa
 
