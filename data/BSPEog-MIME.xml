@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<mime-info xmlns='http://www.freedesktop.org/standards/shared-mime-info'>
+    <mime-type type="application/x-bsp-eog">
+        <comment>BSP EOG Record</comment>
+        <comment xml:lang="es">Registro del BSP EOG</comment>
+        <icon name="BSP EOG"/>
+        <glob pattern="*.eog"/>
+    </mime-type>
+</mime-info>

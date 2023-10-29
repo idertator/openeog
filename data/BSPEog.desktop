@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Encoding=UTF-8
+Name=BSPEog
+Comment=Electrooculographic Signals Recording App
+Exec=sh -c "python3.11 ~/.local/bin/bsp"
+Icon=BSPEog.png
+Terminal=false
+Categories=Science;
