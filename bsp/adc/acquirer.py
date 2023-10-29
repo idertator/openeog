@@ -1,14 +1,20 @@
+import sys
+from os.path import dirname, join
 from typing import Callable
 
 from numpy import ndarray, uint16, zeros
 from PySide6.QtCore import QObject, QRunnable, Signal, Slot
 
-from .plux import MemoryDev, SignalsDev
+EXTERNAL_PATH = join(dirname(__file__), "external")
+
+sys.path.append(EXTERNAL_PATH)
+
+import plux
 
 
-class _BSPRecorder(SignalsDev):
+class _BSPRecorder(plux.SignalsDev):
     def __init__(self, address: str):
-        MemoryDev.__init__(address)
+        plux.MemoryDev.__init__(address)
         self.callback: Callable = None
 
     def set_callback(self, callback: Callable):

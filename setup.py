@@ -27,5 +27,8 @@ setup(
         "bsp.core",
         "bsp.gui",
     ],
+    package_data={
+        "bsp.adc": ["external/plux.so"],
+    },
     install_requires=requirements(),
 )
