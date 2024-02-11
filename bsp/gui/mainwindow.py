@@ -43,7 +43,10 @@ class MainWindow(QMainWindow):
         self._stop_action.setEnabled(False)
         self._toolbar.addAction(self._stop_action)
 
-        self._plotter = Plotter(length=5000)
+        self._plotter = Plotter(
+            length=5000,
+            resolution=self._settings_dialog.resolution,
+        )
         self.setCentralWidget(self._plotter)
 
         self._stimulator = Stimulator(

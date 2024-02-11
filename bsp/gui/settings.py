@@ -66,6 +66,12 @@ class SettingsDialog(QDialog):
         settings.setValue("device_type", value)
 
     @property
+    def resolution(self) -> int:
+        if self.device_type == "Bitalino":
+            return 10
+        return 16
+
+    @property
     def device_address(self) -> str:
         settings = QSettings()
         return settings.value("device_address", "/dev/rfcomm0")
