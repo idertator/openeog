@@ -3,6 +3,11 @@ from PySide6.QtWidgets import QComboBox, QDialog, QFormLayout, QLineEdit, QWidge
 
 from .screens import ScreensManager
 
+DEVICE_TYPES = [
+    "BiosignalsPlux",
+    "Bitalino",
+]
+
 
 class SettingsDialog(QDialog):
     def __init__(
@@ -16,6 +21,16 @@ class SettingsDialog(QDialog):
         self._screens = screens
 
         settings = QSettings()
+
+        device_type = self.device_type
+        if device_type not in DEVICE_TYPES:
+            device_type = DEVICE_TYPES[-1]
+            self.device_type = device_type
+
+        self._device_type = QComboBox()
+        self._device_type.addItems(DEVICE_TYPES)
+        self._device_type.setCurrentText(device_type)
+        self._device_type.currentTextChanged.connect(self.on_device_type_changed)
 
         self._device_address = QLineEdit()
         self._device_address.setText(settings.value("device_address", "/dev/rfcomm0"))
@@ -34,10 +49,21 @@ class SettingsDialog(QDialog):
         )
 
         layout = QFormLayout()
+        layout.addRow("Tipo de Dispositivo", self._device_type)
         layout.addRow("Dispositivo", self._device_address)
         layout.addRow("Pantalla de Estímulo", self._stimuli_monitor)
 
         self.setLayout(layout)
+
+    @property
+    def device_type(self) -> str:
+        settings = QSettings()
+        return settings.value("device_type", "BiosignalsPlux")
+
+    @device_type.setter
+    def device_type(self, value: str):
+        settings = QSettings()
+        settings.setValue("device_type", value)
 
     @property
     def device_address(self) -> str:
@@ -66,3 +92,7 @@ class SettingsDialog(QDialog):
     @Slot()
     def on_stimuli_monitor_changed(self, screen: str):
         self.stimuli_monitor = screen
+
+    @Slot()
+    def on_device_type_changed(self, device_type: str):
+        self.device_type = device_type

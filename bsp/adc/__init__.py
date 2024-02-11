@@ -1,5 +1,9 @@
-from .acquirer import BSPAdquirer
+from .base import Adquirer
+from .biosignalsplux import BiosignalsPluxAdquirer
+from .bitalino import BitalinoAdquirer
 
 __all__ = [
-    "BSPAdquirer",
+    "Adquirer",
+    "BiosignalsPluxAdquirer",
+    "BitalinoAdquirer",
 ]
