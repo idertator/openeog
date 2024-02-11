@@ -8,3 +8,7 @@ scipy
 scikit-learn
 tablib
 tablib[xlsx]
+
+setuptools
+jupyterlab
+matplotlib
