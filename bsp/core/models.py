@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from datetime import datetime
-from enum import StrEnum
+from enum import Enum
 from functools import cached_property
 
 from numpy import ndarray, single
@@ -12,7 +12,7 @@ from .differentiation import differentiate
 from .saccades import saccades
 
 
-class Protocol(StrEnum):
+class Protocol(str, Enum):
     Saccadic = "saccadic"
     Pursuit = "pursuit"
 
@@ -26,7 +26,7 @@ class Protocol(StrEnum):
                 return "Protocolo de Persecución"
 
 
-class TestType(StrEnum):
+class TestType(str, Enum):
     HorizontalCalibration = "HorizontalCalibration"
     HorizontalSaccadic = "HorizontalSaccadic"
     VerticalCalibration = "VerticalCalibration"
@@ -50,7 +50,7 @@ class TestType(StrEnum):
         return "Desconocida"
 
 
-class AnnotationType(StrEnum):
+class AnnotationType(str, Enum):
     Fixation = "Fixation"
     Saccade = "Saccade"
     Pursuit = "Pursuit"
