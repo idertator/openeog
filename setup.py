@@ -39,6 +39,7 @@ setup(
         ],
     },
     data_files=[
+        ("", ["requirements.txt", "README.md"]),
         ("share/icons", ["data/BSPEog.png"]),
         ("share/applications", ["data/BSPEog.desktop"]),
     ],
