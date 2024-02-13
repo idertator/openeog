@@ -57,7 +57,7 @@ setup(
         "Topic :: Scientific/Engineering :: Visualization",
         "Typing :: Typed",
     ],
-    python_requires=">=3.11",
+    python_requires=">=3.10",
     include_package_data=True,
     zip_safe=False,
 )
