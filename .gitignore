@@ -185,3 +185,8 @@ tags
 .scannerwork/
 .ipynb_checkpoints/
 .virtual_documents/
+
+# Releases
+*.tar.gz
+*.run
+
