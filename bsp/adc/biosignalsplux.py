@@ -7,7 +7,13 @@ from PySide6.QtCore import Slot
 
 from .base import Adquirer
 
-EXTERNAL_PATH = join(dirname(__file__), f"external/{platform.system()}")
+EXTERNAL_PATH = join(
+    dirname(__file__),
+    "external/{platform}_{processor}".format(
+        platform=platform.system(),
+        processor=platform.processor(),
+    ),
+)
 sys.path.append(EXTERNAL_PATH)
 
 import plux  # noqa

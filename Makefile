@@ -1,5 +1,5 @@
 NAME=bsp-eog
-VERSION=1.0.0
+VERSION=1.0.1
 
 all: art format
 
@@ -20,5 +20,5 @@ installer:
 	python3 setup.py sdist
 	mv dist/*.tar.gz install/
 	rmdir dist
-	makeself ./install bsp-1.0.0.run "BioSignalsPlux EOG" ./install.sh
+	makeself ./install bsp-1.0.1.run "BioSignalsPlux EOG" ./install.sh
 	rm install/*.tar.gz

@@ -13,7 +13,7 @@ def requirements():
 
 setup(
     name="bsp-eog",
-    version="1.0.0",
+    version="1.0.1",
     description="Electrooculographic Recording and Records Processing Platform",
     long_description=readme(),
     author="Roberto Antonio Becerra García",
@@ -29,13 +29,15 @@ setup(
     ],
     package_data={
         "bsp.adc": [
-            "external/Linux/plux.so",
-            "external/Darwin/bth_macprocess",
-            "external/Darwin/plux.so",
-            "external/Windows/LibFT4222-64.dll",
-            "external/Windows/LibFT4222AB-64.dll",
-            "external/Windows/msvcp100.dll",
-            "external/Windows/msvcr100.dll",
+            "external/Linux_x86_64/plux.so",
+            "external/Darwin_x86_64/bth_macprocess",
+            "external/Darwin_x86_64/plux.so",
+            "external/Darwin_arm/bth_macprocess",
+            "external/Darwin_arm/plux.so",
+            "external/Windows_x86_64/LibFT4222-64.dll",
+            "external/Windows_x86_64/LibFT4222AB-64.dll",
+            "external/Windows_x86_64/msvcp100.dll",
+            "external/Windows_x86_64/msvcr100.dll",
         ],
     },
     data_files=[
