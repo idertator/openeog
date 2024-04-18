@@ -53,8 +53,11 @@ class TestType(str, Enum):
             case TestType.HorizontalPursuit:
                 return "Persecución Horizontal"
 
-            case TestType.Antisaccadic:
-                return "Antisacádica"
+            case TestType.HorizontalAntisaccadic:
+                return "Antisacádica Horizontal"
+
+            case TestType.VerticalAntisaccadic:
+                return "Antisacádica Vertical"
 
         return "Desconocida"
 
