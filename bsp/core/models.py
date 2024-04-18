@@ -15,6 +15,7 @@ from .saccades import saccades
 class Protocol(str, Enum):
     Saccadic = "saccadic"
     Pursuit = "pursuit"
+    Antisaccadic = "antisaccadic"
 
     @property
     def name(self) -> str:
@@ -25,12 +26,16 @@ class Protocol(str, Enum):
             case Protocol.Pursuit:
                 return "Protocolo de Persecución"
 
+            case Protocol.Antisaccadic:
+                return "Protocolo Antisacádico"
+
 
 class TestType(str, Enum):
     HorizontalCalibration = "HorizontalCalibration"
     HorizontalSaccadic = "HorizontalSaccadic"
     VerticalCalibration = "VerticalCalibration"
     HorizontalPursuit = "HorizontalPursuit"
+    Antisaccadic = "Antisaccadic"
 
     @property
     def name(self) -> str:
@@ -46,6 +51,9 @@ class TestType(str, Enum):
 
             case TestType.HorizontalPursuit:
                 return "Persecución Horizontal"
+
+            case TestType.Antisaccadic:
+                return "Antisacádica"
 
         return "Desconocida"
 
