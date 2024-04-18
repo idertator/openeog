@@ -35,7 +35,8 @@ class TestType(str, Enum):
     HorizontalSaccadic = "HorizontalSaccadic"
     VerticalCalibration = "VerticalCalibration"
     HorizontalPursuit = "HorizontalPursuit"
-    Antisaccadic = "Antisaccadic"
+    HorizontalAntisaccadic = "HorizontalAntisaccadic"
+    VerticalAntisaccadic = "VerticalAntisaccadic"
 
     @property
     def name(self) -> str:

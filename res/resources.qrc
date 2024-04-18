@@ -7,5 +7,6 @@
 
         <file alias="pursuit.svg">banners/pursuit.svg</file>
         <file alias="saccades.svg">banners/saccades.svg</file>
+        <file alias="antisaccades.svg">banners/antisaccades.svg</file>
     </qresource>
 </RCC>
