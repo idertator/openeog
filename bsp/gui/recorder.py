@@ -22,7 +22,7 @@ class Recorder(QObject):
     SACCADES_COUNT = 20
 
     PURSUIT_SAMPLES = 40000
-    PURSUIT_VELOCITY = 20
+    PURSUIT_VELOCITY = 1.5
 
     started = Signal()
     stopped = Signal()
@@ -211,11 +211,10 @@ class Recorder(QObject):
             },
             {
                 "test_type": TestType.HorizontalPursuit,
-                "angle": 60,
+                "angle": 30,
                 "hor_stimuli": pursuit_stimuli(
                     length=self.PURSUIT_SAMPLES,
                     speed=self.PURSUIT_VELOCITY,
-                    angle=60,
                 ),
                 "hor_channel": zeros(self.SACCADIC_SAMPLES, dtype=uint16),
                 "ver_stimuli": zeros(self.SACCADIC_SAMPLES, dtype=uint16),
@@ -310,8 +309,8 @@ class Recorder(QObject):
             test["hor_channel"][start:] = hor[:-dif]
             test["ver_channel"][start:] = ver[:-dif]
 
-        stimuli *= 20000
-        stimuli += 32768
+        stimuli *= 200
+        stimuli += 512
 
         self._samples_recorded += samples
         self._stimulator.set_ball_angle(self.current_hor_position, 0)
