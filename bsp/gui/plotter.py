@@ -1,7 +1,7 @@
 from numpy import ndarray
 from PySide6.QtCharts import QChart, QChartView, QLineSeries, QValueAxis
 from PySide6.QtCore import QPointF, Qt
-from PySide6.QtGui import QPainter, QPen
+from PySide6.QtGui import QPainter, QPen, QShowEvent
 from PySide6.QtWidgets import QSplitter, QVBoxLayout, QWidget
 
 
@@ -81,9 +81,6 @@ class Plotter(QWidget):
         self._ver_chart_view.setRenderHint(QPainter.RenderHint.Antialiasing)
 
         self._splitter = QSplitter()
-        self._splitter.addWidget(self._hor_chart_view)
-        self._splitter.addWidget(self._ver_chart_view)
-        self._splitter.setOrientation(Qt.Orientations.Vertical)
 
         self._layout = QVBoxLayout()
         self._layout.addWidget(self._splitter)
@@ -94,6 +91,11 @@ class Plotter(QWidget):
         self._ver_stimulus_buffer = [QPointF(i, 0) for i in range(length)]
 
         self.setLayout(self._layout)
+
+    def showEvent(self, event: QShowEvent):
+        self._splitter.addWidget(self._hor_chart_view)
+        self._splitter.addWidget(self._ver_chart_view)
+        self._splitter.setOrientation(Qt.Orientations.Vertical)
 
     def plot_samples(
         self,

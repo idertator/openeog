@@ -8,6 +8,7 @@ from bsp.adc import Adquirer, BiosignalsPluxAdquirer, BitalinoAdquirer
 from bsp.core import Protocol, Study, Test, TestType, pursuit_stimuli, saccadic_stimuli
 
 from .plotter import Plotter
+from .protocols import PROTOCOLS
 from .screens import ScreensManager
 from .settings import SettingsDialog
 from .stimulator import Stimulator
@@ -21,7 +22,7 @@ class Recorder(QObject):
     SACCADES_COUNT = 20
 
     PURSUIT_SAMPLES = 40000
-    PURSUIT_VELOCITY = 20
+    PURSUIT_VELOCITY = 1.5
 
     started = Signal()
     stopped = Signal()
@@ -53,7 +54,7 @@ class Recorder(QObject):
 
         self._tests = []
         self._samples_recorded = 0
-        self._protocol = Protocol.Saccadic
+        self._protocol = PROTOCOLS[0]["protocol"]
 
     def build_study(self) -> Study:
         study = Study(
@@ -158,6 +159,43 @@ class Recorder(QObject):
             },
         ]
 
+    def initialize_antisaccadic_protocol(self):
+        self._tests = [
+            {
+                "test_type": TestType.HorizontalCalibration,
+                "angle": 30,
+                "hor_stimuli": saccadic_stimuli(
+                    length=self.CALIBRATION_SAMPLES,
+                    saccades=self.CALIBRATION_SACCADES,
+                ),
+                "hor_channel": zeros(self.CALIBRATION_SAMPLES, dtype=uint16),
+                "ver_stimuli": zeros(self.CALIBRATION_SAMPLES, dtype=uint16),
+                "ver_channel": zeros(self.CALIBRATION_SAMPLES, dtype=uint16),
+            },
+            {
+                "test_type": TestType.HorizontalAntisaccadic,
+                "angle": 30,
+                "hor_stimuli": saccadic_stimuli(
+                    length=self.SACCADIC_SAMPLES,
+                    saccades=self.SACCADES_COUNT,
+                ),
+                "hor_channel": zeros(self.SACCADIC_SAMPLES, dtype=uint16),
+                "ver_stimuli": zeros(self.SACCADIC_SAMPLES, dtype=uint16),
+                "ver_channel": zeros(self.SACCADIC_SAMPLES, dtype=uint16),
+            },
+            {
+                "test_type": TestType.HorizontalCalibration,
+                "angle": 30,
+                "hor_stimuli": saccadic_stimuli(
+                    length=self.CALIBRATION_SAMPLES,
+                    saccades=self.CALIBRATION_SACCADES,
+                ),
+                "hor_channel": zeros(self.CALIBRATION_SAMPLES, dtype=uint16),
+                "ver_stimuli": zeros(self.CALIBRATION_SAMPLES, dtype=uint16),
+                "ver_channel": zeros(self.CALIBRATION_SAMPLES, dtype=uint16),
+            },
+        ]
+
     def initialize_pursuit_protocol(self):
         self._tests = [
             {
@@ -173,11 +211,10 @@ class Recorder(QObject):
             },
             {
                 "test_type": TestType.HorizontalPursuit,
-                "angle": 60,
+                "angle": 30,
                 "hor_stimuli": pursuit_stimuli(
                     length=self.PURSUIT_SAMPLES,
                     speed=self.PURSUIT_VELOCITY,
-                    angle=60,
                 ),
                 "hor_channel": zeros(self.SACCADIC_SAMPLES, dtype=uint16),
                 "ver_stimuli": zeros(self.SACCADIC_SAMPLES, dtype=uint16),
@@ -197,10 +234,14 @@ class Recorder(QObject):
         ]
 
     def start(self):
-        if self._protocol == Protocol.Pursuit:
+        if self._protocol == Protocol.Saccadic:
+            self.initialize_saccadic_protocol()
+        elif self._protocol == Protocol.Antisaccadic:
+            self.initialize_antisaccadic_protocol()
+        elif self._protocol == Protocol.Pursuit:
             self.initialize_pursuit_protocol()
         else:
-            self.initialize_saccadic_protocol()
+            raise Exception("Invalid protocol")
 
         self._current_test = -1
         self._stimulator.open()
@@ -268,8 +309,8 @@ class Recorder(QObject):
             test["hor_channel"][start:] = hor[:-dif]
             test["ver_channel"][start:] = ver[:-dif]
 
-        stimuli *= 20000
-        stimuli += 32768
+        stimuli *= 200
+        stimuli += 512
 
         self._samples_recorded += samples
         self._stimulator.set_ball_angle(self.current_hor_position, 0)

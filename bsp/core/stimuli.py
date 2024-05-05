@@ -1,4 +1,4 @@
-from numpy import int32, ndarray, single, zeros
+from numpy import int32, linspace, ndarray, pi, sin, zeros
 from numpy.random import randint
 
 
@@ -47,36 +47,19 @@ def saccadic_stimuli(
 
 def pursuit_stimuli(
     length: int,
-    speed: float,
-    angle: int,
+    speed: float = 1.5,
 ) -> ndarray:
     """Generate a pursuit stimulus
 
     Args:
         length (int): Length of the stimulus
-        speed (float): Speed of the stimulus in °/s
-        angle (int): Angle of the stimulus
+        speed (float, optional): Speed of the stimulus in °/s. Defaults to 2.0.
+        angle (int, optional): Angle of the stimulus. Defaults to 60.
 
     Returns:
         ndarray: Pursuit stimulus
     """
-    result = zeros(length, dtype=single)
+    num_cycles = (speed * 1000) / 360
+    x = linspace(0, num_cycles * 2 * pi, length)
 
-    idx = 0
-    half = angle // 2
-    left, right = -half, half
-    current = 0
-    delta = speed / 1000.0
-
-    while idx < length:
-        result[idx] = current
-        current = current + delta
-        if current < left:
-            current = left
-            delta *= -1
-        elif current > right:
-            current = right
-            delta *= -1
-        idx += 1
-
-    return result / half
+    return sin(x)

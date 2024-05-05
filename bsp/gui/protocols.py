@@ -13,6 +13,8 @@ from PySide6.QtWidgets import (
 
 from bsp.core import Protocol
 
+from .config import PROTOCOLS
+
 
 class ProtocolsDialog(QDialog):
     def __init__(
@@ -22,38 +24,30 @@ class ProtocolsDialog(QDialog):
         super().__init__(parent=parent)
         self.setWindowTitle("Seleccione Protocol")
 
-        self._saccades_protocol_label = QLabel("Protocolo de Sácadas")
-        self._saccades_protocol_label.setAlignment(Qt.AlignCenter)
-        self._saccades_protocol_label.setSizePolicy(
-            QSizePolicy.Expanding,
-            QSizePolicy.Fixed,
-        )
+        self._layout = QVBoxLayout()
+        self._buttons_group = QButtonGroup()
+        self._protocols = {}
 
-        self._saccades_protocol = QPushButton()
-        self._saccades_protocol.setIcon(QIcon(":saccades.svg"))
-        self._saccades_protocol.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
-        self._saccades_protocol.setFixedSize(250, 100)
-        self._saccades_protocol.setIconSize(QSize(250, 100))
-        self._saccades_protocol.setCheckable(True)
-        self._saccades_protocol.setChecked(True)
+        for idx, protocol in enumerate(PROTOCOLS):
+            label = QLabel(protocol["name"])
+            label.setAlignment(Qt.AlignCenter)
+            label.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
 
-        self._pursuit_protocol_label = QLabel("Protocolo de Persecución")
-        self._pursuit_protocol_label.setAlignment(Qt.AlignCenter)
-        self._pursuit_protocol_label.setSizePolicy(
-            QSizePolicy.Expanding,
-            QSizePolicy.Fixed,
-        )
+            button = QPushButton()
+            button.setIcon(QIcon(protocol["icon"]))
+            button.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+            button.setFixedSize(250, 100)
+            button.setIconSize(QSize(250, 100))
+            button.setCheckable(True)
 
-        self._pursuit_protocol = QPushButton()
-        self._pursuit_protocol.setIcon(QIcon(":pursuit.svg"))
-        self._pursuit_protocol.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
-        self._pursuit_protocol.setFixedSize(250, 100)
-        self._pursuit_protocol.setIconSize(QSize(250, 100))
-        self._pursuit_protocol.setCheckable(True)
+            if idx == 0:
+                button.setChecked(True)
 
-        self._buttons = QButtonGroup()
-        self._buttons.addButton(self._saccades_protocol)
-        self._buttons.addButton(self._pursuit_protocol)
+            self._buttons_group.addButton(button)
+            self._layout.addWidget(label)
+            self._layout.addWidget(button)
+
+            self._protocols[id(button)] = protocol["protocol"]
 
         self._select_button = QPushButton("Seleccionar")
         self._select_button.pressed.connect(self.on_select_pressed)
@@ -64,20 +58,18 @@ class ProtocolsDialog(QDialog):
             QDialogButtonBox.AcceptRole,
         )
 
-        self._layout = QVBoxLayout()
-        self._layout.addWidget(self._saccades_protocol_label)
-        self._layout.addWidget(self._saccades_protocol)
-        self._layout.addWidget(self._pursuit_protocol_label)
-        self._layout.addWidget(self._pursuit_protocol)
         self._layout.addWidget(self._button_box)
 
         self.setLayout(self._layout)
 
     @property
     def protocol(self) -> Protocol:
-        if self._pursuit_protocol.isChecked():
-            return Protocol.Pursuit
-        return Protocol.Saccadic
+        for button in self._buttons_group.buttons():
+            if button.isChecked():
+                protocol = self._protocols[id(button)]
+                return protocol
+
+        raise ValueError("No protocol selected")
 
     @Slot()
     def on_select_pressed(self):
