@@ -1,5 +1,5 @@
 from .base import Adquirer
-from .biosignalsplux import BiosignalsPluxAdquirer
+#from .biosignalsplux import BiosignalsPluxAdquirer
 from .bitalino import BitalinoAdquirer
 
 __all__ = [

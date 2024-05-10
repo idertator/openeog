@@ -66,6 +66,7 @@ class AnnotationType(str, Enum):
     Fixation = "Fixation"
     Saccade = "Saccade"
     Pursuit = "Pursuit"
+    AntiSaccade = "AntiSaccade"
 
     @property
     def name(self) -> str:
@@ -78,6 +79,9 @@ class AnnotationType(str, Enum):
 
             case AnnotationType.Pursuit:
                 return "Persecución"
+
+            case AnnotationType.AntiSaccade:
+                return "AntiSaccade"
 
         return "Desconocida"
 
@@ -161,6 +165,86 @@ class Saccade(Annotation):
         amplitude = window.max() - window.min()
 
         return Saccade(
+            onset=onset,
+            offset=offset,
+            latency=onset - transition,
+            duration=offset - onset,
+            amplitude=amplitude,
+            deviation=amplitude / angle,
+            peak_velocity=velocities[onset:offset].max(),
+        )
+
+    @property
+    def json(self) -> dict:
+        return {
+            **super().json,
+            "latency": int(self._latency),
+            "duration": int(self._duration),
+            "amplitude": float(self._amplitude),
+            "deviation": float(self._deviation),
+            "peak_velocity": float(self._peak_velocity),
+        }
+
+    @property
+    def latency(self) -> int:
+        return self._latency
+
+    @property
+    def duration(self) -> int:
+        return self._duration
+
+    @property
+    def amplitude(self) -> float:
+        return self._amplitude
+
+    @property
+    def deviation(self) -> float:
+        return self._deviation
+
+    @property
+    def peak_velocity(self) -> float:
+        return self._peak_velocity
+
+class AntiSaccade(Annotation):
+    def __init__(
+        self,
+        onset: int,
+        offset: int,
+        latency: int,
+        duration: int,
+        amplitude: float,
+        deviation: float,
+        peak_velocity: float,
+    ):
+        super().__init__(
+            annotation_type=AnnotationType.AntiSaccade,
+            onset=onset,
+            offset=offset,
+        )
+        self._latency = latency
+        self._duration = duration
+        self._amplitude = amplitude
+        self._deviation = deviation
+        self._peak_velocity = peak_velocity
+
+    @classmethod
+    def create(
+        cls,
+        onset: int,
+        offset: int,
+        angle: int,
+        channel: ndarray,
+        stimuli: ndarray,
+        velocities: ndarray,
+    ) -> AntiSaccade:
+        transition = onset
+        while transition > 0 and stimuli[transition - 1] == stimuli[transition]:
+            transition -= 1
+
+        window = channel[onset:offset]
+        amplitude = window.max() - window.min()
+
+        return AntiSaccade(
             onset=onset,
             offset=offset,
             latency=onset - transition,
