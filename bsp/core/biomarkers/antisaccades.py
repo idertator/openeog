@@ -1,16 +1,53 @@
+from dataclasses import dataclass
 from bsp.core.differentiation import differentiate
 from bsp.core.impulses import impulses
 from scipy.signal import medfilt
-import numpy as np
 from enum import Enum
 from numpy import ndarray
+import numpy as np
 
 # CONSTANTS
 SAMPLES_INTERVAL = 1/1000
 
+@dataclass
+class AntissaccadeBiomarkers:
+    latency: float
+    location_memory: float
+    peak_velocity: float
+    duration: float
+    correction_latency: float
+
+@dataclass
+class AntissaccadicBiomarkers:
+    antisaccades: list[AntissaccadeBiomarkers]
+    latency_mean: float
+    latency_std: float
+    location_memory_mean: float
+    location_memory_std: float
+    peak_velocity_mean: float
+    peak_velocity_std: float
+    duration_mean: float
+    duration_std: float
+    correction_latency_mean: float
+    correction_latency_std: float
+    response_inhibition: float
+
 class Direction(Enum):
     Left = "left"
     Right = "right"
+
+def antissacadic_biomarkers(channel: np.ndarray, stimuli: np.ndarray) -> AntissaccadicBiomarkers:
+    antisaccades_movements = antisaccades(channel, stimuli)
+    saccades_movements = saccades(channel, stimuli, antisaccades_movements)
+
+    latencies = antisaccade_latencies_biomarker(stimuli, antisaccades_movements)
+    inhibition = antisaccade_response_inhibition_biomarker(saccades_movements, antisaccades_movements)
+    location_memory = antisaccade_location_memory_biomarker(channel, stimuli, antisaccades_movements)
+    velocities = antisaccade_velocities_biomarker(channel, antisaccades_movements)
+    durations = antisaccade_durations_biomarker(antisaccades_movements)
+    correction_latencies = antisaccade_correction_latencies_biomarker(saccades_movements, antisaccades_movements)
+
+    pass
 
 
 def saccades(channel: np.ndarray, changes_stimuli: list[int], antisaccades: list[tuple[int, int]]) -> list[tuple[int, int]]:
@@ -76,7 +113,7 @@ def direction(channel: np.ndarray, stimuli: np.ndarray, start: int, end: int) ->
             return Direction.Left
 
 # Biomarcador 1
-def antisaccade_latencies_biomarker(stimuli: np.ndarray, movements: list[tuple[int, int]]) -> list[float]:
+def antisaccade_latencies_biomarker(stimuli: np.ndarray, antisaccades: list[tuple[int, int]]) -> list[float]:
 
     def detect_changes(stimuli: np.ndarray) -> list[int]:
         change_indices = []
@@ -87,7 +124,7 @@ def antisaccade_latencies_biomarker(stimuli: np.ndarray, movements: list[tuple[i
     
     latencies = []
     stimuli_changes = detect_changes(stimuli)
-    for start, end in movements:
+    for start, end in antisaccades:
         last_stimuli = max(change for change in stimuli_changes if change < start)
         latency = (start - last_stimuli) * SAMPLES_INTERVAL
         latencies.append(latency)
@@ -109,24 +146,24 @@ def antisaccade_location_memory_biomarker(channel: np.ndarray, stimuli: np.ndarr
     return accuracy_locations_memory
 
 # Biomarcador 4
-def antisaccade_velocities_biomarker(channel: np.ndarray, movements: list[tuple[int, int]]) -> list[float]:
+def antisaccade_velocities_biomarker(channel: np.ndarray, antisaccades: list[tuple[int, int]]) -> list[float]:
     # No se aplica filtro a la velocidad
     velocities = []
-    for start, end in movements:
+    for start, end in antisaccades:
         velocidad_max = max(abs(differentiate(channel[start:end])))
         velocities.append(velocidad_max)
     return velocities
 
 # Biomarcador 5
-def antisaccade_durations_biomarker(movements: list[tuple[int, int]]) -> list[float]:
+def antisaccade_durations_biomarker(antisaccades: list[tuple[int, int]]) -> list[float]:
     durations = []
     samples_interval = 1/1000
-    for start, end in movements:
+    for start, end in antisaccades:
         duration = (end - start) * samples_interval
         durations.append(duration)
     return durations
 
-# Biomarcador 6
+# Biomarcador 6 -> Ahora: Devuelve una lista de 3 elementos
 def antisaccade_correction_latencies_biomarker(saccades_movements: list[tuple[int, int]], antisaccades_movements: list[tuple[int, int]]) -> list[float]:
     correction_latencies = []
     
