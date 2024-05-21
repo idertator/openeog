@@ -202,6 +202,11 @@ class Saccade(Annotation):
         return self._peak_velocity
 
 
+class Antisaccade(Annotation):
+    # TODO: Para sofi, implementar esto
+    pass
+
+
 class Test:
     def __init__(
         self,
