@@ -9,6 +9,38 @@ import numpy as np
 # CONSTANTS
 SAMPLES_INTERVAL = 1/1000
 
+class Direction(Enum):
+    Same = "same"
+    Left = "left"
+    Right = "right"
+
+
+class Size(Enum):
+    Invalid = "inv"
+    Small = "small"
+    Large = "large"
+
+
+class Movement(Enum):
+    Saccade = "saccade"
+    Antisaccade = "antisaccade"
+
+@dataclass
+class Event:
+    onset: int
+    offset: int
+    direction: Direction
+    size: Size
+    duration: int
+    amplitude: float
+    transition_index: int
+    transition_change_index: int
+    transition_direction: Direction
+    movement: Movement
+
+    def __str__(self):
+        return f"{self.transition_index} - {self.size} - {self.movement}"
+
 @dataclass
 class AntissaccadeBiomarkers:
     latency: float
@@ -32,9 +64,7 @@ class AntissaccadicBiomarkers:
     correction_latency_std: float
     response_inhibition: float
 
-class Direction(Enum):
-    Left = "left"
-    Right = "right"
+
 
 def antissacadic_biomarkers(channel: np.ndarray, stimuli: np.ndarray) -> AntissaccadicBiomarkers:
     antisaccades_movements = antisaccades(channel, stimuli)
@@ -50,77 +80,11 @@ def antissacadic_biomarkers(channel: np.ndarray, stimuli: np.ndarray) -> Antissa
     pass
 
 
-def saccades(channel: np.ndarray, changes_stimuli: list[int], antisaccades: list[tuple[int, int]]) -> list[tuple[int, int]]:
-    THRESHOLD_SPEED_MICROSACCADE = 10
-    MINIMUM_MICROSACCADE_DURATION = 10
-    MINIMUM_STIMULI_DISTANCE = 200
-
-    list = []
-    velocities_abs = abs(medfilt(differentiate(channel), 71))
-    
-    for change_index in changes_stimuli:
-        next_antisaccade_start = None
-        in_saccade = False
-
-        # Encontrar la próxima antisácada después de este cambio en el estímulo
-        for antisaccade_start, antisaccade_end in antisaccades:
-            if antisaccade_start > change_index:
-                next_antisaccade_start = antisaccade_start
-                break
-
-        if next_antisaccade_start is not None:
-            for idx in range(change_index, next_antisaccade_start):
-                if next_antisaccade_start - idx > 1000: # El impulso no corresponde con la antisácada
-                    break
-                if velocities_abs[idx] > THRESHOLD_SPEED_MICROSACCADE:
-                    if in_saccade == False:
-                        start = idx
-                        in_saccade = True
-                    if velocities_abs[idx + 1] < THRESHOLD_SPEED_MICROSACCADE:
-                        end = idx
-                        in_saccade = False
-                        if (end - start) > MINIMUM_MICROSACCADE_DURATION and (start - change_index) > MINIMUM_STIMULI_DISTANCE:   
-                            list.append((start, end))  
-    return list
-
-def antisaccades(channel: np.ndarray, stimuli: np.ndarray) -> list[tuple[int, int]]:
-    list = []
-    samples_to_remove = 100
-    stimuli = stimuli.copy()[:-samples_to_remove]
-    amplitude_stimuli = abs(min(stimuli) - max(stimuli))
-    min_amplitud_to_be_antisaccade = (amplitude_stimuli-1)/2
-            
-    for start, end in impulses(channel):
-        amplitude_channel = max(abs(max(channel[start:end])), abs(min(channel[start:end]))) - min(abs(max(channel[start:end])), abs(min(channel[start:end])))  
-        if amplitude_channel > min_amplitud_to_be_antisaccade:
-            list.append((start, end))
-    return list
-
-def direction(channel: np.ndarray, stimuli: np.ndarray, start: int, end: int) -> Direction:
-    if channel[end] > 0:
-        if stimuli[end] > 0:
-            # Sácada Derecha
-            return Direction.Right
-        elif stimuli[end] < 0:
-            # Antisácada Derecha
-            return Direction.Right
-    elif channel[end] < 0:
-        if stimuli[end] > 0:
-            # Antisácada Izquierda
-            return Direction.Left
-        elif stimuli[end] < 0:
-            # Sácada Izquierda
-            return Direction.Left
-
 # Biomarcador 1
-def antisaccade_latencies_biomarker(stimuli: np.ndarray, antisaccades: list[tuple[int, int]]) -> list[float]:
+def antisaccade_latencies_biomarker(events: Iterator[Event]) -> list[float]:
 
-    def detect_changes(stimuli: np.ndarray) -> list[int]:
-        change_indices = []
-        for i in range(1, len(stimuli)):
-            if stimuli[i] != stimuli[i - 1]:
-                change_indices.append(i)
-        return change_indices
+    for event in events:
+        if event.
     
     latencies = []
     stimuli_changes = detect_changes(stimuli)
