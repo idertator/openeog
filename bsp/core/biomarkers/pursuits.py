@@ -115,8 +115,10 @@ class PursuitBiomarkers:
             self,
             test: Test,
             samples_to_cut: int,
+            invert_signal: bool = False,
             **kwargs,
     ):
+        self.invert_signal = invert_signal
         self.test = test
         self.samples_to_cut = samples_to_cut
         self.horizontal_channel = None
@@ -126,8 +128,10 @@ class PursuitBiomarkers:
 
     def _preprocess_signals(self):
         to_cut = self.samples_to_cut
-        # -1 por electrodos invertidos, buscar sol fuera de esta seccion
-        self.horizontal_channel = self.test.hor_channel_raw.copy()[to_cut:-to_cut] * -1
+        if self.invert_signal:
+            self.horizontal_channel = self.test.hor_channel_raw.copy()[to_cut:-to_cut] * -1
+        else:
+            self.horizontal_channel = self.test.hor_channel_raw.copy()[to_cut:-to_cut]
         amplitude = self.horizontal_channel.max() - self.horizontal_channel.min()
 
         self.stimuli_channel = self.test.hor_stimuli_raw[to_cut:-to_cut]
