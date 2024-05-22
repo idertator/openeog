@@ -1,1 +1,5 @@
-from .antisaccades import antisaccades
+from .antisaccades import AntisaccadicBiomarkers
+
+__all__ = [
+    "AntisaccadicBiomarkers",
+]

@@ -8,6 +8,7 @@ from numpy import ndarray, single
 
 from .calibration import calibration
 from .denoising import denoise
+from .differentiation import differentiate
 from .saccades import saccades
 
 
@@ -133,11 +134,11 @@ class Saccade(Annotation):
         self,
         onset: int,
         offset: int,
-        latency: int = 0,
-        duration: int = 0,
-        amplitude: float = 0.0,
-        deviation: float = 0.0,
-        peak_velocity: float = 0.0,
+        latency: int,
+        duration: int,
+        amplitude: float,
+        deviation: float,
+        peak_velocity: float,
         transition_index: int = -1,
         transition_change_index: int = -1,
         transition_change_before_index: int = -1,
@@ -185,17 +186,17 @@ class AntiSaccade(Annotation):
         self,
         onset: int,
         offset: int,
-        latency: int = 0,
-        duration: int = 0,
-        amplitude: float = 0.0,
-        deviation: float = 0.0,
-        peak_velocity: float = 0.0,
-        transition_index: int = -1,
-        transition_change_index: int = -1,
-        transition_change_before_index: int = -1,
-        transition_direction: Direction = Direction.Same,
-        direction: Direction = Direction.Same,
-        size: Size = Size.Invalid,
+        direction: Direction,
+        size: Size,
+        latency: int,
+        duration: int,
+        amplitude: float,
+        deviation: float,
+        peak_velocity: float,
+        transition_index: int,
+        transition_change_index: int,
+        transition_change_before_index: int,
+        transition_direction: Direction,
     ):
         super().__init__(
             annotation_type=AnnotationType.AntiSaccade,
@@ -371,6 +372,7 @@ class Test:
                     Saccade(
                         onset=onset,
                         offset=offset,
+                        angle=self.angle,
                     )
                 )
 
