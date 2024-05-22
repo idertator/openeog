@@ -123,7 +123,6 @@ class PursuitBiomarkers:
         self.stimuli_channel = None
         self.stimuli_cutted = None
         self._preprocess_signals()
-        self._stimuli_process()
 
     def _preprocess_signals(self):
         to_cut = self.samples_to_cut
@@ -134,9 +133,6 @@ class PursuitBiomarkers:
         self.stimuli_channel = self.test.hor_stimuli_raw[to_cut:-to_cut]
         self.stimuli_channel -= self.stimuli_channel.mean()
         self.stimuli_channel *= (amplitude * 2)
-
-    def _stimuli_process(self):
-        to_cut = self.samples_to_cut
         self.stimuli_cutted = self.test.hor_stimuli_raw.copy()[to_cut:-to_cut]
 
     # @cached_property
