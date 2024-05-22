@@ -1,22 +1,24 @@
 from bsp.core.models import Test
 import numpy as np
 from scipy import signal
-from scipy.fft import fft, fftfreq
 from scipy.signal import coherence
 from scipy.signal import medfilt
 from bsp.core.saccades import saccades
 from bsp.core import differentiate
 
+
 # from functools import cached_property
 #
 # from numpy import ndarray
 
-#Auxiliar functions
+# Auxiliar functions
 def mse(s1: np.ndarray, s2: np.ndarray) -> float:
     return np.sum((s1 - s2) ** 2) / len(s1)
 
-def move(s: np.ndarray, count: int=1) -> np.ndarray:
+
+def move(s: np.ndarray, count: int = 1) -> np.ndarray:
     return np.hstack((np.ones(count) * s[0], s[:-count]))
+
 
 def best_fit(s1: np.ndarray, s2: np.ndarray) -> tuple[int, float]:
     count = 2000
@@ -29,11 +31,12 @@ def best_fit(s1: np.ndarray, s2: np.ndarray) -> tuple[int, float]:
         best_error = errors[best_displacement]
     return best_displacement, best_error
 
+
 def center_signal(value: np.ndarray) -> np.ndarray:
     return value - value.mean()
 
+
 def scale_channel(value: np.ndarray, angle: float) -> np.ndarray:
-    # Llevar el estímulo al angulo indicado
     min_value = min(value)
     max_value = max(value)
 
@@ -42,21 +45,25 @@ def scale_channel(value: np.ndarray, angle: float) -> np.ndarray:
 
     return value * scale
 
+
 def denoise_35(value: np.ndarray) -> np.ndarray:
     b, a = signal.butter(3, 0.035)
     y = signal.filtfilt(b, a, value)
     return y
+
 
 # Biomarcador 1
 def pursuit_position_mse_biomarker(channel: np.ndarray, stimuli: np.ndarray) -> tuple[int, float]:
     displacement, error = best_fit(stimuli, channel)
     return displacement, error
 
-#Biomarcador 2
+
+# Biomarcador 2
 def pursuit_latency_biomarker(channel: np.ndarray, stimuli: np.ndarray, angle: int) -> float:
     centered_channel = center_signal(channel)
-    scaled_channel = scale_channel(centered_channel, angle)  # pursuit.angle)
-    scaled_stim_channel = scale_channel(stimuli, angle)  # pursuit.angle)
+    centered_stimuli = center_signal(stimuli)
+    scaled_channel = scale_channel(centered_channel, angle)
+    scaled_stim_channel = scale_channel(centered_stimuli, angle)
 
     denoised_channel = denoise_35(scaled_channel)
 
@@ -69,48 +76,54 @@ def pursuit_latency_biomarker(channel: np.ndarray, stimuli: np.ndarray, angle: i
 
     return latency_res / 1000.0
 
-#Biomarcador 3
-def pursuit_saccades_count_biomarker(channel: np.ndarray, angle: int) -> int:
-    numSacc = 0
-    for index in range (angle):
-        for start, end in saccades(channel, index):
-            numSacc +=1
-    return numSacc
 
-#Biomarcador 4
+# Biomarcador 3
+def pursuit_saccades_count_biomarker(channel: np.ndarray, angle: int) -> int:
+    num_sacc = 0
+    for index in range(angle):
+        for start, end in saccades(channel, index):
+            num_sacc += 1
+    return num_sacc
+
+
+# Biomarcador 4
 def pursuit_mean_velocity_biomarker(channel: np.ndarray) -> float:
     ch_filtered = medfilt(channel, 201)
     ch_f_vel = differentiate(ch_filtered)
     mean_pursuit = abs(ch_f_vel.mean())
     return mean_pursuit
 
-#Biomarcador 5
+
+# Biomarcador 5
 def pursuit_mean_velocity_gain_biomarker(channel: np.ndarray, stimuli: np.ndarray) -> float:
     mean_ch = pursuit_mean_velocity_biomarker(channel)
     stimuli_vel = differentiate(stimuli)
     mean_stimuli = abs(stimuli_vel.mean())
-    gain_vel = mean_ch/mean_stimuli
+    gain_vel = mean_ch / mean_stimuli
     return gain_vel
 
-#Biomarcador 6
+
+# Biomarcador 6
 def pursuit_spectral_difference_biomarker(channel: np.ndarray, stimuli: np.ndarray) -> float:
     freqs, c = coherence(stimuli, channel, fs=1000.0)
-    coherence_factor = ((1-c)[:10].mean())
+    coherence_factor = ((1 - c)[:10].mean())
     return coherence_factor
 
 
 class PursuitBiomarkers:
     def __init__(
-        self,
-        test: Test,
-        samples_to_cut: int,
-        **kwargs,
+            self,
+            test: Test,
+            samples_to_cut: int,
+            **kwargs,
     ):
         self.test = test
         self.samples_to_cut = samples_to_cut
         self.horizontal_channel = None
         self.stimuli_channel = None
+        self.stimuli_cutted = None
         self._preprocess_signals()
+        self._stimuli_process()
 
     def _preprocess_signals(self):
         to_cut = self.samples_to_cut
@@ -120,7 +133,11 @@ class PursuitBiomarkers:
 
         self.stimuli_channel = self.test.hor_stimuli_raw[to_cut:-to_cut]
         self.stimuli_channel -= self.stimuli_channel.mean()
-        self.stimuli_channel *= (amplitude*2)
+        self.stimuli_channel *= (amplitude * 2)
+
+    def _stimuli_process(self):
+        to_cut = self.samples_to_cut
+        self.stimuli_cutted = self.test.hor_stimuli_raw.copy()[to_cut:-to_cut]
 
     # @cached_property
     # def _filetered_velocity(self) -> ndarray:
@@ -133,7 +150,7 @@ class PursuitBiomarkers:
     @property
     def latency_mean(self) -> float:
         # En segundos
-        return pursuit_latency_biomarker(self.horizontal_channel, self.stimuli_channel, self.test.angle)
+        return pursuit_latency_biomarker(self.horizontal_channel, self.stimuli_cutted, self.test.angle)
 
     @property
     def corrective_saccades_count(self) -> int:
