@@ -8,8 +8,6 @@ from bsp.core import differentiate
 
 
 # from functools import cached_property
-#
-# from numpy import ndarray
 
 # Auxiliar functions
 def mse(s1: np.ndarray, s2: np.ndarray) -> float:
@@ -18,18 +16,6 @@ def mse(s1: np.ndarray, s2: np.ndarray) -> float:
 
 def move(s: np.ndarray, count: int = 1) -> np.ndarray:
     return np.hstack((np.ones(count) * s[0], s[:-count]))
-
-
-def best_fit(s1: np.ndarray, s2: np.ndarray) -> tuple[int, float]:
-    count = 2000
-    errors = np.zeros(count)
-    best_displacement = 0
-    for i in range(1, count + 1):
-        offset = move(s2, i)
-        errors[i - 1] = mse(s1, offset)
-        best_displacement = errors.argmin()
-        best_error = errors[best_displacement]
-    return best_displacement, best_error
 
 
 def center_signal(value: np.ndarray) -> np.ndarray:
@@ -50,64 +36,6 @@ def denoise_35(value: np.ndarray) -> np.ndarray:
     b, a = signal.butter(3, 0.035)
     y = signal.filtfilt(b, a, value)
     return y
-
-
-# Biomarcador 1
-def pursuit_position_mse_biomarker(channel: np.ndarray, stimuli: np.ndarray) -> tuple[int, float]:
-    displacement, error = best_fit(stimuli, channel)
-    return displacement, error
-
-
-# Biomarcador 2
-def pursuit_latency_biomarker(channel: np.ndarray, stimuli: np.ndarray, angle: int) -> float:
-    centered_channel = center_signal(channel)
-    centered_stimuli = center_signal(stimuli)
-    scaled_channel = scale_channel(centered_channel, angle)
-    scaled_stim_channel = scale_channel(centered_stimuli, angle)
-
-    denoised_channel = denoise_35(scaled_channel)
-
-    peaks_channel = signal.find_peaks_cwt(abs(denoised_channel), 1000)[:-1]
-    peaks_stim_channel = signal.find_peaks_cwt(abs(scaled_stim_channel), 1000)[:-1]
-
-    displacements = peaks_stim_channel - peaks_channel
-
-    latency_res = int(round(displacements.mean(), 0))
-
-    return latency_res / 1000.0
-
-
-# Biomarcador 3
-def pursuit_saccades_count_biomarker(channel: np.ndarray, angle: int) -> int:
-    num_sacc = 0
-    for index in range(angle):
-        for start, end in saccades(channel, index):
-            num_sacc += 1
-    return num_sacc
-
-
-# Biomarcador 4
-def pursuit_mean_velocity_biomarker(channel: np.ndarray) -> float:
-    ch_filtered = medfilt(channel, 201)
-    ch_f_vel = differentiate(ch_filtered)
-    mean_pursuit = abs(ch_f_vel.mean())
-    return mean_pursuit
-
-
-# Biomarcador 5
-def pursuit_mean_velocity_gain_biomarker(channel: np.ndarray, stimuli: np.ndarray) -> float:
-    mean_ch = pursuit_mean_velocity_biomarker(channel)
-    stimuli_vel = differentiate(stimuli)
-    mean_stimuli = abs(stimuli_vel.mean())
-    gain_vel = mean_ch / mean_stimuli
-    return gain_vel
-
-
-# Biomarcador 6
-def pursuit_spectral_difference_biomarker(channel: np.ndarray, stimuli: np.ndarray) -> float:
-    freqs, c = coherence(stimuli, channel, fs=1000.0)
-    coherence_factor = ((1 - c)[:10].mean())
-    return coherence_factor
 
 
 class PursuitBiomarkers:
@@ -144,31 +72,67 @@ class PursuitBiomarkers:
     #     return filtro(self.test.hor_channel_raw)
 
     @property
-    def waveform_mse(self) -> float:
-        return pursuit_position_mse_biomarker(self.horizontal_channel, self.stimuli_channel)[1]
+    def waveform_mse(self) -> tuple[int, float]:
+        count = 2000
+        errors = np.zeros(count)
+        best_displacement = 0
+        for i in range(1, count + 1):
+            offset = move(self.horizontal_channel, i)
+            errors[i - 1] = mse(self.stimuli_channel, offset)
+            best_displacement = errors.argmin()
+            best_error = errors[best_displacement]
+        return best_displacement, best_error
 
     @property
     def latency_mean(self) -> float:
         # En segundos
-        return pursuit_latency_biomarker(self.horizontal_channel, self.stimuli_cutted, self.test.angle)
+        centered_channel = center_signal(self.horizontal_channel)
+        centered_stimuli = center_signal(self.stimuli_cutted)
+        scaled_channel = scale_channel(centered_channel, self.test.angle)
+        scaled_stim_channel = scale_channel(centered_stimuli, self.test.angle)
+
+        denoised_channel = denoise_35(scaled_channel)
+
+        peaks_channel = signal.find_peaks_cwt(abs(denoised_channel), 1000)[:-1]
+        peaks_stim_channel = signal.find_peaks_cwt(abs(scaled_stim_channel), 1000)[:-1]
+
+        displacements = peaks_stim_channel - peaks_channel
+
+        latency_res = int(round(displacements.mean(), 0))
+
+        return latency_res / 1000.0
 
     @property
     def corrective_saccades_count(self) -> int:
-        return pursuit_saccades_count_biomarker(self.horizontal_channel, self.test.angle)
+        num_sacc = 0
+        for index in range(self.test.angle):
+            for start, end in saccades(self.horizontal_channel, index):
+                num_sacc += 1
+        return num_sacc
 
     @property
     def velocity_mean(self) -> float:
-        return pursuit_mean_velocity_biomarker(self.horizontal_channel)
-        # velocities = self._filetered_velocity
+        ch_filtered = medfilt(self.horizontal_channel, 201)
+        ch_f_vel = differentiate(ch_filtered)
+        mean_pursuit = abs(ch_f_vel.mean())
+        return mean_pursuit
+
+    # velocities = self._filetered_velocity
 
     @property
     def velocity_gain(self) -> float:
-        return pursuit_mean_velocity_gain_biomarker(self.horizontal_channel, self.stimuli_channel)
+        mean_ch = self.velocity_mean
+        stimuli_vel = differentiate(self.stimuli_channel)
+        mean_stimuli = abs(stimuli_vel.mean())
+        gain_vel = mean_ch / mean_stimuli
+        return gain_vel
         # velocities = self._filetered_velocity
 
     @property
     def spectral_coherence(self) -> float:
-        return pursuit_spectral_difference_biomarker(self.horizontal_channel, self.stimuli_channel)
+        freqs, c = coherence(self.stimuli_channel, self.horizontal_channel, fs=1000.0)
+        coherence_factor = ((1 - c)[:10].mean())
+        return coherence_factor
 
     @property
     def to_dict(self) -> dict[str, int | float]:
