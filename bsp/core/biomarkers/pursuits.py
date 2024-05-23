@@ -50,6 +50,7 @@ class PursuitBiomarkers:
         self.test = test
         self.samples_to_cut = samples_to_cut
         self.horizontal_channel = None
+        self.horizontal_cutted = None
         self.stimuli_channel = None
         self.stimuli_cutted = None
         self._preprocess_signals()
@@ -57,12 +58,14 @@ class PursuitBiomarkers:
     def _preprocess_signals(self):
         to_cut = self.samples_to_cut
         if self.invert_signal:
-            self.horizontal_channel = self.test.hor_channel_raw.copy()[to_cut:-to_cut] * -1
+            self.horizontal_channel = self.test.hor_channel.copy()[to_cut:-to_cut] * -1
+            self.horizontal_cutted = self.test.hor_channel_raw.copy()[to_cut:-to_cut] * -1
         else:
-            self.horizontal_channel = self.test.hor_channel_raw.copy()[to_cut:-to_cut]
+            self.horizontal_channel = self.test.hor_channel.copy()[to_cut:-to_cut]
+            self.horizontal_cutted = self.test.hor_channel_raw.copy()[to_cut:-to_cut]
         amplitude = self.horizontal_channel.max() - self.horizontal_channel.min()
 
-        self.stimuli_channel = self.test.hor_stimuli_raw[to_cut:-to_cut]
+        self.stimuli_channel = self.test.hor_stimuli[to_cut:-to_cut]
         self.stimuli_channel -= self.stimuli_channel.mean()
         self.stimuli_channel *= (amplitude * 2)
         self.stimuli_cutted = self.test.hor_stimuli_raw.copy()[to_cut:-to_cut]
@@ -86,7 +89,7 @@ class PursuitBiomarkers:
     @property
     def latency_mean(self) -> float:
         # En segundos
-        centered_channel = center_signal(self.horizontal_channel)
+        centered_channel = center_signal(self.horizontal_cutted)
         centered_stimuli = center_signal(self.stimuli_cutted)
         scaled_channel = scale_channel(centered_channel, self.test.angle)
         scaled_stim_channel = scale_channel(centered_stimuli, self.test.angle)

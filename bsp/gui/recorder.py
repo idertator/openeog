@@ -4,7 +4,7 @@ from typing import Type
 from numpy import uint16, zeros
 from PySide6.QtCore import QObject, QThreadPool, Signal
 
-from bsp.adc import Adquirer, BiosignalsPluxAdquirer, BitalinoAdquirer
+from bsp.adc import Adquirer, BitalinoAdquirer
 from bsp.core import Protocol, Study, Test, TestType, pursuit_stimuli, saccadic_stimuli
 
 from .plotter import Plotter
@@ -256,7 +256,8 @@ class Recorder(QObject):
         if self._settings.device_type == "Bitalino":
             return BitalinoAdquirer
 
-        return BiosignalsPluxAdquirer
+        #return BiosignalsPluxAdquirer
+        return None
 
     def next_test(self):
         if self._current_test < len(self._tests) - 1:
