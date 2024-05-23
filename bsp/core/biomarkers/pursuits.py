@@ -77,7 +77,7 @@ class PursuitBiomarkers:
             self.horizontal_cutted = self.test.hor_channel_raw.copy()[to_cut:-to_cut]
         amplitude = self.horizontal_channel.max() - self.horizontal_channel.min()
 
-        self.stimuli_channel = self.test.hor_stimuli[to_cut:-to_cut]
+        self.stimuli_channel = self.test.hor_stimuli.copy()[to_cut:-to_cut]
         self.stimuli_channel -= self.stimuli_channel.mean()
         self.stimuli_channel *= (amplitude * 2)
         self.stimuli_cutted = self.test.hor_stimuli_raw.copy()[to_cut:-to_cut]
