@@ -112,7 +112,7 @@ class PursuitBiomarkers:
     @property
     def corrective_saccades_count(self) -> int:
         num_sacc = 0
-        for index in range(self.test.angle):
+        for index in range(self.test.angle+1):
             for start, end in saccades(self.horizontal_channel, index):
                 num_sacc += 1
         return num_sacc
