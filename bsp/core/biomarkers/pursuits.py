@@ -18,6 +18,16 @@ def move(s: np.ndarray, count: int = 1) -> np.ndarray:
     return np.hstack((np.ones(count) * s[0], s[:-count]))
 
 
+def best_fit(s1: np.ndarray, s2: np.ndarray) -> tuple[int, float]:
+    count = 2000
+    errors = np.zeros(count)
+    for i in range(1, count + 1):
+        offset = move(s2, i)
+        errors[i - 1] = mse(s1, offset)
+        best_displacement = errors.argmin()
+        best_error = errors[best_displacement]
+    return best_displacement, best_error
+
 def center_signal(value: np.ndarray) -> np.ndarray:
     return value - value.mean()
 
@@ -76,15 +86,7 @@ class PursuitBiomarkers:
 
     @property
     def waveform_mse(self) -> tuple[int, float]:
-        count = 2000
-        errors = np.zeros(count)
-        best_displacement = 0
-        for i in range(1, count + 1):
-            offset = move(self.horizontal_channel, i)
-            errors[i - 1] = mse(self.stimuli_channel, offset)
-            best_displacement = errors.argmin()
-            best_error = errors[best_displacement]
-        return best_displacement, best_error
+        return best_fit(self.stimuli_channel, self.horizontal_channel)
 
     @property
     def latency_mean(self) -> float:
