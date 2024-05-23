@@ -19,6 +19,7 @@ def move(s: np.ndarray, count: int = 1) -> np.ndarray:
 
 
 def best_fit(s1: np.ndarray, s2: np.ndarray) -> tuple[int, float]:
+    # best_fit(stimuli, horizontal)
     count = 2000
     errors = np.zeros(count)
     for i in range(1, count + 1):
@@ -27,6 +28,7 @@ def best_fit(s1: np.ndarray, s2: np.ndarray) -> tuple[int, float]:
         best_displacement = errors.argmin()
         best_error = errors[best_displacement]
     return best_displacement, best_error
+
 
 def center_signal(value: np.ndarray) -> np.ndarray:
     return value - value.mean()
