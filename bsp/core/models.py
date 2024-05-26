@@ -159,7 +159,7 @@ class Saccade(Annotation):
         self.peak_velocity = peak_velocity
         self.transition_index = transition_index
         self.transition_change_index = transition_change_index
-        self.ransition_change_before_index = transition_change_before_index
+        self.transition_change_before_index = transition_change_before_index
         self.transition_direction = transition_direction
 
     @property
@@ -384,7 +384,7 @@ class Study:
         self,
         recorded_at: datetime | None,
         tests: list[Test],
-        protocol: Protocol = Protocol.Saccadic,
+        protocol: Protocol,
         hor_calibration: float | None = None,
         hor_calibration_diff: float | None = None,
         ver_calibration: float | None = None,

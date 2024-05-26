@@ -15,7 +15,7 @@ from .utils import center_signal, scale_channel
 SAMPLES_INTERVAL = 1 / 1000
 
 
-class AntisaccadicBiomarkers:
+class AntisaccadeBiomarkers:
     def __init__(
         self,
         test: Test,
@@ -125,9 +125,7 @@ class AntisaccadicBiomarkers:
             duration,
             amplitude,
         ) in self._clasify_impulses():
-            t_idx, t_change, t_change_before, t_direction = self.stimuli_transitions[
-                onset
-            ]
+            t_idx, t_change, t_change_before, t_direction = self.stimuli_transitions[onset]
 
             if direction == t_direction:
                 Movement = Saccade
@@ -137,7 +135,7 @@ class AntisaccadicBiomarkers:
             yield Movement(
                 onset=onset,
                 offset=offset,
-                latency=onset - t_change,
+                latency=onset - t_change_before,
                 duration=duration,
                 amplitude=amplitude,
                 deviation=amplitude / self.test.angle,
@@ -181,182 +179,172 @@ class AntisaccadicBiomarkers:
 
         return result
 
-    # def annotate_test(self):
-    #     # Identificar todas las anotaciones presentes en la señal y guardarlas en self.annotations
-    #     raise NotImplementedError()
-    #
+    #Biomarcador 1
+    @property
+    def antisaccade_latencies_biomarker(self) -> list[float]:
+        latencies = []
+        for annotation in self.detect_annotations:
+            if isinstance(annotation, AntiSaccade):
+                latency = annotation.latency * SAMPLES_INTERVAL
+                latencies.append(latency)
+        return latencies
+    
+    # Biomarcador 2 -> Agregado (de toda la prueba)
+
+    # Biomarcador 3
+    @property
+    def antisaccade_location_memory_biomarker(self) -> list[float]:
+        accuracy_locations_memory = []
+        amplitude_stimuli = abs(min(self.centered_stim_channel) - max(self.centered_stim_channel)) / 2
+        for annotation in self.detect_annotations:
+            if isinstance(annotation, AntiSaccade):
+                amplitude_channel = max(
+                    abs(max(self.denoised_hori_channel[annotation.onset : annotation.offset])),
+                    abs(min(self.denoised_hori_channel[annotation.onset : annotation.offset]))) 
+                - min(abs(max(self.denoised_hori_channel[annotation.onset : annotation.offset])),
+                        abs(min(self.denoised_hori_channel[annotation.onset : annotation.offset])),
+                        )
+                location_memory = (
+                    abs(amplitude_stimuli - amplitude_channel) / amplitude_stimuli
+                )
+                accuracy_locations_memory.append(location_memory)
+        return accuracy_locations_memory
+    
+    # Biomarcador 4
+    @property
+    def antisaccade_velocities_biomarker(self) -> list[float]:
+        velocities = []
+        for annotation in self.detect_annotations:
+            if isinstance(annotation, AntiSaccade):
+                velocities.append(annotation.peak_velocity)
+        return velocities
+    
+    # Biomarcador 5
+    @property
+    def antisaccade_durations_biomarker(self) -> list[float]:
+        durations = []
+        for annotation in self.detect_annotations:
+            if isinstance(annotation, AntiSaccade):
+                durations.append(annotation.duration * SAMPLES_INTERVAL)
+        return durations
+    
+    # Biomarcador 6 -> Ahora: Devuelve una lista de 3 elementos
+    @property
+    def antisaccade_correction_latencies_biomarker(self) -> list[float]:
+        correction_latencies = []
+        previous_annotation = None
+        for annotation in self.detect_annotations:
+            if (previous_annotation is None):
+                correction_latencies.append(0)
+            elif (previous_annotation is not None and
+                isinstance(previous_annotation, Saccade) and
+                isinstance(annotation, AntiSaccade) and
+                annotation.transition_index == previous_annotation.transition_index):
+                correction_latency = (
+                    annotation.onset - previous_annotation.offset
+                ) * SAMPLES_INTERVAL
+                correction_latencies.append(correction_latency)
+            elif (previous_annotation is not None and
+                not isinstance(previous_annotation, Saccade) and
+                  isinstance(annotation, AntiSaccade)):
+                correction_latencies.append(0)
+            previous_annotation = annotation
+        return correction_latencies
+
+    
+    
+class AntisaccadicBiomarkers:
+    def __init__(
+        self, 
+        antisaccade_biomarkers: AntisaccadeBiomarkers
+    ):
+        self.antisaccade_biomarkers = antisaccade_biomarkers
+
+    @property
+    def latency_mean(self) -> float:
+        # En segundos
+        latencies = np.array(self.antisaccade_biomarkers.antisaccade_latencies_biomarker)
+        return latencies.mean() if len(latencies) > 0 else float('nan')
+
+    @property
+    def latency_std(self) -> float:
+        # En segundos
+        latencies = np.array(self.antisaccade_biomarkers.antisaccade_latencies_biomarker)
+        return latencies.std() if latencies.size > 0 else float('nan')
+
+    @property
+    def memory_mean(self) -> float:
+        # Ángulo en grados
+        memories = np.array(self.antisaccade_biomarkers.antisaccade_location_memory_biomarker)
+        return memories.mean() if memories.size > 0 else float('nan')
+
+    @property
+    def memory_std(self) -> float:
+        # Ángulo en grados
+        memories = np.array(self.antisaccade_biomarkers.antisaccade_location_memory_biomarker)
+        return memories.std() if memories.size > 0 else float('nan')
+
+    @property
+    def velocity_peak_mean(self) -> float:
+        # Ángulo en grados por segundo
+        velocities = np.array(self.antisaccade_biomarkers.antisaccade_velocities_biomarker)
+        return velocities.mean() if velocities.size > 0 else float('nan')
+
+    @property
+    def velocity_peak_std(self) -> float:
+        # Ángulo en grados por segundo
+        velocities = np.array(self.antisaccade_biomarkers.antisaccade_velocities_biomarker)
+        return velocities.std() if velocities.size > 0 else float('nan')
+
+    @property
+    def duration_mean(self) -> float:
+        # Ángulo en grados por segundo
+        durations = np.array(self.antisaccade_biomarkers.antisaccade_durations_biomarker)
+        return durations.mean() if durations.size > 0 else float('nan')
+
+    @property
+    def duration_std(self) -> float:
+        # Ángulo en grados por segundo
+        durations = np.array(self.antisaccade_biomarkers.antisaccade_durations_biomarker)
+        return durations.std() if durations.size > 0 else float('nan')
 
 
-#     @property
-#     def latency_mean(self) -> float:
-#         latencies = np.array([saccade.latency for saccade in self.annotations])
-#         return latencies.mean()
-#
-#     @property
-#     def latency_std(self) -> float:
-#         # En segundos
-#         raise NotImplementedError()
-#
-#     @property
-#     def memory_mean(self) -> float:
-#         # Ángulo en grados
-#         raise NotImplementedError()
-#
-#     @property
-#     def memory_std(self) -> float:
-#         # Ángulo en grados
-#         raise NotImplementedError()
-#
-#     @property
-#     def velocity_peak_mean(self) -> float:
-#         # Ángulo en grados por segundo
-#         raise NotImplementedError()
-#
-#     @property
-#     def velocity_peak_std(self) -> float:
-#         # Ángulo en grados por segundo
-#         raise NotImplementedError()
-#
-#     @property
-#     def duration_mean(self) -> float:
-#         # Ángulo en grados por segundo
-#         raise NotImplementedError()
-#
-#     @property
-#     def duration_std(self) -> float:
-#         # Ángulo en grados por segundo
-#         raise NotImplementedError()
-#
-#     @property
-#     def correction_latency_mean(self) -> float:
-#         # Ángulo en grados por segundo
-#         raise NotImplementedError()
-#
-#     @property
-#     def correction_latency_std(self) -> float:
-#         # Ángulo en grados por segundo
-#         raise NotImplementedError()
-#
-#     @property
-#     def response_inhibition(self) -> float:
-#         # Ratio entre total de sácadas inapropiadas / total de antisácadas
-#         raise NotImplementedError()
-#
-#     @property
-#     def to_dict(self) -> dict[str, int | float]:
-#         return {
-#             "latency_mean": self.latency_mean,
-#             "latency_std": self.latency_std,
-#             "memory_mean": self.memory_mean,
-#             "memory_std": self.memory_std,
-#             "velocity_peak_mean": self.velocity_peak_mean,
-#             "velocity_peak_std": self.velocity_peak_std,
-#             "duration_mean": self.duration_mean,
-#             "duration_std": self.duration_std,
-#             "correction_latency_mean": self.correction_latency_mean,
-#             "correction_latency_std": self.correction_latency_std,
-#             "response_inhibition": self.response_inhibition,
-#         }
-#
-#
-# # Biomarcador 1
-# def antisaccade_latencies_biomarker(events: Iterator[Event]) -> list[float]:
-#     latencies = []
-#     for event in events:
-#         if event.movement == Movement.Antisaccade:
-#             latency = (
-#                 event.onset - event.transition_change_before_index
-#             ) * SAMPLES_INTERVAL
-#             latencies.append(latency)
-#     return latencies
-#
-#
-# # Biomarcador 2
-# def antisaccade_response_inhibition_biomarker(events: Iterator[Event]) -> float:
-#     num_saccades_movements = 0
-#     num_antisaccades_movements = 0
-#     for event in events:
-#         if event.movement == Movement.Antisaccade:
-#             num_antisaccades_movements += 1
-#         if event.movement == Movement.Saccade:
-#             num_saccades_movements += 1
-#     return num_saccades_movements / num_antisaccades_movements
-#
-#
-# # Biomarcador 3
-# def antisaccade_location_memory_biomarker(
-#     channel: np.ndarray, stimuli: np.ndarray, events: Iterator[Event]
-# ) -> list[float]:
-#     accuracy_locations_memory = []
-#     amplitude_stimuli = abs(min(stimuli) - max(stimuli)) / 2
-#     for event in events:
-#         if event.movement == Movement.Antisaccade:
-#             amplitude_channel = max(
-#                 abs(max(channel[event.onset : event.offset])),
-#                 abs(min(channel[event.onset : event.offset])),
-#             ) - min(
-#                 abs(max(channel[event.onset : event.offset])),
-#                 abs(min(channel[event.onset : event.offset])),
-#             )
-#             location_memory = (
-#                 abs(amplitude_stimuli - amplitude_channel) / amplitude_stimuli
-#             )
-#             print(amplitude_stimuli, amplitude_channel)
-#             accuracy_locations_memory.append(location_memory)
-#     return accuracy_locations_memory
-#
-#
-# # Biomarcador 4
-# def antisaccade_velocities_biomarker(
-#     channel: np.ndarray, events: Iterator[Event]
-# ) -> list[float]:
-#     velocities = []
-#     for event in events:
-#         if event.movement == Movement.Antisaccade:
-#             velocidad_max = max(abs(differentiate(channel[event.onset : event.offset])))
-#             velocities.append(velocidad_max)
-#     return velocities
-#
-#
-# # Biomarcador 5
-# def antisaccade_durations_biomarker(events: Iterator[Event]) -> list[float]:
-#     durations = []
-#     for event in events:
-#         if event.movement == Movement.Antisaccade:
-#             duration = (event.offset - event.onset) * SAMPLES_INTERVAL
-#             durations.append(duration)
-#     return durations
-#
-#
-# # Biomarcador 6 -> Ahora: Devuelve una lista de 3 elementos
-# def antisaccade_correction_latencies_biomarker(
-#     saccades_movements: list[tuple[int, int]],
-#     antisaccades_movements: list[tuple[int, int]],
-# ) -> list[float]:
-#     # Se crea una lista porque se necesita un valor del evento anterior
-#     def create_list_event(events: Iterator[Event]):
-#         list = []
-#         for event in events:
-#             list.append(event)
-#         return list
-#
-#     correction_latencies = []
-#     for idx, event in enumerate(create_list_event(events)):
-#         if (
-#             events[idx - 1].movement == Movement.Saccade
-#             and event.movement == Movement.Antisaccade
-#             and event.transition_index == events[idx - 1].transition_index
-#         ):
-#             correction_latency = (
-#                 events[idx].onset - events[idx - 1].offset
-#             ) * SAMPLES_INTERVAL
-#             correction_latencies.append(correction_latency)
-#             saccade_has_ocurred = False
-#         elif (
-#             events[idx - 1].movement != Movement.Saccade
-#             and event.movement == Movement.Antisaccade
-#         ):
-#             correction_latencies.append(0)
-#     return correction_latencies
-#
+    @property
+    def correction_latency_mean(self) -> float:
+        # Ángulo en grados por segundo
+        correction_latencies = np.array(self.antisaccade_biomarkers.antisaccade_correction_latencies_biomarker)
+        return correction_latencies.mean() if correction_latencies.size > 0 else float('nan')
+
+
+    @property
+    def correction_latency_std(self) -> float:
+        # Ángulo en grados por segundo
+        correction_latencies = np.array(self.antisaccade_biomarkers.antisaccade_correction_latencies_biomarker)
+        return correction_latencies.std() if correction_latencies.size > 0 else float('nan')
+
+    @property
+    def response_inhibition(self) -> float:
+        # Ratio entre total de sácadas inapropiadas / total de antisácadas
+        annotations = self.antisaccade_biomarkers.detect_annotations
+        inappropriate_saccades = len([a for a in annotations if isinstance(a, Saccade)])
+        total_antisaccades = len([a for a in annotations if isinstance(a, AntiSaccade)])
+        return inappropriate_saccades / total_antisaccades if total_antisaccades > 0 else float('nan')
+
+    @property
+    def to_dict(self) -> dict[str, int | float]:
+        return {
+            "latency_mean": self.latency_mean,
+            "latency_std": self.latency_std,
+            "memory_mean": self.memory_mean,
+            "memory_std": self.memory_std,
+            "velocity_peak_mean": self.velocity_peak_mean,
+            "velocity_peak_std": self.velocity_peak_std,
+            "duration_mean": self.duration_mean,
+            "duration_std": self.duration_std,
+            "correction_latency_mean": self.correction_latency_mean,
+            "correction_latency_std": self.correction_latency_std,
+            "response_inhibition": self.response_inhibition,
+        }
+
+
 
