@@ -25,7 +25,10 @@ setup(
         "bsp",
         "bsp.adc",
         "bsp.core",
+        "bsp.core.biomarkers",
+        "bsp.core.protocols",
         "bsp.gui",
+        "bsp.gui.protocols",
     ],
     package_data={
         "bsp.adc": [

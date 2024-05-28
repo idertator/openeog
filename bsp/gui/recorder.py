@@ -6,9 +6,9 @@ from PySide6.QtCore import QObject, QThreadPool, Signal
 
 from bsp.adc import Adquirer, BiosignalsPluxAdquirer, BitalinoAdquirer
 from bsp.core import Protocol, Study, Test, TestType, pursuit_stimuli, saccadic_stimuli
+from bsp.gui.config import PROTOCOLS
 
 from .plotter import Plotter
-from .protocols import PROTOCOLS
 from .screens import ScreensManager
 from .settings import SettingsDialog
 from .stimulator import Stimulator

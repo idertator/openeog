@@ -12,8 +12,7 @@ from PySide6.QtWidgets import (
 )
 
 from bsp.core import Protocol
-
-from .config import PROTOCOLS
+from bsp.gui.config import PROTOCOLS
 
 
 class ProtocolsDialog(QDialog):
