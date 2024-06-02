@@ -26,6 +26,7 @@ def impulses(channel: ndarray) -> Iterator[tuple[int, int]]:
     def iterate_clusters():
         start = None
         for idx, label in enumerate(labels):
+            
             if label == 1:
                 if start is None:
                     start = idx

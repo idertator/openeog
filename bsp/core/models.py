@@ -8,8 +8,19 @@ from numpy import ndarray, single
 
 from .calibration import calibration
 from .denoising import denoise
-from .differentiation import differentiate
 from .saccades import saccades
+
+
+class Direction(str, Enum):
+    Same = "same"
+    Left = "left"
+    Right = "right"
+
+
+class Size(str, Enum):
+    Invalid = "inv"
+    Small = "small"
+    Large = "large"
 
 
 class Protocol(str, Enum):
@@ -66,6 +77,7 @@ class AnnotationType(str, Enum):
     Fixation = "Fixation"
     Saccade = "Saccade"
     Pursuit = "Pursuit"
+    AntiSaccade = "AntiSaccade"
 
     @property
     def name(self) -> str:
@@ -79,6 +91,9 @@ class AnnotationType(str, Enum):
             case AnnotationType.Pursuit:
                 return "Persecución"
 
+            case AnnotationType.AntiSaccade:
+                return "AntiSaccade"
+
         return "Desconocida"
 
 
@@ -90,35 +105,27 @@ class Annotation:
         offset: int,
     ):
         self._annotation_type = annotation_type
-        self._onset = onset
-        self._offset = offset
+        self.onset = onset
+        self.offset = offset
 
     def __str__(self):
         return "{annotation} from {onset} to {offset}".format(
             annotation=self._annotation_type.value,
-            onset=self._onset,
-            offset=self._offset,
+            onset=self.onset,
+            offset=self.offset,
         )
 
     @property
     def json(self) -> dict:
         return {
             "annotation_type": self._annotation_type.value,
-            "onset": self._onset,
-            "offset": self._offset,
+            "onset": self.onset,
+            "offset": self.offset,
         }
 
     @property
     def annotation_type(self) -> AnnotationType:
         return self._annotation_type
-
-    @property
-    def onset(self) -> int:
-        return self._onset
-
-    @property
-    def offset(self) -> int:
-        return self._offset
 
 
 class Saccade(Annotation):
@@ -126,80 +133,103 @@ class Saccade(Annotation):
         self,
         onset: int,
         offset: int,
-        latency: int,
-        duration: int,
-        amplitude: float,
-        deviation: float,
-        peak_velocity: float,
+        latency: int = 0,
+        duration: int = 0,
+        amplitude: float = 0.0,
+        deviation: float = 0.0,
+        peak_velocity: float = 0.0,
+        transition_index: int = -1,
+        transition_change_index: int = -1,
+        transition_change_before_index: int = -1,
+        transition_direction: Direction = Direction.Same,
+        direction: Direction = Direction.Same,
+        size: Size = Size.Invalid,
     ):
         super().__init__(
             annotation_type=AnnotationType.Saccade,
             onset=onset,
             offset=offset,
         )
-        self._latency = latency
-        self._duration = duration
-        self._amplitude = amplitude
-        self._deviation = deviation
-        self._peak_velocity = peak_velocity
-
-    @classmethod
-    def create(
-        cls,
-        onset: int,
-        offset: int,
-        angle: int,
-        channel: ndarray,
-        stimuli: ndarray,
-        velocities: ndarray,
-    ) -> Saccade:
-        transition = onset
-        while transition > 0 and stimuli[transition - 1] == stimuli[transition]:
-            transition -= 1
-
-        window = channel[onset:offset]
-        amplitude = window.max() - window.min()
-
-        return Saccade(
-            onset=onset,
-            offset=offset,
-            latency=onset - transition,
-            duration=offset - onset,
-            amplitude=amplitude,
-            deviation=amplitude / angle,
-            peak_velocity=velocities[onset:offset].max(),
-        )
+        self.direction = direction
+        self.size = size
+        self.latency = latency
+        self.duration = duration
+        self.amplitude = amplitude
+        self.deviation = deviation
+        self.peak_velocity = peak_velocity
+        self.transition_index = transition_index
+        self.transition_change_index = transition_change_index
+        self.transition_change_before_index = transition_change_before_index
+        self.transition_direction = transition_direction
 
     @property
     def json(self) -> dict:
         return {
             **super().json,
-            "latency": int(self._latency),
-            "duration": int(self._duration),
-            "amplitude": float(self._amplitude),
-            "deviation": float(self._deviation),
-            "peak_velocity": float(self._peak_velocity),
+            "direction": self.direction.value,
+            "size": self.size.value,
+            "latency": self.latency,
+            "duration": self.duration,
+            "amplitude": self.amplitude,
+            "deviation": self.deviation,
+            "peak_velocity": self.peak_velocity,
+            "transition_index": self.transition_index,
+            "transition_change_index": self.transition_change_index,
+            "transition_change_before_index": self.transition_change_before_index,
+            "transition_direction": self.transition_direction.value,
         }
 
-    @property
-    def latency(self) -> int:
-        return self._latency
+
+class AntiSaccade(Annotation):
+    def __init__(
+        self,
+        onset: int,
+        offset: int,
+        latency: int = 0,
+        duration: int = 0,
+        amplitude: float = 0.0,
+        deviation: float = 0.0,
+        peak_velocity: float = 0.0,
+        transition_index: int = -1,
+        transition_change_index: int = -1,
+        transition_change_before_index: int = -1,
+        transition_direction: Direction = Direction.Same,
+        direction: Direction = Direction.Same,
+        size: Size = Size.Invalid,
+    ):
+        super().__init__(
+            annotation_type=AnnotationType.AntiSaccade,
+            onset=onset,
+            offset=offset,
+        )
+        self.direction = direction
+        self.size = size
+        self.latency = latency
+        self.duration = duration
+        self.amplitude = amplitude
+        self.deviation = deviation
+        self.peak_velocity = peak_velocity
+        self.transition_index = transition_index
+        self.transition_change_index = transition_change_index
+        self.transition_change_before_index = transition_change_before_index
+        self.transition_direction = transition_direction
 
     @property
-    def duration(self) -> int:
-        return self._duration
-
-    @property
-    def amplitude(self) -> float:
-        return self._amplitude
-
-    @property
-    def deviation(self) -> float:
-        return self._deviation
-
-    @property
-    def peak_velocity(self) -> float:
-        return self._peak_velocity
+    def json(self) -> dict:
+        return {
+            **super().json,
+            "direction": self.direction.value,
+            "size": self.size.value,
+            "latency": self.latency,
+            "duration": self.duration,
+            "amplitude": self.amplitude,
+            "deviation": self.deviation,
+            "peak_velocity": self.peak_velocity,
+            "transition_index": self.transition_index,
+            "transition_change_index": self.transition_change_index,
+            "transition_change_before_index": self.transition_change_before_index,
+            "transition_direction": self.transition_direction.value,
+        }
 
 
 class Antisaccade(Annotation):
@@ -337,20 +367,15 @@ class Test:
 
         if self.test_type == TestType.HorizontalSaccadic:
             result = []
-            velocities = abs(differentiate(self.hor_channel))
 
             for onset, offset in saccades(
                 channel=self.hor_channel,
                 angle=self.angle,
             ):
                 result.append(
-                    Saccade.create(
+                    Saccade(
                         onset=onset,
                         offset=offset,
-                        angle=self.angle,
-                        channel=self.hor_channel,
-                        stimuli=self.hor_stimuli,
-                        velocities=velocities,
                     )
                 )
 
@@ -364,7 +389,7 @@ class Study:
         self,
         recorded_at: datetime | None,
         tests: list[Test],
-        protocol: Protocol = Protocol.Saccadic,
+        protocol: Protocol,
         hor_calibration: float | None = None,
         hor_calibration_diff: float | None = None,
         ver_calibration: float | None = None,

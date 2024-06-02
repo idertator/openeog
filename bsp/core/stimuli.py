@@ -1,12 +1,13 @@
-from numpy import int32, linspace, ndarray, pi, sin, zeros
-from numpy.random import randint
+import numpy as np
+
+from .models import Direction
 
 
 def saccadic_stimuli(
     length: int,
     saccades: int,
     variability: float = 0.05,
-) -> ndarray:
+) -> np.ndarray:
     """Generate a saccadic stimulus
 
     Args:
@@ -22,7 +23,7 @@ def saccadic_stimuli(
     delta = int(center * variability)
     low, high = center - delta, center + delta
 
-    fixations = randint(low, high, size=fixations_count, dtype=int32)
+    fixations = np.randint(low, high, size=fixations_count, dtype=np.int32)
     edges_samples = fixations[0] + fixations[-1] + (length - sum(fixations))
 
     fixations[0] = edges_samples // 2
@@ -30,7 +31,7 @@ def saccadic_stimuli(
 
     assert sum(fixations) == length
 
-    result = zeros(length, dtype=int32)
+    result = np.zeros(length, dtype=np.int32)
 
     start = int(fixations[0])
     for idx in range(1, len(fixations) - 1):
@@ -48,7 +49,7 @@ def saccadic_stimuli(
 def pursuit_stimuli(
     length: int,
     speed: float = 1.5,
-) -> ndarray:
+) -> np.ndarray:
     """Generate a pursuit stimulus
 
     Args:
@@ -60,6 +61,36 @@ def pursuit_stimuli(
         ndarray: Pursuit stimulus
     """
     num_cycles = (speed * 1000) / 360
-    x = linspace(0, num_cycles * 2 * pi, length)
+    x = np.linspace(0, num_cycles * 2 * np.pi, length)
 
-    return sin(x)
+    return np.sin(x)
+
+
+class SaccadicStimuliTransitions:
+    def __init__(self, stimuli: np.ndarray):
+        self.transitions = []
+        for idx in range(1, len(stimuli)):
+            if stimuli[idx - 1] != stimuli[idx]:
+                before_value = stimuli[idx - 1]
+                after_value = stimuli[idx]
+
+                if before_value < after_value:
+                    self.transitions.append((idx, Direction.Left))
+                else:
+                    self.transitions.append((idx, Direction.Right))
+
+    def __len__(self) -> int:
+        return len(self.transitions)
+
+    def __getitem__(self, pos: int) -> tuple[int, int, int, Direction]:
+        if self.transitions:
+            idx = 0
+            change, direction = self.transitions[idx]
+            change_before = change
+            while pos > change and idx < len(self.transitions) - 1:
+                change_before = change
+                idx += 1
+                change, direction = self.transitions[idx]
+            return idx, change, change_before, direction
+
+        return 0, 0, Direction.Same

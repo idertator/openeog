@@ -11,7 +11,7 @@ def saccades(
     angle: int,
     tolerance: float = 0.2,
 ) -> Iterator[tuple[int, int]]:
-    """Saccade identification with automatic velocoty threshold
+    """Saccade identification with automatic velocity threshold
 
     Args:
         channel (ndarray): channel

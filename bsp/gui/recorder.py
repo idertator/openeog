@@ -4,7 +4,7 @@ from typing import Type
 from numpy import uint16, zeros
 from PySide6.QtCore import QObject, QThreadPool, Signal
 
-from bsp.adc import Adquirer, BiosignalsPluxAdquirer, BitalinoAdquirer
+from bsp.adc import Adquirer, BitalinoAdquirer
 from bsp.core import Protocol, Study, Test, TestType, pursuit_stimuli, saccadic_stimuli
 from bsp.gui.config import PROTOCOLS
 
