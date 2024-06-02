@@ -1,11 +1,8 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
-
 from bsp.core.models import Protocol
 
 
-@dataclass
 class ProtocolTemplate:
     protocol: Protocol
     name: str

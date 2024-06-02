@@ -1,10 +1,12 @@
+from functools import cached_property
+
 import numpy as np
 from scipy import signal
 from scipy.signal import coherence, medfilt
 
 from bsp.core import differentiate, helpers
 from bsp.core.denoising import denoise_35
-from bsp.core.models import Test
+from bsp.core.models import Saccade, Test
 from bsp.core.saccades import saccades
 
 
@@ -12,7 +14,7 @@ class PursuitBiomarkers:
     def __init__(
         self,
         test: Test,
-        to_cut: int,
+        to_cut: int = 100,
         invert_signal: bool = False,
         **kwargs,
     ):
@@ -69,8 +71,8 @@ class PursuitBiomarkers:
         """
         centered_channel = helpers.center_signal(self.horizontal_cutted)
         centered_stimuli = helpers.center_signal(self.stimuli_cutted)
-        scaled_channel = helpers.scale_channel(centered_channel, self.angle)
-        scaled_stim_channel = helpers.scale_channel(centered_stimuli, self.angle)
+        scaled_channel = helpers.scale_signal(centered_channel, self.angle)
+        scaled_stim_channel = helpers.scale_signal(centered_stimuli, self.angle)
 
         denoised_channel = denoise_35(scaled_channel)
 
@@ -83,6 +85,21 @@ class PursuitBiomarkers:
 
         return latency_res / 1000.0
 
+    @cached_property
+    def saccades(self) -> list[Saccade]:
+        """Saccades
+
+        Returns:
+            list[Saccade]: saccades
+        """
+        return [
+            Saccade(
+                onset=start,
+                offset=end,
+            )
+            for start, end in saccades(self.horizontal_channel, self.angle)
+        ]
+
     @property
     def corrective_saccades_count(self) -> int:
         """Corrective saccades count
@@ -90,11 +107,7 @@ class PursuitBiomarkers:
         Returns:
             int: number of saccades
         """
-        num_sacc = 0
-        for index in range(self.angle + 1):
-            for start, end in saccades(self.horizontal_channel, index):
-                num_sacc += 1
-        return num_sacc
+        return len(self.saccades)
 
     @property
     def velocity_mean(self) -> float:

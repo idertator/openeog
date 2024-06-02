@@ -24,3 +24,27 @@ installer:
 	rmdir dist
 	makeself ./install bsp-${VERSION}.run "BioSignalsPlux EOG" ./install.sh
 	rm install/*.tar.gz
+
+install_requirements:
+	( \
+ 	  source .venv/bin/activate; \
+  	  uv pip install -r requirements.txt; \
+	)
+
+update_requirements:
+	( \
+ 	  source .venv/bin/activate; \
+  	  uv pip install --upgrade -r requirements.txt; \
+	)
+
+notebook:
+	( \
+ 	  source .venv/bin/activate; \
+	  jupyter notebook; \
+	)
+
+develop:
+	( \
+ 	  source .venv/bin/activate; \
+	  python setup.py develop; \
+	)

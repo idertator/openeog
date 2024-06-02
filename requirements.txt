@@ -11,6 +11,7 @@ tablib[xlsx]
 
 setuptools
 jupyterlab
+notebook
 matplotlib
 
 pyserial

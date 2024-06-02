@@ -1,11 +1,8 @@
-from dataclasses import dataclass
-
 from bsp.core.models import Protocol
 
 from .base import ProtocolTemplate
 
 
-@dataclass
 class PursuitProtocolTemplate(ProtocolTemplate):
     velocity: float
     protocol: Protocol = Protocol.Pursuit

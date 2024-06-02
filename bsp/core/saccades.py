@@ -1,8 +1,8 @@
 from typing import Iterator
 
 from numpy import ndarray
-from scipy.signal import medfilt
 
+from .denoising import denoise_35
 from .differentiation import differentiate
 
 
@@ -21,7 +21,7 @@ def saccades(
     Yields:
         Iterator[tuple[int, int]]: Saccades onset and offset
     """
-    velocities = medfilt(differentiate(channel), 71)
+    velocities = differentiate(denoise_35(channel))
     threshold = velocities.std()
     velocities = abs(velocities)
     right = len(channel) - 1

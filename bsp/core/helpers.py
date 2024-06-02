@@ -1,7 +1,7 @@
 import numpy as np
 
 
-def scale_channel(value: np.ndarray, angle: float) -> np.ndarray:
+def scale_signal(value: np.ndarray, angle: float) -> np.ndarray:
     """Scale the channel to the angle
 
     Args:
