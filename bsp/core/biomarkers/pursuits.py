@@ -1,102 +1,76 @@
-from bsp.core.models import Test
 import numpy as np
 from scipy import signal
-from scipy.signal import coherence
-from scipy.signal import medfilt
+from scipy.signal import coherence, medfilt
+
+from bsp.core import differentiate, helpers
+from bsp.core.denoising import denoise_35
+from bsp.core.models import Test
 from bsp.core.saccades import saccades
-from bsp.core import differentiate
-
-
-# from functools import cached_property
-
-# Auxiliar functions
-def mse(s1: np.ndarray, s2: np.ndarray) -> float:
-    return np.sum((s1 - s2) ** 2) / len(s1)
-
-
-def move(s: np.ndarray, count: int = 1) -> np.ndarray:
-    return np.hstack((np.ones(count) * s[0], s[:-count]))
-
-
-def best_fit(s1: np.ndarray, s2: np.ndarray) -> tuple[int, float]:
-    # best_fit(stimuli, horizontal)
-    count = 2000
-    errors = np.zeros(count)
-    for i in range(1, count + 1):
-        offset = move(s2, i)
-        errors[i - 1] = mse(s1, offset)
-        best_displacement = errors.argmin()
-        best_error = errors[best_displacement]
-    return best_displacement, best_error
-
-
-def center_signal(value: np.ndarray) -> np.ndarray:
-    return value - value.mean()
-
-
-def scale_channel(value: np.ndarray, angle: float) -> np.ndarray:
-    min_value = min(value)
-    max_value = max(value)
-
-    amplitude_raw = max_value - min_value
-    scale = angle / amplitude_raw
-
-    return value * scale
-
-
-def denoise_35(value: np.ndarray) -> np.ndarray:
-    b, a = signal.butter(3, 0.035)
-    y = signal.filtfilt(b, a, value)
-    return y
 
 
 class PursuitBiomarkers:
     def __init__(
-            self,
-            test: Test,
-            samples_to_cut: int,
-            invert_signal: bool = False,
-            **kwargs,
+        self,
+        test: Test,
+        to_cut: int,
+        invert_signal: bool = False,
+        **kwargs,
     ):
-        self.invert_signal = invert_signal
-        self.test = test
-        self.samples_to_cut = samples_to_cut
+        """Constructor
+
+        Args:
+            test (Test): test
+            to_cut (int): number of samples to cut
+            invert_signal (bool, optional): invert signal. Defaults to False.
+
+        Returns:
+            PursuitBiomarkers: object
+        """
+        self.angle = test.angle
         self.horizontal_channel = None
         self.horizontal_cutted = None
-        self.stimuli_channel = None
-        self.stimuli_cutted = None
-        self._preprocess_signals()
 
-    def _preprocess_signals(self):
-        to_cut = self.samples_to_cut
-        if self.invert_signal:
-            self.horizontal_channel = self.test.hor_channel.copy()[to_cut:-to_cut] * -1
-            self.horizontal_cutted = self.test.hor_channel_raw.copy()[to_cut:-to_cut] * -1
+        if invert_signal:
+            self.horizontal_channel = test.hor_channel.copy()[to_cut:-to_cut] * -1
+            self.horizontal_cutted = test.hor_channel_raw.copy()[to_cut:-to_cut] * -1
         else:
-            self.horizontal_channel = self.test.hor_channel.copy()[to_cut:-to_cut]
-            self.horizontal_cutted = self.test.hor_channel_raw.copy()[to_cut:-to_cut]
+            self.horizontal_channel = test.hor_channel.copy()[to_cut:-to_cut]
+            self.horizontal_cutted = test.hor_channel_raw.copy()[to_cut:-to_cut]
         amplitude = self.horizontal_channel.max() - self.horizontal_channel.min()
 
-        self.stimuli_channel = self.test.hor_stimuli.copy()[to_cut:-to_cut]
+        self.stimuli_channel = test.hor_stimuli.copy()[to_cut:-to_cut]
         self.stimuli_channel -= self.stimuli_channel.mean()
-        self.stimuli_channel *= (amplitude * 2)
-        self.stimuli_cutted = self.test.hor_stimuli_raw.copy()[to_cut:-to_cut]
-
-    # @cached_property
-    # def _filetered_velocity(self) -> ndarray:
-    #     return filtro(self.test.hor_channel_raw)
+        self.stimuli_channel *= amplitude * 2
+        self.stimuli_cutted = test.hor_stimuli_raw.copy()[to_cut:-to_cut]
 
     @property
     def waveform_mse(self) -> tuple[int, float]:
-        return best_fit(self.stimuli_channel, self.horizontal_channel)
+        """Waveform MSE
+
+        Returns:
+            tuple[int, float]: displacement, error
+        """
+        count = 2000
+        errors = np.zeros(count)
+        for i in range(1, count + 1):
+            offset = helpers.move(self.horizontal_channel, i)
+            errors[i - 1] = helpers.mse(self.stimuli_channel, offset)
+            best_displacement = errors.argmin()
+            best_error = errors[best_displacement]
+
+        return best_displacement, best_error
 
     @property
     def latency_mean(self) -> float:
-        # En segundos
-        centered_channel = center_signal(self.horizontal_cutted)
-        centered_stimuli = center_signal(self.stimuli_cutted)
-        scaled_channel = scale_channel(centered_channel, self.test.angle)
-        scaled_stim_channel = scale_channel(centered_stimuli, self.test.angle)
+        """Latency Mean
+
+        Returns:
+            float: latency (in seconds)
+        """
+        centered_channel = helpers.center_signal(self.horizontal_cutted)
+        centered_stimuli = helpers.center_signal(self.stimuli_cutted)
+        scaled_channel = helpers.scale_channel(centered_channel, self.angle)
+        scaled_stim_channel = helpers.scale_channel(centered_stimuli, self.angle)
 
         denoised_channel = denoise_35(scaled_channel)
 
@@ -111,38 +85,62 @@ class PursuitBiomarkers:
 
     @property
     def corrective_saccades_count(self) -> int:
+        """Corrective saccades count
+
+        Returns:
+            int: number of saccades
+        """
         num_sacc = 0
-        for index in range(self.test.angle+1):
+        for index in range(self.angle + 1):
             for start, end in saccades(self.horizontal_channel, index):
                 num_sacc += 1
         return num_sacc
 
     @property
     def velocity_mean(self) -> float:
+        """Velocity Mean
+
+        Returns:
+            float: velocity (in degrees per second)
+        """
         ch_filtered = medfilt(self.horizontal_channel, 201)
         ch_f_vel = differentiate(ch_filtered)
         mean_pursuit = abs(ch_f_vel.mean())
         return mean_pursuit
 
-    # velocities = self._filetered_velocity
-
     @property
     def velocity_gain(self) -> float:
+        """Velocity Gain
+
+        Returns:
+            float: velocity gain
+        """
         mean_ch = self.velocity_mean
         stimuli_vel = differentiate(self.stimuli_channel)
         mean_stimuli = abs(stimuli_vel.mean())
         gain_vel = mean_ch / mean_stimuli
+
         return gain_vel
-        # velocities = self._filetered_velocity
 
     @property
     def spectral_coherence(self) -> float:
+        """Spectral Coherence
+
+        Returns:
+            float: spectral coherence
+        """
         freqs, c = coherence(self.stimuli_channel, self.horizontal_channel, fs=1000.0)
-        coherence_factor = ((1 - c)[:10].mean())
+        coherence_factor = (1 - c)[:10].mean()
+
         return coherence_factor
 
     @property
     def to_dict(self) -> dict[str, int | float]:
+        """To Dict
+
+        Returns:
+            dict[str, int | float]: dictionary
+        """
         return {
             "waveform_mse": self.waveform_mse,
             "latency_mean": self.latency_mean,
