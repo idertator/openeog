@@ -4,6 +4,6 @@ from .bitalino import BitalinoAdquirer
 
 __all__ = [
     "Adquirer",
-    "BiosignalsPluxAdquirer",
+   # "BiosignalsPluxAdquirer",
     "BitalinoAdquirer",
 ]
