@@ -469,3 +469,6 @@ class AntisaccadicBiomarkers:
             "correction_latency_std": self.correction_latency_std,
             "response_inhibition": self.response_inhibition,
         }
+
+    def save_to(self, filename: str):
+        raise NotImplementedError()

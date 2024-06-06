@@ -162,3 +162,6 @@ class PursuitBiomarkers:
             "velocity_gain": self.velocity_gain,
             "spectral_coherence": self.spectral_coherence,
         }
+
+    def save_to(self, filename: str):
+        raise NotImplementedError()
