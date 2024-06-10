@@ -16,9 +16,9 @@ class FinishingPage(QtWidgets.QWizardPage):
         wizard.setButtonLayout(
             [
                 QtWidgets.QWizard.Stretch,
+                QtWidgets.QWizard.CancelButton,
                 QtWidgets.QWizard.BackButton,
                 QtWidgets.QWizard.FinishButton,
-                QtWidgets.QWizard.CancelButton,
             ]
         )
         wizard.button(QtWidgets.QWizard.NextButton).setEnabled(False)
