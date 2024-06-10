@@ -69,6 +69,7 @@ class MainWindow(QMainWindow):
         if not self._new_record_wizard:
             self._new_record_wizard = NewRecordWizard(self)
             self._new_record_wizard.exec()
+
             # self._recorder.protocol = self._new_record_wizard.protocol
 
     @Slot()
