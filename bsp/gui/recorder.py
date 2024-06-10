@@ -256,7 +256,7 @@ class Recorder(QObject):
         if self._settings.device_type == "Bitalino":
             return BitalinoAdquirer
 
-        #return BiosignalsPluxAdquirer
+        # return BiosignalsPluxAdquirer
         return None
 
     def next_test(self):
