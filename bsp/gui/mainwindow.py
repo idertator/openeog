@@ -5,8 +5,8 @@ from PySide6.QtWidgets import QFileDialog, QMainWindow, QMessageBox
 from bsp.core import Protocol, saccadic_report, save_study
 
 from . import resources  # noqa
+from .newrecord import NewRecordWizard
 from .plotter import Plotter
-from .protocols import ProtocolsDialog
 from .recorder import Recorder
 from .screens import ScreensManager
 from .settings import SettingsDialog
@@ -63,13 +63,13 @@ class MainWindow(QMainWindow):
         )
         self._recorder.finished.connect(self.on_recording_finished)
 
-        self._protocols_dialog = None
+        self._new_record_wizard = None
 
     def showEvent(self, event: QShowEvent):
-        if not self._protocols_dialog:
-            self._protocols_dialog = ProtocolsDialog(self)
-            self._protocols_dialog.exec()
-            self._recorder.protocol = self._protocols_dialog.protocol
+        if not self._new_record_wizard:
+            self._new_record_wizard = NewRecordWizard(self)
+            self._new_record_wizard.exec()
+            # self._recorder.protocol = self._new_record_wizard.protocol
 
     @Slot()
     def on_settings_clicked(self):
