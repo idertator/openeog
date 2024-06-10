@@ -2,14 +2,20 @@ import sys
 
 from PySide6.QtWidgets import QApplication
 
+from bsp.core import log
+
 from .gui import MainWindow, ScreensManager
+
+VERSION = "1.1.0"
 
 
 def main():
+    log.info("Starting BSP {version}".format(version=VERSION))
+
     app = QApplication(sys.argv)
     app.setOrganizationDomain("idertator")
     app.setApplicationName("bsp")
-    app.setApplicationVersion("1.0.2")
+    app.setApplicationVersion(VERSION)
     app.setApplicationDisplayName("BioSignalPlux - EOG Recorder")
 
     screens = ScreensManager(app)

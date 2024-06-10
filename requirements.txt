@@ -15,3 +15,5 @@ notebook
 matplotlib
 
 pyserial
+
+termcolor

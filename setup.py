@@ -13,7 +13,7 @@ def requirements():
 
 setup(
     name="bsp-eog",
-    version="1.0.2",
+    version="1.1.0",
     description="Electrooculographic Recording and Records Processing Platform",
     long_description=readme(),
     author="Roberto Antonio Becerra García",
