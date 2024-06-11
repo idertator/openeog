@@ -16,6 +16,7 @@ class ProtocolsPursuitPage(QtWidgets.QWizardPage):
             [
                 QtWidgets.QWizard.Stretch,
                 QtWidgets.QWizard.CancelButton,
+                QtWidgets.QWizard.BackButton,
                 QtWidgets.QWizard.NextButton,
             ]
         )

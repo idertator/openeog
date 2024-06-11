@@ -27,12 +27,21 @@ class NewRecordWizard(QtWidgets.QWizard):
         self.setWindowFlag(QtCore.Qt.WindowCloseButtonHint, False)
         self.setWindowFlag(QtCore.Qt.WindowMaximizeButtonHint, False)
 
+        self.setButtonText(QtWidgets.QWizard.CustomButton1, "Cargar")
+        self.setButtonText(QtWidgets.QWizard.CustomButton2, "Guardar")
         self.setButtonText(QtWidgets.QWizard.CancelButton, "Cancelar")
         self.setButtonText(QtWidgets.QWizard.NextButton, "Siguiente")
         self.setButtonText(QtWidgets.QWizard.BackButton, "Atrás")
         self.setButtonText(QtWidgets.QWizard.FinishButton, "Finalizar")
         self.setButtonText(QtWidgets.QWizard.HelpButton, "Ayuda")
 
+        self._load_button = self.button(QtWidgets.QWizard.CustomButton1)
+        self._load_button.clicked.connect(self.on_load_clicked)
+
+        self._save_button = self.button(QtWidgets.QWizard.CustomButton2)
+        self._save_button.clicked.connect(self.on_save_clicked)
+
+        # Setting up pages
         self._protocols_page = ProtocolsPage(self)
         self._protocols_antisaccadic_page = ProtocolsAntisaccadicPage(self)
         self._protocols_pursuit_page = ProtocolsPursuitPage(self)
@@ -73,3 +82,13 @@ class NewRecordWizard(QtWidgets.QWizard):
     def reject(self):
         log.info("User cancelled the wizard")
         exit(0)
+
+    def on_load_clicked(self):
+        if self.currentId() in {1, 2, 3}:
+            page = self.currentPage()
+            page.load_protocol()
+
+    def on_save_clicked(self):
+        if self.currentId() in {1, 2, 3}:
+            page = self.currentPage()
+            page.save_protocol()
