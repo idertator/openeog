@@ -54,6 +54,8 @@ class NewRecordWizard(QtWidgets.QWizard):
         self.addPage(self._protocols_pursuit_page)  # ID 3
         self.addPage(self._finishing_page)  # ID 4
 
+        self.currentIdChanged.connect(self.on_current_id_changed)
+
         self.setStartId(0)
 
     def showEvent(self, event: QtGui.QShowEvent):
@@ -82,6 +84,36 @@ class NewRecordWizard(QtWidgets.QWizard):
     def reject(self):
         log.info("User cancelled the wizard")
         exit(0)
+
+    def on_current_id_changed(self, id):
+        if id == 0:
+            self.setButtonLayout(
+                [
+                    QtWidgets.QWizard.Stretch,
+                    QtWidgets.QWizard.CancelButton,
+                    QtWidgets.QWizard.NextButton,
+                ]
+            )
+        elif id in {1, 2, 3}:
+            self.setButtonLayout(
+                [
+                    QtWidgets.QWizard.CustomButton1,
+                    QtWidgets.QWizard.CustomButton2,
+                    QtWidgets.QWizard.Stretch,
+                    QtWidgets.QWizard.CancelButton,
+                    QtWidgets.QWizard.BackButton,
+                    QtWidgets.QWizard.NextButton,
+                ]
+            )
+        else:
+            self.setButtonLayout(
+                [
+                    QtWidgets.QWizard.Stretch,
+                    QtWidgets.QWizard.CancelButton,
+                    QtWidgets.QWizard.BackButton,
+                    QtWidgets.QWizard.FinishButton,
+                ]
+            )
 
     def on_load_clicked(self):
         if self.currentId() in {1, 2, 3}:

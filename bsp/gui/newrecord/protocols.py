@@ -56,16 +56,6 @@ class ProtocolsPage(QtWidgets.QWizardPage):
 
         self.registerField("protocol*", self, "protocol")
 
-    def initializePage(self):
-        wizard = self.wizard()
-        wizard.setButtonLayout(
-            [
-                QtWidgets.QWizard.Stretch,
-                QtWidgets.QWizard.CancelButton,
-                QtWidgets.QWizard.NextButton,
-            ]
-        )
-
     def isComplete(self) -> bool:
         return self._protocol is not None
 

@@ -10,15 +10,3 @@ class FinishingPage(QtWidgets.QWizardPage):
 
         self.setTitle("Finalizando la Configuración")
         self.setFinalPage(True)
-
-    def initializePage(self):
-        wizard = self.wizard()
-        wizard.setButtonLayout(
-            [
-                QtWidgets.QWizard.Stretch,
-                QtWidgets.QWizard.CancelButton,
-                QtWidgets.QWizard.BackButton,
-                QtWidgets.QWizard.FinishButton,
-            ]
-        )
-        wizard.button(QtWidgets.QWizard.NextButton).setEnabled(False)
