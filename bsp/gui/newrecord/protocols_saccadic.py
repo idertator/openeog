@@ -80,6 +80,10 @@ class ProtocolsSaccadicPage(QtWidgets.QWizardPage):
 
         self.setLayout(self._form_layout)
 
+    def initializePage(self):
+        if filename := settings.default_saccadic_protocol_path():
+            self._load_protocol_file(filename)
+
     def isComplete(self) -> bool:
         try:
             self.validate()
@@ -179,16 +183,12 @@ class ProtocolsSaccadicPage(QtWidgets.QWizardPage):
     def _validate_saccadic_count(self, json: dict) -> int:
         saccadic_count = json.get("saccadic_count", None)
         if not isinstance(saccadic_count, (int, float)):
-            raise ValueError(f"Longitud de calibración inválida: {saccadic_count}")
+            raise ValueError(f"Cantidad de sácadas inválida: {saccadic_count}")
 
         if saccadic_count < 5 or saccadic_count > 30:
-            raise ValueError(f"Longitud de calibración inválida: {saccadic_count}")
+            raise ValueError(f"Cantidad de sácadas inválida: {saccadic_count}")
 
         return int(saccadic_count)
-
-    def initializePage(self):
-        if filename := settings.default_saccadic_protocol_path():
-            self._load_protocol_file(filename)
 
     def _load_protocol_file(self, filename: str):
         json = {}
@@ -223,6 +223,7 @@ class ProtocolsSaccadicPage(QtWidgets.QWizardPage):
             self._saccadic_60.setChecked(json["saccadic_60"])
 
         except ValueError as e:
+            log.error(str(e))
             QtWidgets.QMessageBox.critical(
                 self,
                 "Formato inválido",

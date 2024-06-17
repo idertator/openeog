@@ -33,3 +33,13 @@ def default_saccadic_protocol_path() -> str:
 def set_default_saccadic_protocol_path(path: str):
     settings = QSettings()
     settings.setValue("default_saccadic_protocol_path", path)
+
+
+def default_antisaccadic_protocol_path() -> str:
+    settings = QSettings()
+    return settings.value("default_antisaccadic_protocol_path", "")
+
+
+def set_default_antisaccadic_protocol_path(path: str):
+    settings = QSettings()
+    settings.setValue("default_antisaccadic_protocol_path", path)
