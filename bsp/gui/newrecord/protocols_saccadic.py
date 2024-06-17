@@ -2,6 +2,7 @@ from json import dump, load
 
 from PySide6 import QtWidgets
 
+from bsp import settings
 from bsp.core import Protocol, log
 
 
@@ -74,6 +75,8 @@ class ProtocolsSaccadicPage(QtWidgets.QWizardPage):
         self._form_layout.addRow("Sacádica 20°", self._saccadic_20)
         self._form_layout.addRow("Sacádica 30°", self._saccadic_30)
         self._form_layout.addRow("Sacádica 60°", self._saccadic_60)
+
+        self.completeChanged.connect(self.on_complete_changed)
 
         self.setLayout(self._form_layout)
 
@@ -183,63 +186,77 @@ class ProtocolsSaccadicPage(QtWidgets.QWizardPage):
 
         return int(saccadic_count)
 
+    def initializePage(self):
+        if filename := settings.default_saccadic_protocol_path():
+            self._load_protocol_file(filename)
+
+    def _load_protocol_file(self, filename: str):
+        json = {}
+        with open(filename, "rt") as f:
+            json = load(f)
+
+        try:
+            self._validate_type(json)
+
+            self._name_text.setText(
+                self._validate_name(json),
+            )
+            self._calibration_length.setValue(
+                self._validate_calibration_length(json),
+            )
+            self._calibration_count.setValue(
+                self._validate_calibration_count(json),
+            )
+            self._saccadic_length.setValue(
+                self._validate_saccadic_length(json),
+            )
+            self._saccadic_variability.setValue(
+                self._validate_saccadic_variability(json),
+            )
+            self._saccadic_count.setValue(
+                self._validate_saccadic_count(json),
+            )
+            self._saccadic_replicas.setChecked(json["include_replicas"])
+            self._saccadic_10.setChecked(json["saccadic_10"])
+            self._saccadic_20.setChecked(json["saccadic_20"])
+            self._saccadic_30.setChecked(json["saccadic_30"])
+            self._saccadic_60.setChecked(json["saccadic_60"])
+
+        except ValueError as e:
+            QtWidgets.QMessageBox.critical(
+                self,
+                "Formato inválido",
+                str(e),
+            )
+
     def load_protocol(self):
         filename, _ = QtWidgets.QFileDialog.getOpenFileName(
             self,
             "Cargar Protocolo",
-            "",
+            settings.protocols_path(),
             "Protocolo (*.json)",
         )
         if filename:
-            json = {}
-            with open(filename, "rt") as f:
-                json = load(f)
-
-            try:
-                self._validate_type(json)
-
-                self._name_text.setText(
-                    self._validate_name(json),
-                )
-                self._calibration_length.setValue(
-                    self._validate_calibration_length(json),
-                )
-                self._calibration_count.setValue(
-                    self._validate_calibration_count(json),
-                )
-                self._saccadic_length.setValue(
-                    self._validate_saccadic_length(json),
-                )
-                self._saccadic_variability.setValue(
-                    self._validate_saccadic_variability(json),
-                )
-                self._saccadic_count.setValue(
-                    self._validate_saccadic_count(json),
-                )
-                self._saccadic_replicas.setChecked(json["include_replicas"])
-                self._saccadic_10.setChecked(json["saccadic_10"])
-                self._saccadic_20.setChecked(json["saccadic_20"])
-                self._saccadic_30.setChecked(json["saccadic_30"])
-                self._saccadic_60.setChecked(json["saccadic_60"])
-
-            except ValueError as e:
-                QtWidgets.QMessageBox.critical(
-                    self,
-                    "Formato inválido",
-                    str(e),
-                )
+            self._load_protocol_file(filename)
 
     def save_protocol(self):
+        default_path = "{dir}/{name}.json".format(
+            dir=settings.protocols_path(),
+            name=self._name_text.text().strip(),
+        )
+
         filename, _ = QtWidgets.QFileDialog.getSaveFileName(
             self,
             "Guardar Protocolo",
-            "",
+            default_path,
             "Protocolo (*.json)",
         )
 
         if filename:
             with open(filename, "wt") as f:
                 dump(self.json, f, indent=4)
+
+            settings.set_default_saccadic_protocol_path(filename)
 
             QtWidgets.QMessageBox.information(
                 self,
@@ -252,3 +269,8 @@ class ProtocolsSaccadicPage(QtWidgets.QWizardPage):
 
     def on_saccadic_check_changed(self):
         self.completeChanged.emit()
+
+    def on_complete_changed(self):
+        wizard = self.wizard()
+        save_button = wizard.button(QtWidgets.QWizard.CustomButton2)
+        save_button.setEnabled(self.isComplete())
