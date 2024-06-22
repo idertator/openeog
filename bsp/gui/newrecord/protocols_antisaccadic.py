@@ -1,4 +1,5 @@
 from json import dump, load
+from os.path import dirname
 
 from PySide6 import QtWidgets
 
@@ -193,6 +194,8 @@ class ProtocolsAntisaccadicPage(QtWidgets.QWizardPage):
         return int(antisaccadic_count)
 
     def _load_protocol_file(self, filename: str):
+        log.debug(f"Loading protocol: {filename}")
+
         json = {}
         with open(filename, "rt") as f:
             json = load(f)
@@ -259,6 +262,7 @@ class ProtocolsAntisaccadicPage(QtWidgets.QWizardPage):
             with open(filename, "wt") as f:
                 dump(self.json, f, indent=4)
 
+            settings.set_protocols_path(dirname(filename))
             settings.set_default_antisaccadic_protocol_path(filename)
 
             QtWidgets.QMessageBox.information(
