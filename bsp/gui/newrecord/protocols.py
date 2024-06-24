@@ -2,6 +2,7 @@ from PySide6 import QtCore, QtWidgets
 from PySide6.QtCore import Property
 from PySide6.QtGui import QIcon
 
+from bsp import settings
 from bsp.core import Protocol, log
 from bsp.gui.config import PROTOCOLS
 
@@ -56,6 +57,18 @@ class ProtocolsPage(QtWidgets.QWizardPage):
 
         self.registerField("protocol*", self, "protocol")
 
+    def _protocolIdx(self, value: Protocol) -> int:
+        for idx, protocol in enumerate(PROTOCOLS):
+            if protocol["protocol"] == value:
+                return idx
+        return 0
+
+    def initializePage(self):
+        self.protocol = settings.default_selected_protocol()
+        self.setField("protocol", self.protocol)
+        button = self._buttons_group.button(self._protocolIdx(self.protocol))
+        button.setChecked(True)
+
     def isComplete(self) -> bool:
         return self._protocol is not None
 
@@ -72,5 +85,5 @@ class ProtocolsPage(QtWidgets.QWizardPage):
         idx = self._buttons_group.id(button)
         protocol = PROTOCOLS[idx]["protocol"]
         self.setField("protocol", protocol)
-        log.debug(f"Selected protocol: {self.protocol}")
+        settings.set_default_selected_protocol(protocol)
         self.completeChanged.emit()

@@ -3,7 +3,7 @@ from pathlib import Path
 
 from PySide6.QtCore import QSettings
 
-from bsp.core import log
+from bsp.core import Protocol, log
 
 DEFAULT_DATA_DIR = Path(expanduser("~/Registros/"))
 DEFAULT_PROTOCOLS_DIR = DEFAULT_DATA_DIR / "Protocols"
@@ -27,6 +27,26 @@ def set_protocols_path(path: str):
     if not Path(path).exists():
         Path(path).mkdir(parents=True)
         log.debug(f"Created protocols path: {path}")
+
+
+def default_selected_protocol() -> Protocol:
+    settings = QSettings()
+
+    protocol = settings.value("default_selected_protocol", Protocol.Saccadic)
+    if isinstance(protocol, str):
+        return Protocol(protocol)
+
+    return protocol
+
+
+def set_default_selected_protocol(protocol: Protocol):
+    settings = QSettings()
+
+    if isinstance(protocol, str):
+        protocol = Protocol(protocol)
+
+    settings.setValue("default_selected_protocol", protocol.value)
+    log.debug(f"Set default selected protocol: {protocol}")
 
 
 def default_saccadic_protocol_path() -> str:
