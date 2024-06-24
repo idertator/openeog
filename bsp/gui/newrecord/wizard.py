@@ -3,6 +3,7 @@ from sys import exit
 from PySide6 import QtCore, QtGui, QtWidgets
 
 from bsp.core import Protocol, log
+from bsp.gui.screens import ScreensManager
 
 from .finishing import FinishingPage
 from .protocols import ProtocolsPage
@@ -12,8 +13,14 @@ from .protocols_saccadic import ProtocolsSaccadicPage
 
 
 class NewRecordWizard(QtWidgets.QWizard):
-    def __init__(self, parent=None):
+    def __init__(
+        self,
+        screens: ScreensManager,
+        parent=None,
+    ):
         super().__init__(parent)
+
+        self._screens = screens
 
         self.setWindowFlags(
             self.windowFlags()
@@ -46,7 +53,7 @@ class NewRecordWizard(QtWidgets.QWizard):
         self._protocols_antisaccadic_page = ProtocolsAntisaccadicPage(self)
         self._protocols_pursuit_page = ProtocolsPursuitPage(self)
         self._protocols_saccadic_page = ProtocolsSaccadicPage(self)
-        self._finishing_page = FinishingPage(self)
+        self._finishing_page = FinishingPage(self._screens, self)
 
         self.addPage(self._protocols_page)  # ID 0
         self.addPage(self._protocols_saccadic_page)  # ID 1

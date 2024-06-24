@@ -16,6 +16,7 @@ from .stimulator import Stimulator
 class MainWindow(QMainWindow):
     def __init__(self, screens: ScreensManager):
         super().__init__()
+        self._screens = screens
 
         self.setWindowTitle("EOG Recorder")
 
@@ -67,7 +68,7 @@ class MainWindow(QMainWindow):
 
     def showEvent(self, event: QShowEvent):
         if not self._new_record_wizard:
-            self._new_record_wizard = NewRecordWizard(self)
+            self._new_record_wizard = NewRecordWizard(self._screens, self)
             self._new_record_wizard.exec()
 
             # self._recorder.protocol = self._new_record_wizard.protocol

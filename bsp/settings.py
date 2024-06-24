@@ -8,6 +8,11 @@ from bsp.core import Protocol, log
 DEFAULT_DATA_DIR = Path(expanduser("~/Registros/"))
 DEFAULT_PROTOCOLS_DIR = DEFAULT_DATA_DIR / "Protocols"
 
+DEVICE_TYPES = [
+    "BiosignalsPlux",
+    "Bitalino",
+]
+
 
 def protocols_path() -> str:
     settings = QSettings()
@@ -80,3 +85,13 @@ def set_default_pursuit_protocol_path(path: str):
     settings = QSettings()
     settings.setValue("default_pursuit_protocol_path", path)
     log.debug(f"Set default pursuit protocol path: {path}")
+
+
+def default_device_address() -> str:
+    settings = QSettings()
+    return settings.value("device_address", "/dev/rfcomm0")
+
+
+def set_default_device_address(address: str) -> str:
+    settings = QSettings()
+    return settings.value("device_address", address)
