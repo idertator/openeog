@@ -49,3 +49,14 @@ def set_default_antisaccadic_protocol_path(path: str):
     settings = QSettings()
     settings.setValue("default_antisaccadic_protocol_path", path)
     log.debug(f"Set default antisaccadic protocol path: {path}")
+
+
+def default_pursuit_protocol_path() -> str:
+    settings = QSettings()
+    return settings.value("default_pursuit_protocol_path", "")
+
+
+def set_default_pursuit_protocol_path(path: str):
+    settings = QSettings()
+    settings.setValue("default_pursuit_protocol_path", path)
+    log.debug(f"Set default pursuit protocol path: {path}")
