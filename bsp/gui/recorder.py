@@ -6,7 +6,7 @@ from PySide6.QtCore import QObject, QThreadPool, Signal
 
 from bsp.adc import Adquirer, BitalinoAdquirer
 from bsp.core import Protocol, Study, Test, TestType, pursuit_stimuli, saccadic_stimuli
-from bsp.gui.config import PROTOCOLS
+from bsp.settings import config
 
 from .plotter import Plotter
 from .screens import ScreensManager
@@ -54,7 +54,7 @@ class Recorder(QObject):
 
         self._tests = []
         self._samples_recorded = 0
-        self._protocol = PROTOCOLS[0]["protocol"]
+        self._protocol = config.PROTOCOLS[0]["protocol"]
 
     def build_study(self) -> Study:
         study = Study(

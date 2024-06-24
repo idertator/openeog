@@ -1,7 +1,7 @@
 from PySide6 import QtCore, QtWidgets
 
 from bsp.gui.screens import ScreensManager
-from bsp.settings import DEVICE_TYPES, default_device_address
+from bsp.settings import config
 
 
 class FinishingPage(QtWidgets.QWizardPage):
@@ -18,17 +18,17 @@ class FinishingPage(QtWidgets.QWizardPage):
         self._screens = screens
 
         device_type = self.device_type
-        if device_type not in DEVICE_TYPES:
-            device_type = DEVICE_TYPES[-1]
+        if device_type not in config.DEVICE_TYPES:
+            device_type = config.DEVICE_TYPES[-1]
             self.device_type = device_type
 
         self._device_type = QtWidgets.QComboBox()
-        self._device_type.addItems(DEVICE_TYPES)
+        self._device_type.addItems(config.DEVICE_TYPES)
         self._device_type.setCurrentText(device_type)
         self._device_type.currentTextChanged.connect(self.on_device_type_changed)
 
         self._device_address = QtWidgets.QLineEdit()
-        self._device_address.setText(default_device_address())
+        self._device_address.setText(config.default_device_address)
         self._device_address.textChanged.connect(self.on_device_address_changed)
 
         stimuli_monitor = self.stimuli_monitor

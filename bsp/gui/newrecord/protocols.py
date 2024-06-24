@@ -2,9 +2,8 @@ from PySide6 import QtCore, QtWidgets
 from PySide6.QtCore import Property
 from PySide6.QtGui import QIcon
 
-from bsp import settings
-from bsp.core import Protocol, log
-from bsp.gui.config import PROTOCOLS
+from bsp.core import Protocol
+from bsp.settings import config
 
 
 class ProtocolsPage(QtWidgets.QWizardPage):
@@ -25,7 +24,7 @@ class ProtocolsPage(QtWidgets.QWizardPage):
         self._buttons_group.setExclusive(True)
         self._buttons_group.buttonClicked.connect(self.on_protocol_button_clicked)
 
-        for idx, protocol in enumerate(PROTOCOLS):
+        for idx, protocol in enumerate(config.PROTOCOLS):
             label = QtWidgets.QLabel(protocol["name"])
             label.setAlignment(QtCore.Qt.AlignCenter)
             label.setSizePolicy(
@@ -58,13 +57,13 @@ class ProtocolsPage(QtWidgets.QWizardPage):
         self.registerField("protocol*", self, "protocol")
 
     def _protocolIdx(self, value: Protocol) -> int:
-        for idx, protocol in enumerate(PROTOCOLS):
+        for idx, protocol in enumerate(config.PROTOCOLS):
             if protocol["protocol"] == value:
                 return idx
         return 0
 
     def initializePage(self):
-        self.protocol = settings.default_selected_protocol()
+        self.protocol = config.default_selected_protocol
         self.setField("protocol", self.protocol)
         button = self._buttons_group.button(self._protocolIdx(self.protocol))
         button.setChecked(True)
@@ -83,7 +82,7 @@ class ProtocolsPage(QtWidgets.QWizardPage):
 
     def on_protocol_button_clicked(self, button: QtWidgets.QPushButton):
         idx = self._buttons_group.id(button)
-        protocol = PROTOCOLS[idx]["protocol"]
+        protocol = config.PROTOCOLS[idx]["protocol"]
         self.setField("protocol", protocol)
-        settings.set_default_selected_protocol(protocol)
+        config.default_selected_protocol = protocol
         self.completeChanged.emit()

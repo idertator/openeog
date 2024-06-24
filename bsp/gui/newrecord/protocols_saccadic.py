@@ -3,8 +3,8 @@ from os.path import dirname
 
 from PySide6 import QtWidgets
 
-from bsp import settings
 from bsp.core import Protocol, log
+from bsp.settings import config
 
 
 class ProtocolsSaccadicPage(QtWidgets.QWizardPage):
@@ -82,7 +82,7 @@ class ProtocolsSaccadicPage(QtWidgets.QWizardPage):
         self.setLayout(self._form_layout)
 
     def initializePage(self):
-        if filename := settings.default_saccadic_protocol_path():
+        if filename := config.default_saccadic_protocol_path:
             self._load_protocol_file(filename)
 
     def isComplete(self) -> bool:
@@ -237,7 +237,7 @@ class ProtocolsSaccadicPage(QtWidgets.QWizardPage):
         filename, _ = QtWidgets.QFileDialog.getOpenFileName(
             self,
             "Cargar Protocolo",
-            settings.protocols_path(),
+            config.protocols_path,
             "Protocolo (*.json)",
         )
         if filename:
@@ -245,7 +245,7 @@ class ProtocolsSaccadicPage(QtWidgets.QWizardPage):
 
     def save_protocol(self):
         default_path = "{dir}/{name}.json".format(
-            dir=settings.protocols_path(),
+            dir=config.protocols_path,
             name=self._name_text.text().strip(),
         )
 
@@ -260,8 +260,8 @@ class ProtocolsSaccadicPage(QtWidgets.QWizardPage):
             with open(filename, "wt") as f:
                 dump(self.json, f, indent=4)
 
-            settings.set_protocols_path(dirname(filename))
-            settings.set_default_saccadic_protocol_path(filename)
+            config.protocols_path = dirname(filename)
+            config.default_saccadic_protocol_path = filename
 
             QtWidgets.QMessageBox.information(
                 self,
