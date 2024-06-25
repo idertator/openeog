@@ -19,7 +19,7 @@ class FinishingPage(QtWidgets.QWizardPage):
 
         self._record_name = QtWidgets.QLineEdit()
         self._record_name.setText("")
-        self._record_name.setFixedWidth(260)
+        self._record_name.setFixedWidth(270)
         self._record_name.textChanged.connect(self.on_record_name_changed)
 
         device_type = config.device_type

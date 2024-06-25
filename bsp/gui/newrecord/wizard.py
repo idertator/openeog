@@ -20,6 +20,9 @@ class NewRecordWizard(QtWidgets.QWizard):
     ):
         super().__init__(parent)
 
+        # Set fixed size
+        self.setFixedSize(800, 600)
+
         self._screens = screens
 
         self.setWindowFlags(

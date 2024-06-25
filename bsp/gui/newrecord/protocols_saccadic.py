@@ -17,6 +17,7 @@ class ProtocolsSaccadicPage(QtWidgets.QWizardPage):
         self.setTitle("Configure su registro de Sacádico")
 
         self._name_text = QtWidgets.QLineEdit(self)
+        self._name_text.setFixedWidth(270)
         self._name_text.textChanged.connect(self.on_name_text_changed)
 
         self._calibration_length = QtWidgets.QSpinBox(self)
