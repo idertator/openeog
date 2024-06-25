@@ -97,12 +97,34 @@ class BSPConfig(QSettings):
         log.debug(f"Set default pursuit protocol path: {path}")
 
     @property
-    def default_device_address(self) -> str:
+    def device_address(self) -> str:
         return self.value("device_address", "/dev/rfcomm0")
 
-    @default_device_address.setter
-    def default_device_address(self, address: str) -> str:
+    @device_address.setter
+    def device_address(self, address: str) -> str:
         return self.value("device_address", address)
+
+    @property
+    def device_type(self) -> str:
+        return self.value("device_type", "BiosignalsPlux")
+
+    @device_type.setter
+    def device_type(self, value: str):
+        self.setValue("device_type", value)
+
+    @property
+    def stimuli_monitor(self) -> str:
+        return self.value("stimuli_monitor", "")
+
+    @stimuli_monitor.setter
+    def stimuli_monitor(self, value: str):
+        self.setValue("stimuli_monitor", value)
+
+    @property
+    def resolution(self) -> int:
+        if self.device_type == "Bitalino":
+            return 10
+        return 16
 
 
 config = BSPConfig()
