@@ -75,7 +75,7 @@ class ProtocolsPursuitPage(QtWidgets.QWizardPage):
         self.setLayout(self._form_layout)
 
     def initializePage(self):
-        if filename := config.default_pursuit_protocol_path:
+        if filename := config.pursuit_protocol_path:
             self._load_protocol_file(filename)
 
     def isComplete(self) -> bool:
@@ -240,7 +240,7 @@ class ProtocolsPursuitPage(QtWidgets.QWizardPage):
                 dump(self.json, f, indent=4)
 
             config.protocols_path = dirname(filename)
-            config.default_pursuit_protocol_path = filename
+            config.pursuit_protocol_path = filename
 
             QtWidgets.QMessageBox.information(
                 self,

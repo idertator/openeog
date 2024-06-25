@@ -54,47 +54,59 @@ class BSPConfig(QSettings):
             log.debug(f"Created protocols path: {path}")
 
     @property
-    def default_selected_protocol(self) -> Protocol:
-        protocol = self.value("default_selected_protocol", Protocol.Saccadic)
+    def selected_protocol(self) -> Protocol:
+        protocol = self.value("selected_protocol", Protocol.Saccadic)
         if isinstance(protocol, str):
             return Protocol(protocol)
 
         return protocol
 
-    @default_selected_protocol.setter
-    def default_selected_protocol(self, protocol: Protocol):
+    @selected_protocol.setter
+    def selected_protocol(self, protocol: Protocol):
         if isinstance(protocol, str):
             protocol = Protocol(protocol)
 
-        self.setValue("default_selected_protocol", protocol.value)
-        log.debug(f"Set default selected protocol: {protocol}")
+        self.setValue("selected_protocol", protocol.value)
+        log.debug(f"Set selected protocol: {protocol}")
 
     @property
-    def default_saccadic_protocol_path(self) -> str:
-        return self.value("default_saccadic_protocol_path", "")
+    def saccadic_protocol_path(self) -> str:
+        return self.value("saccadic_protocol_path", "")
 
-    @default_saccadic_protocol_path.setter
-    def default_saccadic_protocol_path(self, path: str):
-        self.setValue("default_saccadic_protocol_path", path)
-        log.debug(f"Set default saccadic protocol path: {path}")
-
-    @property
-    def default_antisaccadic_protocol_path(self) -> str:
-        return self.value("default_antisaccadic_protocol_path", "")
-
-    @default_antisaccadic_protocol_path.setter
-    def default_antisaccadic_protocol_path(self, path: str):
-        self.setValue("default_antisaccadic_protocol_path", path)
-        log.debug(f"Set default antisaccadic protocol path: {path}")
+    @saccadic_protocol_path.setter
+    def saccadic_protocol_path(self, path: str):
+        self.setValue("saccadic_protocol_path", path)
+        log.debug(f"Set saccadic protocol path: {path}")
 
     @property
-    def default_pursuit_protocol_path(self) -> str:
-        return self.value("default_pursuit_protocol_path", "")
+    def antisaccadic_protocol_path(self) -> str:
+        return self.value("antisaccadic_protocol_path", "")
 
-    @default_pursuit_protocol_path.setter
-    def default_pursuit_protocol_path(self, path: str):
-        self.setValue("default_pursuit_protocol_path", path)
-        log.debug(f"Set default pursuit protocol path: {path}")
+    @antisaccadic_protocol_path.setter
+    def antisaccadic_protocol_path(self, path: str):
+        self.setValue("antisaccadic_protocol_path", path)
+        log.debug(f"Set antisaccadic protocol path: {path}")
+
+    @property
+    def pursuit_protocol_path(self) -> str:
+        return self.value("pursuit_protocol_path", "")
+
+    @pursuit_protocol_path.setter
+    def pursuit_protocol_path(self, path: str):
+        self.setValue("pursuit_protocol_path", path)
+        log.debug(f"Set pursuit protocol path: {path}")
+
+    @property
+    def record_path(self) -> str:
+        return self.value("record_path", str(_DEFAULT_DATA_DIR))
+
+    @record_path.setter
+    def record_path(self, path: str):
+        if not Path(path).exists():
+            Path(path).mkdir(parents=True)
+
+        self.setValue("record_path", path)
+        log.debug(f"Set record path: {path}")
 
     @property
     def device_address(self) -> str:

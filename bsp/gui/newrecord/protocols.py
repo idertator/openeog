@@ -63,7 +63,7 @@ class ProtocolsPage(QtWidgets.QWizardPage):
         return 0
 
     def initializePage(self):
-        self.protocol = config.default_selected_protocol
+        self.protocol = config.selected_protocol
         self.setField("protocol", self.protocol)
         button = self._buttons_group.button(self._protocolIdx(self.protocol))
         button.setChecked(True)
@@ -84,5 +84,5 @@ class ProtocolsPage(QtWidgets.QWizardPage):
         idx = self._buttons_group.id(button)
         protocol = config.PROTOCOLS[idx]["protocol"]
         self.setField("protocol", protocol)
-        config.default_selected_protocol = protocol
+        config.selected_protocol = protocol
         self.completeChanged.emit()
