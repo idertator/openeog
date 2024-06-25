@@ -1,6 +1,11 @@
 from enum import Enum
 
 
+class Device(str, Enum):
+    BiosignalsPlux = "BiosignalsPlux"
+    Bitalino = "Bitalino"
+
+
 class Direction(str, Enum):
     Same = "same"
     Left = "left"

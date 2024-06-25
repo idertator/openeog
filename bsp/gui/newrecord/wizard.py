@@ -3,7 +3,9 @@ from sys import exit
 from PySide6 import QtCore, QtGui, QtWidgets
 
 from bsp.core import Protocol, log
+from bsp.core.models import Session
 from bsp.gui.screens import ScreensManager
+from bsp.settings import config
 
 from .finishing import FinishingPage
 from .protocols import ProtocolsPage
@@ -94,6 +96,31 @@ class NewRecordWizard(QtWidgets.QWizard):
     def reject(self):
         log.info("User cancelled the wizard")
         exit(0)
+
+    @property
+    def session(self) -> Session:
+        protocol = self._protocols_page.protocol
+        template = None
+
+        match protocol:
+            case Protocol.Saccadic:
+                template = self._protocols_saccadic_page.protocol_template
+
+            case Protocol.Antisaccadic:
+                template = self._protocols_antisaccadic_page.protocol_template
+
+            case Protocol.Pursuit:
+                template = self._protocols_pursuit_page.protocol_template
+
+        return Session(
+            name=self._finishing_page.record_name,
+            path=config.record_path,
+            protocol=protocol,
+            template=template,
+            device=config.device_type,
+            address=config.device_address,
+            stimuli_monitor=config.stimuli_monitor,
+        )
 
     def on_current_id_changed(self, id):
         if id == 0:

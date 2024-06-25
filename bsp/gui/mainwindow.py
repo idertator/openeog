@@ -2,7 +2,7 @@ from PySide6.QtCore import Slot
 from PySide6.QtGui import QAction, QIcon, QShowEvent
 from PySide6.QtWidgets import QFileDialog, QMainWindow, QMessageBox
 
-from bsp.core import Protocol, saccadic_report, save_study
+from bsp.core import Protocol, log, saccadic_report, save_study
 
 from . import resources  # noqa
 from .newrecord import NewRecordWizard
@@ -71,7 +71,7 @@ class MainWindow(QMainWindow):
             self._new_record_wizard = NewRecordWizard(self._screens, self)
             self._new_record_wizard.exec()
 
-            # self._recorder.protocol = self._new_record_wizard.protocol
+        log.debug(self._new_record_wizard.session)
 
     @Slot()
     def on_settings_clicked(self):

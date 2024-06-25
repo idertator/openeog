@@ -1,5 +1,6 @@
 from PySide6 import QtWidgets
 
+from bsp.core.logging import log
 from bsp.gui.screens import ScreensManager
 from bsp.settings import config
 
@@ -41,7 +42,8 @@ class FinishingPage(QtWidgets.QWizardPage):
         stimuli_monitor = config.stimuli_monitor or self._screens.screen_list[-1]
         if stimuli_monitor not in screens.screen_list:
             stimuli_monitor = screens.screen_list[-1]
-            self.stimuli_monitor = stimuli_monitor
+
+        config.stimuli_monitor = stimuli_monitor
 
         self._stimuli_monitor = QtWidgets.QComboBox()
         self._stimuli_monitor.addItems(screens.screen_list)

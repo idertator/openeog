@@ -1,14 +1,12 @@
 from __future__ import annotations
 
-import logging
 from dataclasses import dataclass
 from json import dump, load
 
+from bsp.core.logging import log
 from bsp.core.models import Protocol
 
 from .base import ProtocolTemplate
-
-log = logging.getLogger("t3")
 
 
 @dataclass
