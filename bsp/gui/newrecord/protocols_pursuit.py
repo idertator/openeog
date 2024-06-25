@@ -1,9 +1,9 @@
-from json import dump, load
 from os.path import dirname
 
 from PySide6 import QtWidgets
 
-from bsp.core import Protocol, log
+from bsp.core import log
+from bsp.core.models import PursuitProtocolTemplate
 from bsp.settings import config
 
 
@@ -87,20 +87,19 @@ class ProtocolsPursuitPage(QtWidgets.QWizardPage):
             return False
 
     @property
-    def json(self) -> dict:
-        return {
-            "type": Protocol.Pursuit,
-            "name": self._name_text.text().strip(),
-            "calibration_length": self._calibration_length.value(),
-            "calibration_count": self._calibration_count.value(),
-            "pursuit_length": self._pursuit_length.value(),
-            "pursuit_speed": self._pursuit_speed.value(),
-            "include_replicas": self._pursuit_replicas.isChecked(),
-            "pursuit_10": self._pursuit_10.isChecked(),
-            "pursuit_20": self._pursuit_20.isChecked(),
-            "pursuit_30": self._pursuit_30.isChecked(),
-            "pursuit_60": self._pursuit_60.isChecked(),
-        }
+    def protocol_template(self) -> PursuitProtocolTemplate:
+        return PursuitProtocolTemplate(
+            name=self._name_text.text().strip(),
+            calibration_length=self._calibration_length.value(),
+            calibration_count=self._calibration_count.value(),
+            pursuit_length=self._pursuit_length.value(),
+            pursuit_speed=self._pursuit_speed.value(),
+            include_replicas=self._pursuit_replicas.isChecked(),
+            pursuit_10=self._pursuit_10.isChecked(),
+            pursuit_20=self._pursuit_20.isChecked(),
+            pursuit_30=self._pursuit_30.isChecked(),
+            pursuit_60=self._pursuit_60.isChecked(),
+        )
 
     def validate(self):
         if self._name_text.text().strip() == "":
@@ -116,94 +115,20 @@ class ProtocolsPursuitPage(QtWidgets.QWizardPage):
         ):
             raise ValueError("Debe seleccionar al menos una prueba de persecución")
 
-    def _validate_type(self, json: dict) -> Protocol:
-        test_type = json.get("type", None)
-        if test_type not in iter(Protocol):
-            raise ValueError(f"Tipo de prueba inválido: {test_type}")
-
-        test_type = Protocol(test_type)
-        if test_type != Protocol.Pursuit:
-            raise ValueError(f"Tipo de prueba inválido: {test_type}")
-
-        return test_type
-
-    def _validate_name(self, json: dict) -> str:
-        name = json.get("name", None)
-        if not isinstance(name, str) or not name:
-            raise ValueError(f"El nombre {name} no es válido")
-
-        return name
-
-    def _validate_calibration_length(self, json: dict) -> float:
-        calibration_length = json.get("calibration_length", None)
-        if not isinstance(calibration_length, (int, float)):
-            raise ValueError(f"Longitud de calibración inválida: {calibration_length}")
-
-        if calibration_length < 10 or calibration_length > 100:
-            raise ValueError(f"Longitud de calibración inválida: {calibration_length}")
-
-        return float(calibration_length)
-
-    def _validate_calibration_count(self, json: dict) -> int:
-        calibration_count = json.get("calibration_count", None)
-        if not isinstance(calibration_count, (int, float)):
-            raise ValueError(f"Longitud de calibración inválida: {calibration_count}")
-
-        if calibration_count < 5 or calibration_count > 10:
-            raise ValueError(f"Longitud de calibración inválida: {calibration_count}")
-
-        return int(calibration_count)
-
-    def _validate_pursuit_length(self, json: dict) -> float:
-        pursuit_length = json.get("pursuit_length", None)
-        if not isinstance(pursuit_length, (int, float)):
-            raise ValueError("Longitud de persecución inválida")
-
-        if pursuit_length < 10 or pursuit_length > 100:
-            raise ValueError("Longitud de persecución inválida")
-
-        return float(pursuit_length)
-
-    def _validate_pursuit_speed(self, json: dict) -> float:
-        pursuit_speed = json.get("pursuit_speed", None)
-        if not isinstance(pursuit_speed, (int, float)):
-            raise ValueError("Variabilidad sacádica inválida")
-
-        if pursuit_speed < 0.1 or pursuit_speed > 10.0:
-            raise ValueError("Variabilidad sacádica inválida")
-
-        return float(pursuit_speed)
-
     def _load_protocol_file(self, filename: str):
-        log.debug(f"Loading protocol: {filename}")
-
-        json = {}
-        with open(filename, "rt") as f:
-            json = load(f)
-
         try:
-            self._validate_type(json)
+            protocol_template = PursuitProtocolTemplate.open(filename)
 
-            self._name_text.setText(
-                self._validate_name(json),
-            )
-            self._calibration_length.setValue(
-                self._validate_calibration_length(json),
-            )
-            self._calibration_count.setValue(
-                self._validate_calibration_count(json),
-            )
-            self._pursuit_length.setValue(
-                self._validate_pursuit_length(json),
-            )
-            self._pursuit_speed.setValue(
-                self._validate_pursuit_speed(json),
-            )
-            self._pursuit_replicas.setChecked(json["include_replicas"])
-            self._pursuit_10.setChecked(json["pursuit_10"])
-            self._pursuit_20.setChecked(json["pursuit_20"])
-            self._pursuit_30.setChecked(json["pursuit_30"])
-            self._pursuit_60.setChecked(json["pursuit_60"])
+            self._name_text.setText(protocol_template.name)
+            self._calibration_length.setValue(protocol_template.calibration_length)
+            self._calibration_count.setValue(protocol_template.calibration_count)
+            self._pursuit_length.setValue(protocol_template.pursuit_length)
+            self._pursuit_speed.setValue(protocol_template.pursuit_speed)
+            self._pursuit_replicas.setChecked(protocol_template.include_replicas)
+            self._pursuit_10.setChecked(protocol_template.pursuit_10)
+            self._pursuit_20.setChecked(protocol_template.pursuit_20)
+            self._pursuit_30.setChecked(protocol_template.pursuit_30)
+            self._pursuit_60.setChecked(protocol_template.pursuit_60)
 
         except ValueError as e:
             log.error(str(e))
@@ -237,9 +162,7 @@ class ProtocolsPursuitPage(QtWidgets.QWizardPage):
         )
 
         if filename:
-            with open(filename, "wt") as f:
-                dump(self.json, f, indent=4)
-
+            self.protocol_template.save(filename)
             config.protocols_path = dirname(filename)
             config.pursuit_protocol_path = filename
 

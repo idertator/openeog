@@ -1,9 +1,9 @@
-from json import dump, load
 from os.path import dirname
 
 from PySide6 import QtWidgets
 
-from bsp.core import Protocol, log
+from bsp.core import log
+from bsp.core.models import AntisaccadicProtocolTemplate
 from bsp.settings import config
 
 
@@ -96,21 +96,20 @@ class ProtocolsAntisaccadicPage(QtWidgets.QWizardPage):
             return False
 
     @property
-    def json(self) -> dict:
-        return {
-            "type": Protocol.Antisaccadic,
-            "name": self._name_text.text().strip(),
-            "calibration_length": self._calibration_length.value(),
-            "calibration_count": self._calibration_count.value(),
-            "antisaccadic_length": self._antisaccadic_length.value(),
-            "antisaccadic_variability": self._antisaccadic_variability.value(),
-            "antisaccadic_count": self._antisaccadic_count.value(),
-            "include_replicas": self._antisaccadic_replicas.isChecked(),
-            "antisaccadic_10": self._antisaccadic_10.isChecked(),
-            "antisaccadic_20": self._antisaccadic_20.isChecked(),
-            "antisaccadic_30": self._antisaccadic_30.isChecked(),
-            "antisaccadic_60": self._antisaccadic_60.isChecked(),
-        }
+    def protocol_template(self) -> AntisaccadicProtocolTemplate:
+        return AntisaccadicProtocolTemplate(
+            name=self._name_text.text().strip(),
+            calibration_length=self._calibration_length.value(),
+            calibration_count=self._calibration_count.value(),
+            antisaccadic_length=self._antisaccadic_length.value(),
+            antisaccadic_variability=self._antisaccadic_variability.value(),
+            antisaccadic_count=self._antisaccadic_count.value(),
+            include_replicas=self._antisaccadic_replicas.isChecked(),
+            antisaccadic_10=self._antisaccadic_10.isChecked(),
+            antisaccadic_20=self._antisaccadic_20.isChecked(),
+            antisaccadic_30=self._antisaccadic_30.isChecked(),
+            antisaccadic_60=self._antisaccadic_60.isChecked(),
+        )
 
     def validate(self):
         if self._name_text.text().strip() == "":
@@ -126,107 +125,23 @@ class ProtocolsAntisaccadicPage(QtWidgets.QWizardPage):
         ):
             raise ValueError("Debe seleccionar al menos una prueba antisacádica")
 
-    def _validate_type(self, json: dict) -> Protocol:
-        test_type = json.get("type", None)
-        if test_type not in iter(Protocol):
-            raise ValueError(f"Tipo de prueba inválido: {test_type}")
-
-        test_type = Protocol(test_type)
-        if test_type != Protocol.Antisaccadic:
-            raise ValueError(f"Tipo de prueba inválido: {test_type}")
-
-        return test_type
-
-    def _validate_name(self, json: dict) -> str:
-        name = json.get("name", None)
-        if not isinstance(name, str) or not name:
-            raise ValueError(f"El nombre {name} no es válido")
-
-        return name
-
-    def _validate_calibration_length(self, json: dict) -> float:
-        calibration_length = json.get("calibration_length", None)
-        if not isinstance(calibration_length, (int, float)):
-            raise ValueError(f"Longitud de calibración inválida: {calibration_length}")
-
-        if calibration_length < 10 or calibration_length > 100:
-            raise ValueError(f"Longitud de calibración inválida: {calibration_length}")
-
-        return float(calibration_length)
-
-    def _validate_calibration_count(self, json: dict) -> int:
-        calibration_count = json.get("calibration_count", None)
-        if not isinstance(calibration_count, (int, float)):
-            raise ValueError(f"Longitud de calibración inválida: {calibration_count}")
-
-        if calibration_count < 5 or calibration_count > 10:
-            raise ValueError(f"Longitud de calibración inválida: {calibration_count}")
-
-        return int(calibration_count)
-
-    def _validate_antisaccadic_length(self, json: dict) -> float:
-        antisaccadic_length = json.get("antisaccadic_length", None)
-        if not isinstance(antisaccadic_length, (int, float)):
-            raise ValueError("Longitud antisacádica inválida")
-
-        if antisaccadic_length < 10 or antisaccadic_length > 100:
-            raise ValueError("Longitud antisacádica inválida")
-
-        return float(antisaccadic_length)
-
-    def _validate_antisaccadic_variability(self, json: dict) -> float:
-        antisaccadic_variability = json.get("antisaccadic_variability", None)
-        if not isinstance(antisaccadic_variability, (int, float)):
-            raise ValueError("Variabilidad antisacádica inválida")
-
-        if antisaccadic_variability < 0.1 or antisaccadic_variability > 100:
-            raise ValueError("Variabilidad antisacádica inválida")
-
-        return float(antisaccadic_variability)
-
-    def _validate_antisaccadic_count(self, json: dict) -> int:
-        antisaccadic_count = json.get("antisaccadic_count", None)
-        if not isinstance(antisaccadic_count, (int, float)):
-            raise ValueError(f"Cantidad de antisácadas inválida: {antisaccadic_count}")
-
-        if antisaccadic_count < 5 or antisaccadic_count > 30:
-            raise ValueError(f"Cantidad de antisácadas inválida: {antisaccadic_count}")
-
-        return int(antisaccadic_count)
-
     def _load_protocol_file(self, filename: str):
-        log.debug(f"Loading protocol: {filename}")
-
-        json = {}
-        with open(filename, "rt") as f:
-            json = load(f)
-
         try:
-            self._validate_type(json)
+            protocol_template = AntisaccadicProtocolTemplate.open(filename)
 
-            self._name_text.setText(
-                self._validate_name(json),
-            )
-            self._calibration_length.setValue(
-                self._validate_calibration_length(json),
-            )
-            self._calibration_count.setValue(
-                self._validate_calibration_count(json),
-            )
-            self._antisaccadic_length.setValue(
-                self._validate_antisaccadic_length(json),
-            )
+            self._name_text.setText(protocol_template.name)
+            self._calibration_length.setValue(protocol_template.calibration_length)
+            self._calibration_count.setValue(protocol_template.calibration_count)
+            self._antisaccadic_length.setValue(protocol_template.antisaccadic_length)
             self._antisaccadic_variability.setValue(
-                self._validate_antisaccadic_variability(json),
+                protocol_template.antisaccadic_variability
             )
-            self._antisaccadic_count.setValue(
-                self._validate_antisaccadic_count(json),
-            )
-            self._antisaccadic_replicas.setChecked(json["include_replicas"])
-            self._antisaccadic_10.setChecked(json["antisaccadic_10"])
-            self._antisaccadic_20.setChecked(json["antisaccadic_20"])
-            self._antisaccadic_30.setChecked(json["antisaccadic_30"])
-            self._antisaccadic_60.setChecked(json["antisaccadic_60"])
+            self._antisaccadic_count.setValue(protocol_template.antisaccadic_count)
+            self._antisaccadic_replicas.setChecked(protocol_template.include_replicas)
+            self._antisaccadic_10.setChecked(protocol_template.antisaccadic_10)
+            self._antisaccadic_20.setChecked(protocol_template.antisaccadic_20)
+            self._antisaccadic_30.setChecked(protocol_template.antisaccadic_30)
+            self._antisaccadic_60.setChecked(protocol_template.antisaccadic_60)
 
         except ValueError as e:
             log.error(str(e))
@@ -260,9 +175,7 @@ class ProtocolsAntisaccadicPage(QtWidgets.QWizardPage):
         )
 
         if filename:
-            with open(filename, "wt") as f:
-                dump(self.json, f, indent=4)
-
+            self.protocol_template.save(filename)
             config.protocols_path = dirname(filename)
             config.antisaccadic_protocol_path = filename
 

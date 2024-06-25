@@ -1,9 +1,9 @@
-from json import dump, load
 from os.path import dirname
 
 from PySide6 import QtWidgets
 
-from bsp.core import Protocol, log
+from bsp.core import log
+from bsp.core.models import SaccadicProtocolTemplate
 from bsp.settings import config
 
 
@@ -94,21 +94,20 @@ class ProtocolsSaccadicPage(QtWidgets.QWizardPage):
             return False
 
     @property
-    def json(self) -> dict:
-        return {
-            "type": Protocol.Saccadic,
-            "name": self._name_text.text().strip(),
-            "calibration_length": self._calibration_length.value(),
-            "calibration_count": self._calibration_count.value(),
-            "saccadic_length": self._saccadic_length.value(),
-            "saccadic_variability": self._saccadic_variability.value(),
-            "saccadic_count": self._saccadic_count.value(),
-            "include_replicas": self._saccadic_replicas.isChecked(),
-            "saccadic_10": self._saccadic_10.isChecked(),
-            "saccadic_20": self._saccadic_20.isChecked(),
-            "saccadic_30": self._saccadic_30.isChecked(),
-            "saccadic_60": self._saccadic_60.isChecked(),
-        }
+    def protocol_template(self) -> SaccadicProtocolTemplate:
+        return SaccadicProtocolTemplate(
+            name=self._name_text.text().strip(),
+            calibration_length=self._calibration_length.value(),
+            calibration_count=self._calibration_count.value(),
+            saccadic_length=self._saccadic_length.value(),
+            saccadic_variability=self._saccadic_variability.value(),
+            saccadic_count=self._saccadic_count.value(),
+            include_replicas=self._saccadic_replicas.isChecked(),
+            saccadic_10=self._saccadic_10.isChecked(),
+            saccadic_20=self._saccadic_20.isChecked(),
+            saccadic_30=self._saccadic_30.isChecked(),
+            saccadic_60=self._saccadic_60.isChecked(),
+        )
 
     def validate(self):
         if self._name_text.text().strip() == "":
@@ -124,107 +123,21 @@ class ProtocolsSaccadicPage(QtWidgets.QWizardPage):
         ):
             raise ValueError("Debe seleccionar al menos una prueba sacádica")
 
-    def _validate_type(self, json: dict) -> Protocol:
-        test_type = json.get("type", None)
-        if test_type not in iter(Protocol):
-            raise ValueError(f"Tipo de prueba inválido: {test_type}")
-
-        test_type = Protocol(test_type)
-        if test_type != Protocol.Saccadic:
-            raise ValueError(f"Tipo de prueba inválido: {test_type}")
-
-        return test_type
-
-    def _validate_name(self, json: dict) -> str:
-        name = json.get("name", None)
-        if not isinstance(name, str) or not name:
-            raise ValueError(f"El nombre {name} no es válido")
-
-        return name
-
-    def _validate_calibration_length(self, json: dict) -> float:
-        calibration_length = json.get("calibration_length", None)
-        if not isinstance(calibration_length, (int, float)):
-            raise ValueError(f"Longitud de calibración inválida: {calibration_length}")
-
-        if calibration_length < 10 or calibration_length > 100:
-            raise ValueError(f"Longitud de calibración inválida: {calibration_length}")
-
-        return float(calibration_length)
-
-    def _validate_calibration_count(self, json: dict) -> int:
-        calibration_count = json.get("calibration_count", None)
-        if not isinstance(calibration_count, (int, float)):
-            raise ValueError(f"Longitud de calibración inválida: {calibration_count}")
-
-        if calibration_count < 5 or calibration_count > 10:
-            raise ValueError(f"Longitud de calibración inválida: {calibration_count}")
-
-        return int(calibration_count)
-
-    def _validate_saccadic_length(self, json: dict) -> float:
-        saccadic_length = json.get("saccadic_length", None)
-        if not isinstance(saccadic_length, (int, float)):
-            raise ValueError("Longitud sacádica inválida")
-
-        if saccadic_length < 10 or saccadic_length > 100:
-            raise ValueError("Longitud sacádica inválida")
-
-        return float(saccadic_length)
-
-    def _validate_saccadic_variability(self, json: dict) -> float:
-        saccadic_variability = json.get("saccadic_variability", None)
-        if not isinstance(saccadic_variability, (int, float)):
-            raise ValueError("Variabilidad sacádica inválida")
-
-        if saccadic_variability < 0.1 or saccadic_variability > 100:
-            raise ValueError("Variabilidad sacádica inválida")
-
-        return float(saccadic_variability)
-
-    def _validate_saccadic_count(self, json: dict) -> int:
-        saccadic_count = json.get("saccadic_count", None)
-        if not isinstance(saccadic_count, (int, float)):
-            raise ValueError(f"Cantidad de sácadas inválida: {saccadic_count}")
-
-        if saccadic_count < 5 or saccadic_count > 30:
-            raise ValueError(f"Cantidad de sácadas inválida: {saccadic_count}")
-
-        return int(saccadic_count)
-
     def _load_protocol_file(self, filename: str):
-        log.debug(f"Loading protocol: {filename}")
-
-        json = {}
-        with open(filename, "rt") as f:
-            json = load(f)
-
         try:
-            self._validate_type(json)
+            protocol_template = SaccadicProtocolTemplate.open(filename)
 
-            self._name_text.setText(
-                self._validate_name(json),
-            )
-            self._calibration_length.setValue(
-                self._validate_calibration_length(json),
-            )
-            self._calibration_count.setValue(
-                self._validate_calibration_count(json),
-            )
-            self._saccadic_length.setValue(
-                self._validate_saccadic_length(json),
-            )
-            self._saccadic_variability.setValue(
-                self._validate_saccadic_variability(json),
-            )
-            self._saccadic_count.setValue(
-                self._validate_saccadic_count(json),
-            )
-            self._saccadic_replicas.setChecked(json["include_replicas"])
-            self._saccadic_10.setChecked(json["saccadic_10"])
-            self._saccadic_20.setChecked(json["saccadic_20"])
-            self._saccadic_30.setChecked(json["saccadic_30"])
-            self._saccadic_60.setChecked(json["saccadic_60"])
+            self._name_text.setText(protocol_template.name)
+            self._calibration_length.setValue(protocol_template.calibration_length)
+            self._calibration_count.setValue(protocol_template.calibration_count)
+            self._saccadic_length.setValue(protocol_template.saccadic_length)
+            self._saccadic_variability.setValue(protocol_template.saccadic_variability)
+            self._saccadic_count.setValue(protocol_template.saccadic_count)
+            self._saccadic_replicas.setChecked(protocol_template.include_replicas)
+            self._saccadic_10.setChecked(protocol_template.saccadic_10)
+            self._saccadic_20.setChecked(protocol_template.saccadic_20)
+            self._saccadic_30.setChecked(protocol_template.saccadic_30)
+            self._saccadic_60.setChecked(protocol_template.saccadic_60)
 
         except ValueError as e:
             log.error(str(e))
@@ -258,9 +171,7 @@ class ProtocolsSaccadicPage(QtWidgets.QWizardPage):
         )
 
         if filename:
-            with open(filename, "wt") as f:
-                dump(self.json, f, indent=4)
-
+            self.protocol_template.save(filename)
             config.protocols_path = dirname(filename)
             config.saccadic_protocol_path = filename
 
