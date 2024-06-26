@@ -13,7 +13,7 @@ _DEFAULT_PROTOCOLS_DIR = _DEFAULT_DATA_DIR / "Protocols"
 
 class BSPConfig(QSettings):
     DEVICE_TYPES = [
-        "BiosignalsPlux",
+        # "BiosignalsPlux",
         "Bitalino",
     ]
 
