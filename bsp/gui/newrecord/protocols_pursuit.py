@@ -6,6 +6,8 @@ from bsp.core import log
 from bsp.core.models import PursuitProtocolTemplate
 from bsp.settings import config
 
+from .consts import SELECTOR_WIDTH
+
 
 class ProtocolsPursuitPage(QtWidgets.QWizardPage):
     def __init__(
@@ -17,29 +19,32 @@ class ProtocolsPursuitPage(QtWidgets.QWizardPage):
         self.setTitle("Configure su registro de Persecución Suave")
 
         self._name_text = QtWidgets.QLineEdit(self)
-        self._name_text.setFixedWidth(270)
+        self._name_text.setSizePolicy(
+            QtWidgets.QSizePolicy.Expanding,
+            QtWidgets.QSizePolicy.Fixed,
+        )
         self._name_text.textChanged.connect(self.on_name_text_changed)
 
         self._calibration_length = QtWidgets.QSpinBox(self)
-        self._calibration_length.setMinimumWidth(105)
+        self._calibration_length.setFixedWidth(SELECTOR_WIDTH)
         self._calibration_length.setMinimum(10)
         self._calibration_length.setMaximum(100)
         self._calibration_length.setSuffix(" segundos")
 
         self._calibration_count = QtWidgets.QSpinBox(self)
-        self._calibration_count.setMinimumWidth(105)
+        self._calibration_count.setFixedWidth(SELECTOR_WIDTH)
         self._calibration_count.setMinimum(5)
         self._calibration_count.setMaximum(10)
         self._calibration_count.setSuffix(" sácadas")
 
         self._pursuit_length = QtWidgets.QSpinBox(self)
-        self._pursuit_length.setMinimumWidth(105)
+        self._pursuit_length.setFixedWidth(SELECTOR_WIDTH)
         self._pursuit_length.setMinimum(10)
         self._pursuit_length.setMaximum(100)
         self._pursuit_length.setSuffix(" segundos")
 
         self._pursuit_speed = QtWidgets.QDoubleSpinBox(self)
-        self._pursuit_speed.setMinimumWidth(105)
+        self._pursuit_speed.setFixedWidth(SELECTOR_WIDTH)
         self._pursuit_speed.setMinimum(0.1)
         self._pursuit_speed.setMaximum(10.0)
         self._pursuit_speed.setSuffix("°/segundo")

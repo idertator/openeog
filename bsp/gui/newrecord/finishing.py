@@ -4,6 +4,7 @@ from bsp.core.logging import log
 from bsp.gui.screens import ScreensManager
 from bsp.settings import config
 
+from .consts import SELECTOR_WIDTH
 
 class FinishingPage(QtWidgets.QWizardPage):
     def __init__(
@@ -20,7 +21,10 @@ class FinishingPage(QtWidgets.QWizardPage):
 
         self._record_name = QtWidgets.QLineEdit()
         self._record_name.setText("")
-        self._record_name.setFixedWidth(270)
+        self._record_name.setSizePolicy(
+            QtWidgets.QSizePolicy.Expanding,
+            QtWidgets.QSizePolicy.Fixed,
+        )
         self._record_name.textChanged.connect(self.on_record_name_changed)
 
         device_type = config.device_type
@@ -31,12 +35,12 @@ class FinishingPage(QtWidgets.QWizardPage):
         self._device_type = QtWidgets.QComboBox()
         self._device_type.addItems(config.DEVICE_TYPES)
         self._device_type.setCurrentText(device_type)
-        self._device_type.setFixedWidth(200)
+        self._device_type.setFixedWidth(SELECTOR_WIDTH)
         self._device_type.currentTextChanged.connect(self.on_device_type_changed)
 
         self._device_address = QtWidgets.QLineEdit()
         self._device_address.setText(config.device_address)
-        self._device_address.setFixedWidth(200)
+        self._device_address.setFixedWidth(SELECTOR_WIDTH)
         self._device_address.textChanged.connect(self.on_device_address_changed)
 
         stimuli_monitor = config.stimuli_monitor or self._screens.screen_list[-1]
@@ -48,7 +52,7 @@ class FinishingPage(QtWidgets.QWizardPage):
         self._stimuli_monitor = QtWidgets.QComboBox()
         self._stimuli_monitor.addItems(screens.screen_list)
         self._stimuli_monitor.setCurrentText(stimuli_monitor)
-        self._stimuli_monitor.setFixedWidth(200)
+        self._stimuli_monitor.setFixedWidth(SELECTOR_WIDTH)
         self._stimuli_monitor.currentTextChanged.connect(
             self.on_stimuli_monitor_changed
         )
@@ -56,7 +60,10 @@ class FinishingPage(QtWidgets.QWizardPage):
         self._record_path_edit = QtWidgets.QLineEdit()
         self._record_path_edit.setText(config.record_path)
         self._record_path_edit.setReadOnly(True)
-        self._record_path_edit.setFixedWidth(200)
+        self._record_path_edit.setSizePolicy(
+            QtWidgets.QSizePolicy.Expanding,
+            QtWidgets.QSizePolicy.Fixed,
+        )
 
         self._record_path_button = QtWidgets.QPushButton()
         self._record_path_button.setText("Select")
