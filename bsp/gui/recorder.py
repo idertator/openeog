@@ -5,7 +5,7 @@ from PySide6.QtCore import QObject, QThreadPool, Signal
 
 from bsp.adc import Adquirer, BitalinoAdquirer
 from bsp.core.logging import log
-from bsp.core.models import Protocol, Session, Study, Test, TestType
+from bsp.core.models import Protocol, Session, Study, Test, TestType, Device
 from bsp.settings import config
 
 from .plotter import Plotter
@@ -22,7 +22,6 @@ class Recorder(QObject):
     def __init__(
         self,
         screens: ScreensManager,
-        settings: SettingsDialog,
         stimulator: Stimulator,
         plotter: Plotter,
         parent=None,
@@ -31,12 +30,11 @@ class Recorder(QObject):
 
         self._threadpool = QThreadPool()
         self._screens = screens
-        self._settings = settings
         self._stimulator = stimulator
         self._plotter = plotter
         self._adquirer = None
 
-        stimulus_screen = self._settings.stimuli_monitor
+        stimulus_screen = config.stimuli_monitor
         refresh_rate = self._screens.refresh_rate(stimulus_screen)
         self._buffer_length = 1000 // refresh_rate
 
@@ -98,8 +96,8 @@ class Recorder(QObject):
         self.next_test()
 
     @property
-    def acquirer_class(self) -> Type[Adquirer]:
-        if self._settings.device_type == "Bitalino":
+    def acquirer_class(self) -> Type[Adquirer] | None :
+        if config.device_type == Device.Bitalino:
             return BitalinoAdquirer
 
         # return BiosignalsPluxAdquirer
@@ -115,7 +113,7 @@ class Recorder(QObject):
             angle = test["angle"]
 
             self._adquirer = self.acquirer_class(
-                address=self._settings.device_address,
+                address=config.device_address,
                 samples=samples,
                 buffer_length=self._buffer_length,
                 parent=self,

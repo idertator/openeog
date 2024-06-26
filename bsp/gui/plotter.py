@@ -9,10 +9,12 @@ class Plotter(QWidget):
     def __init__(
         self,
         parent=None,
-        resolution: int = 16,  # in bits
         length: int = 10000,  # in ms
     ):
         super().__init__(parent)
+
+        # TODO: Get this later from config
+        resolution = 10 # Bitalino Resolution 
 
         self.length = length
         self.resolution = resolution

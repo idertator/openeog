@@ -7,6 +7,8 @@ from PySide6.QtWidgets import QWidget
 from .screens import ScreensManager
 from .settings import SettingsDialog
 
+from bsp.settings import config
+
 
 class Stimulator(QWidget):
     MAX_DISTANCE_PERCENTAGE = 0.9
@@ -19,14 +21,12 @@ class Stimulator(QWidget):
     def __init__(
         self,
         screens: ScreensManager,
-        settings: SettingsDialog,
         ball_ratio: float = 60,  # in mm
     ):
         super().__init__()
         self._screens = screens
-        self._settings = settings
 
-        self._stimuli_screen = self._settings.stimuli_monitor
+        self._stimuli_screen = config.stimuli_monitor
         physical_size = self._screens.physical_size(self._stimuli_screen)
 
         self._width = physical_size.width()
