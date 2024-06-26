@@ -1,8 +1,7 @@
-from PySide6.QtCore import Slot
 from PySide6.QtGui import QAction, QIcon, QShowEvent
 from PySide6.QtWidgets import QFileDialog, QMainWindow, QMessageBox
 
-from bsp.core import Protocol, log, saccadic_report, save_study
+from bsp.core import Protocol, Session, log, saccadic_report, save_study
 
 from . import resources  # noqa
 from .newrecord import NewRecordWizard
@@ -65,19 +64,18 @@ class MainWindow(QMainWindow):
         self._recorder.finished.connect(self.on_recording_finished)
 
         self._new_record_wizard = None
+        self._session = None
 
     def showEvent(self, event: QShowEvent):
         if not self._new_record_wizard:
             self._new_record_wizard = NewRecordWizard(self._screens, self)
             self._new_record_wizard.exec()
 
-        log.debug(self._new_record_wizard.session)
+        self._session = self._new_record_wizard.session
 
-    @Slot()
     def on_settings_clicked(self):
         self._settings_dialog.exec()
 
-    @Slot()
     def on_play_clicked(self):
         self._recording = True
         self._stop_action.setEnabled(True)
@@ -85,13 +83,11 @@ class MainWindow(QMainWindow):
 
         self._recorder.start()
 
-    @Slot()
     def on_stop_clicked(self):
         self._recording = False
         self._stop_action.setEnabled(False)
         self._play_action.setEnabled(True)
 
-    @Slot()
     def on_recording_finished(self):
         filepath, _ = QFileDialog.getSaveFileName(
             self,
