@@ -3,6 +3,8 @@ from PySide6.QtWidgets import QMainWindow, QMessageBox
 from bsp.core import Session, log, save_study
 from os.path import join
 
+from . import resources  # noqa
+from .newrecord import NewRecordWizard
 from .plotter import Plotter
 from .recorder import Recorder
 from .screens import ScreensManager
