@@ -21,11 +21,13 @@ class Test(object):
         hor_annotations: list[Annotation] = [],
         ver_annotations: list[Annotation] = [],
         fs: int = 1000,
+        replica: bool = False,
         **kwargs,
     ):
         self._test_type = test_type
         self._angle = angle
         self._fs = fs
+        self._replica = replica
 
         self._hor_stimuli = hor_stimuli
         self._hor_channel = hor_channel
@@ -38,6 +40,12 @@ class Test(object):
         self._ver_calibration: float = 1.0
 
     def __str__(self):
+        if self._replica:
+            return "{test} at {angle}° (Replica)".format(
+                test=self._test_type.value,
+                angle=self._angle,
+            )
+
         return "{test} at {angle}°".format(
             test=self._test_type.value,
             angle=self._angle,
@@ -49,6 +57,7 @@ class Test(object):
             "test_type": self._test_type.value,
             "angle": self._angle,
             "fs": self._fs,
+            "replica": self._replica,
             "length": len(self.hor_stimuli),
             "hor_annotations": [a.json for a in self._hor_annotations],
             "ver_annotations": [a.json for a in self._ver_annotations],

@@ -3,8 +3,11 @@ from __future__ import annotations
 from dataclasses import dataclass
 from json import dump, load
 
+import numpy as np
+
 from bsp.core.logging import log
-from bsp.core.models import Protocol
+from bsp.core.models import Protocol, TestType
+from bsp.core.stimuli import saccadic_stimuli
 
 from .base import ProtocolTemplate
 
@@ -94,3 +97,171 @@ class SaccadicProtocolTemplate(ProtocolTemplate):
                 "saccadic_60": self.saccadic_60,
             }
         )
+
+    @property
+    def tests(self) -> list[dict]:
+        result = []
+
+        calibration_length = int(self.calibration_length * 1000)
+
+        result.append(
+            {
+                "test_type": TestType.HorizontalCalibration,
+                "angle": 30,
+                "replica": False,
+                "hor_stimuli": saccadic_stimuli(
+                    length=calibration_length,
+                    saccades=self.calibration_count,
+                ),
+                "hor_channel": np.zeros(calibration_length, dtype=np.uint16),
+                "ver_stimuli": np.zeros(calibration_length, dtype=np.uint16),
+                "ver_channel": np.zeros(calibration_length, dtype=np.uint16),
+            }
+        )
+
+        saccades_samples = int(self.saccadic_length * 1000)
+
+        if self.saccadic_10:
+            result.append(
+                {
+                    "test_type": TestType.HorizontalSaccadic,
+                    "angle": 10,
+                    "replica": False,
+                    "hor_stimuli": saccadic_stimuli(
+                        length=saccades_samples,
+                        saccades=self.saccadic_count,
+                    ),
+                    "hor_channel": np.zeros(saccades_samples, dtype=np.uint16),
+                    "ver_stimuli": np.zeros(saccades_samples, dtype=np.uint16),
+                    "ver_channel": np.zeros(saccades_samples, dtype=np.uint16),
+                }
+            )
+
+            if self.include_replicas:
+                result.append(
+                    {
+                        "test_type": TestType.HorizontalSaccadic,
+                        "angle": 10,
+                        "replica": True,
+                        "hor_stimuli": saccadic_stimuli(
+                            length=saccades_samples,
+                            saccades=self.saccadic_count,
+                        ),
+                        "hor_channel": np.zeros(saccades_samples, dtype=np.uint16),
+                        "ver_stimuli": np.zeros(saccades_samples, dtype=np.uint16),
+                        "ver_channel": np.zeros(saccades_samples, dtype=np.uint16),
+                    }
+                )
+
+        if self.saccadic_20:
+            result.append(
+                {
+                    "test_type": TestType.HorizontalSaccadic,
+                    "angle": 20,
+                    "replica": False,
+                    "hor_stimuli": saccadic_stimuli(
+                        length=saccades_samples,
+                        saccades=self.saccadic_count,
+                    ),
+                    "hor_channel": np.zeros(saccades_samples, dtype=np.uint16),
+                    "ver_stimuli": np.zeros(saccades_samples, dtype=np.uint16),
+                    "ver_channel": np.zeros(saccades_samples, dtype=np.uint16),
+                }
+            )
+
+            if self.include_replicas:
+                result.append(
+                    {
+                        "test_type": TestType.HorizontalSaccadic,
+                        "angle": 20,
+                        "replica": True,
+                        "hor_stimuli": saccadic_stimuli(
+                            length=saccades_samples,
+                            saccades=self.saccadic_count,
+                        ),
+                        "hor_channel": np.zeros(saccades_samples, dtype=np.uint16),
+                        "ver_stimuli": np.zeros(saccades_samples, dtype=np.uint16),
+                        "ver_channel": np.zeros(saccades_samples, dtype=np.uint16),
+                    }
+                )
+
+        if self.saccadic_30:
+            result.append(
+                {
+                    "test_type": TestType.HorizontalSaccadic,
+                    "angle": 30,
+                    "replica": False,
+                    "hor_stimuli": saccadic_stimuli(
+                        length=saccades_samples,
+                        saccades=self.saccadic_count,
+                    ),
+                    "hor_channel": np.zeros(saccades_samples, dtype=np.uint16),
+                    "ver_stimuli": np.zeros(saccades_samples, dtype=np.uint16),
+                    "ver_channel": np.zeros(saccades_samples, dtype=np.uint16),
+                }
+            )
+
+            if self.include_replicas:
+                result.append(
+                    {
+                        "test_type": TestType.HorizontalSaccadic,
+                        "angle": 30,
+                        "replica": True,
+                        "hor_stimuli": saccadic_stimuli(
+                            length=saccades_samples,
+                            saccades=self.saccadic_count,
+                        ),
+                        "hor_channel": np.zeros(saccades_samples, dtype=np.uint16),
+                        "ver_stimuli": np.zeros(saccades_samples, dtype=np.uint16),
+                        "ver_channel": np.zeros(saccades_samples, dtype=np.uint16),
+                    }
+                )
+
+        if self.saccadic_60:
+            result.append(
+                {
+                    "test_type": TestType.HorizontalSaccadic,
+                    "angle": 60,
+                    "replica": False,
+                    "hor_stimuli": saccadic_stimuli(
+                        length=saccades_samples,
+                        saccades=self.saccadic_count,
+                    ),
+                    "hor_channel": np.zeros(saccades_samples, dtype=np.uint16),
+                    "ver_stimuli": np.zeros(saccades_samples, dtype=np.uint16),
+                    "ver_channel": np.zeros(saccades_samples, dtype=np.uint16),
+                }
+            )
+
+            if self.include_replicas:
+                result.append(
+                    {
+                        "test_type": TestType.HorizontalSaccadic,
+                        "angle": 60,
+                        "replica": True,
+                        "hor_stimuli": saccadic_stimuli(
+                            length=saccades_samples,
+                            saccades=self.saccadic_count,
+                        ),
+                        "hor_channel": np.zeros(saccades_samples, dtype=np.uint16),
+                        "ver_stimuli": np.zeros(saccades_samples, dtype=np.uint16),
+                        "ver_channel": np.zeros(saccades_samples, dtype=np.uint16),
+                    }
+                )
+
+        result.append(
+            {
+                "test_type": TestType.HorizontalCalibration,
+                "angle": 30,
+                "replica": True,
+                "hor_stimuli": saccadic_stimuli(
+                    length=calibration_length,
+                    saccades=self.calibration_count,
+                ),
+                "hor_channel": np.zeros(calibration_length, dtype=np.uint16),
+                "ver_stimuli": np.zeros(calibration_length, dtype=np.uint16),
+                "ver_channel": np.zeros(calibration_length, dtype=np.uint16),
+            }
+        )
+
+        return result

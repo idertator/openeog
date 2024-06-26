@@ -3,8 +3,11 @@ from __future__ import annotations
 from dataclasses import dataclass
 from json import dump, load
 
+import numpy as np
+
 from bsp.core.logging import log
-from bsp.core.models import Protocol
+from bsp.core.models import Protocol, TestType
+from bsp.core.stimuli import pursuit_stimuli, saccadic_stimuli
 
 from .base import ProtocolTemplate
 
@@ -85,3 +88,169 @@ class PursuitProtocolTemplate(ProtocolTemplate):
                 "pursuit_60": self.pursuit_60,
             }
         )
+
+    @property
+    def tests(self) -> list[dict]:
+        result = []
+
+        calibration_length = int(self.calibration_length * 1000)
+
+        result.append(
+            {
+                "test_type": TestType.HorizontalCalibration,
+                "angle": 30,
+                "hor_stimuli": saccadic_stimuli(
+                    length=calibration_length,
+                    saccades=self.calibration_count,
+                ),
+                "hor_channel": np.zeros(calibration_length, dtype=np.uint16),
+                "ver_stimuli": np.zeros(calibration_length, dtype=np.uint16),
+                "ver_channel": np.zeros(calibration_length, dtype=np.uint16),
+            }
+        )
+
+        pursuit_length = int(self.pursuit_length * 1000)
+
+        if self.pursuit_10:
+            result.append(
+                {
+                    "test_type": TestType.HorizontalPursuit,
+                    "angle": 10,
+                    "replica": False,
+                    "hor_stimuli": pursuit_stimuli(
+                        length=pursuit_length,
+                        speed=self.pursuit_speed,
+                    ),
+                    "hor_channel": np.zeros(pursuit_length, dtype=np.uint16),
+                    "ver_stimuli": np.zeros(pursuit_length, dtype=np.uint16),
+                    "ver_channel": np.zeros(pursuit_length, dtype=np.uint16),
+                }
+            )
+
+            if self.include_replicas:
+                result.append(
+                    {
+                        "test_type": TestType.HorizontalPursuit,
+                        "angle": 10,
+                        "replica": True,
+                        "hor_stimuli": pursuit_stimuli(
+                            length=pursuit_length,
+                            speed=self.pursuit_speed,
+                        ),
+                        "hor_channel": np.zeros(pursuit_length, dtype=np.uint16),
+                        "ver_stimuli": np.zeros(pursuit_length, dtype=np.uint16),
+                        "ver_channel": np.zeros(pursuit_length, dtype=np.uint16),
+                    }
+                )
+
+        if self.pursuit_20:
+            result.append(
+                {
+                    "test_type": TestType.HorizontalPursuit,
+                    "angle": 20,
+                    "replica": False,
+                    "hor_stimuli": pursuit_stimuli(
+                        length=pursuit_length,
+                        speed=self.pursuit_speed,
+                    ),
+                    "hor_channel": np.zeros(pursuit_length, dtype=np.uint16),
+                    "ver_stimuli": np.zeros(pursuit_length, dtype=np.uint16),
+                    "ver_channel": np.zeros(pursuit_length, dtype=np.uint16),
+                }
+            )
+
+            if self.include_replicas:
+                result.append(
+                    {
+                        "test_type": TestType.HorizontalPursuit,
+                        "angle": 20,
+                        "replica": True,
+                        "hor_stimuli": pursuit_stimuli(
+                            length=pursuit_length,
+                            speed=self.pursuit_speed,
+                        ),
+                        "hor_channel": np.zeros(pursuit_length, dtype=np.uint16),
+                        "ver_stimuli": np.zeros(pursuit_length, dtype=np.uint16),
+                        "ver_channel": np.zeros(pursuit_length, dtype=np.uint16),
+                    }
+                )
+
+        if self.pursuit_30:
+            result.append(
+                {
+                    "test_type": TestType.HorizontalPursuit,
+                    "angle": 30,
+                    "replica": False,
+                    "hor_stimuli": pursuit_stimuli(
+                        length=pursuit_length,
+                        speed=self.pursuit_speed,
+                    ),
+                    "hor_channel": np.zeros(pursuit_length, dtype=np.uint16),
+                    "ver_stimuli": np.zeros(pursuit_length, dtype=np.uint16),
+                    "ver_channel": np.zeros(pursuit_length, dtype=np.uint16),
+                }
+            )
+
+            if self.include_replicas:
+                result.append(
+                    {
+                        "test_type": TestType.HorizontalPursuit,
+                        "angle": 30,
+                        "replica": True,
+                        "hor_stimuli": pursuit_stimuli(
+                            length=pursuit_length,
+                            speed=self.pursuit_speed,
+                        ),
+                        "hor_channel": np.zeros(pursuit_length, dtype=np.uint16),
+                        "ver_stimuli": np.zeros(pursuit_length, dtype=np.uint16),
+                        "ver_channel": np.zeros(pursuit_length, dtype=np.uint16),
+                    }
+                )
+
+        if self.pursuit_60:
+            result.append(
+                {
+                    "test_type": TestType.HorizontalPursuit,
+                    "angle": 60,
+                    "replica": False,
+                    "hor_stimuli": pursuit_stimuli(
+                        length=pursuit_length,
+                        speed=self.pursuit_speed,
+                    ),
+                    "hor_channel": np.zeros(pursuit_length, dtype=np.uint16),
+                    "ver_stimuli": np.zeros(pursuit_length, dtype=np.uint16),
+                    "ver_channel": np.zeros(pursuit_length, dtype=np.uint16),
+                }
+            )
+
+            if self.include_replicas:
+                result.append(
+                    {
+                        "test_type": TestType.HorizontalPursuit,
+                        "angle": 60,
+                        "replica": True,
+                        "hor_stimuli": pursuit_stimuli(
+                            length=pursuit_length,
+                            speed=self.pursuit_speed,
+                        ),
+                        "hor_channel": np.zeros(pursuit_length, dtype=np.uint16),
+                        "ver_stimuli": np.zeros(pursuit_length, dtype=np.uint16),
+                        "ver_channel": np.zeros(pursuit_length, dtype=np.uint16),
+                    }
+                )
+
+        result.append(
+            {
+                "test_type": TestType.HorizontalCalibration,
+                "angle": 30,
+                "hor_stimuli": saccadic_stimuli(
+                    length=calibration_length,
+                    saccades=self.calibration_count,
+                ),
+                "hor_channel": np.zeros(calibration_length, dtype=np.uint16),
+                "ver_stimuli": np.zeros(calibration_length, dtype=np.uint16),
+                "ver_channel": np.zeros(calibration_length, dtype=np.uint16),
+            }
+        )
+
+        return result

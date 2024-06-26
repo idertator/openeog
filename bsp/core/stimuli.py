@@ -23,7 +23,7 @@ def saccadic_stimuli(
     delta = int(center * variability)
     low, high = center - delta, center + delta
 
-    fixations = np.randint(low, high, size=fixations_count, dtype=np.int32)
+    fixations = np.random.randint(low, high, size=fixations_count, dtype=np.int32)
     edges_samples = fixations[0] + fixations[-1] + (length - sum(fixations))
 
     fixations[0] = edges_samples // 2

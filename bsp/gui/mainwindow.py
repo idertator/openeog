@@ -81,7 +81,7 @@ class MainWindow(QMainWindow):
         self._stop_action.setEnabled(True)
         self._play_action.setEnabled(False)
 
-        self._recorder.start()
+        self._recorder.start(self._session)
 
     def on_stop_clicked(self):
         self._recording = False

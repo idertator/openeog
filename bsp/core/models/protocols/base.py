@@ -16,3 +16,7 @@ class ProtocolTemplate:
             "calibration_length": self.calibration_length,
             "calibration_count": self.calibration_count,
         }
+
+    @property
+    def tests(self) -> list[dict]:
+        raise NotImplementedError()

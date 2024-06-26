@@ -1,11 +1,11 @@
 from datetime import datetime
 from typing import Type
 
-from numpy import uint16, zeros
 from PySide6.QtCore import QObject, QThreadPool, Signal
 
 from bsp.adc import Adquirer, BitalinoAdquirer
-from bsp.core import Protocol, Study, Test, TestType, pursuit_stimuli, saccadic_stimuli
+from bsp.core.logging import log
+from bsp.core.models import Protocol, Session, Study, Test, TestType
 from bsp.settings import config
 
 from .plotter import Plotter
@@ -15,15 +15,6 @@ from .stimulator import Stimulator
 
 
 class Recorder(QObject):
-    CALIBRATION_SACCADES = 10
-    CALIBRATION_SAMPLES = 20000
-
-    SACCADIC_SAMPLES = 40000
-    SACCADES_COUNT = 20
-
-    PURSUIT_SAMPLES = 40000
-    PURSUIT_VELOCITY = 1.5
-
     started = Signal()
     stopped = Signal()
     finished = Signal()
@@ -52,6 +43,7 @@ class Recorder(QObject):
         self._stimulator.started.connect(self.start_test)
         self._stimulator.initialized.connect(self.on_stimulator_initialized)
 
+        self._session: Session | None = None
         self._tests = []
         self._samples_recorded = 0
         self._protocol = config.PROTOCOLS[0]["protocol"]
@@ -89,159 +81,13 @@ class Recorder(QObject):
     def protocol(self, protocol: Protocol):
         self._protocol = protocol
 
-    def initialize_saccadic_protocol(self):
-        self._tests = [
-            {
-                "test_type": TestType.HorizontalCalibration,
-                "angle": 30,
-                "hor_stimuli": saccadic_stimuli(
-                    length=self.CALIBRATION_SAMPLES,
-                    saccades=self.CALIBRATION_SACCADES,
-                ),
-                "hor_channel": zeros(self.CALIBRATION_SAMPLES, dtype=uint16),
-                "ver_stimuli": zeros(self.CALIBRATION_SAMPLES, dtype=uint16),
-                "ver_channel": zeros(self.CALIBRATION_SAMPLES, dtype=uint16),
-            },
-            {
-                "test_type": TestType.HorizontalSaccadic,
-                "angle": 10,
-                "hor_stimuli": saccadic_stimuli(
-                    length=self.SACCADIC_SAMPLES,
-                    saccades=self.SACCADES_COUNT,
-                ),
-                "hor_channel": zeros(self.SACCADIC_SAMPLES, dtype=uint16),
-                "ver_stimuli": zeros(self.SACCADIC_SAMPLES, dtype=uint16),
-                "ver_channel": zeros(self.SACCADIC_SAMPLES, dtype=uint16),
-            },
-            {
-                "test_type": TestType.HorizontalSaccadic,
-                "angle": 20,
-                "hor_stimuli": saccadic_stimuli(
-                    length=self.SACCADIC_SAMPLES,
-                    saccades=self.SACCADES_COUNT,
-                ),
-                "hor_channel": zeros(self.SACCADIC_SAMPLES, dtype=uint16),
-                "ver_stimuli": zeros(self.SACCADIC_SAMPLES, dtype=uint16),
-                "ver_channel": zeros(self.SACCADIC_SAMPLES, dtype=uint16),
-            },
-            {
-                "test_type": TestType.HorizontalSaccadic,
-                "angle": 30,
-                "hor_stimuli": saccadic_stimuli(
-                    length=self.SACCADIC_SAMPLES,
-                    saccades=self.SACCADES_COUNT,
-                ),
-                "hor_channel": zeros(self.SACCADIC_SAMPLES, dtype=uint16),
-                "ver_stimuli": zeros(self.SACCADIC_SAMPLES, dtype=uint16),
-                "ver_channel": zeros(self.SACCADIC_SAMPLES, dtype=uint16),
-            },
-            {
-                "test_type": TestType.HorizontalSaccadic,
-                "angle": 60,
-                "hor_stimuli": saccadic_stimuli(
-                    length=self.SACCADIC_SAMPLES,
-                    saccades=self.SACCADES_COUNT,
-                ),
-                "hor_channel": zeros(self.SACCADIC_SAMPLES, dtype=uint16),
-                "ver_stimuli": zeros(self.SACCADIC_SAMPLES, dtype=uint16),
-                "ver_channel": zeros(self.SACCADIC_SAMPLES, dtype=uint16),
-            },
-            {
-                "test_type": TestType.HorizontalCalibration,
-                "angle": 30,
-                "hor_stimuli": saccadic_stimuli(
-                    length=self.CALIBRATION_SAMPLES,
-                    saccades=self.CALIBRATION_SACCADES,
-                ),
-                "hor_channel": zeros(self.CALIBRATION_SAMPLES, dtype=uint16),
-                "ver_stimuli": zeros(self.CALIBRATION_SAMPLES, dtype=uint16),
-                "ver_channel": zeros(self.CALIBRATION_SAMPLES, dtype=uint16),
-            },
-        ]
+    def start(self, session: Session):
+        if not session:
+            log.error("No session provided")
+            raise ValueError("No session provided")
 
-    def initialize_antisaccadic_protocol(self):
-        self._tests = [
-            {
-                "test_type": TestType.HorizontalCalibration,
-                "angle": 30,
-                "hor_stimuli": saccadic_stimuli(
-                    length=self.CALIBRATION_SAMPLES,
-                    saccades=self.CALIBRATION_SACCADES,
-                ),
-                "hor_channel": zeros(self.CALIBRATION_SAMPLES, dtype=uint16),
-                "ver_stimuli": zeros(self.CALIBRATION_SAMPLES, dtype=uint16),
-                "ver_channel": zeros(self.CALIBRATION_SAMPLES, dtype=uint16),
-            },
-            {
-                "test_type": TestType.HorizontalAntisaccadic,
-                "angle": 30,
-                "hor_stimuli": saccadic_stimuli(
-                    length=self.SACCADIC_SAMPLES,
-                    saccades=self.SACCADES_COUNT,
-                ),
-                "hor_channel": zeros(self.SACCADIC_SAMPLES, dtype=uint16),
-                "ver_stimuli": zeros(self.SACCADIC_SAMPLES, dtype=uint16),
-                "ver_channel": zeros(self.SACCADIC_SAMPLES, dtype=uint16),
-            },
-            {
-                "test_type": TestType.HorizontalCalibration,
-                "angle": 30,
-                "hor_stimuli": saccadic_stimuli(
-                    length=self.CALIBRATION_SAMPLES,
-                    saccades=self.CALIBRATION_SACCADES,
-                ),
-                "hor_channel": zeros(self.CALIBRATION_SAMPLES, dtype=uint16),
-                "ver_stimuli": zeros(self.CALIBRATION_SAMPLES, dtype=uint16),
-                "ver_channel": zeros(self.CALIBRATION_SAMPLES, dtype=uint16),
-            },
-        ]
-
-    def initialize_pursuit_protocol(self):
-        self._tests = [
-            {
-                "test_type": TestType.HorizontalCalibration,
-                "angle": 30,
-                "hor_stimuli": saccadic_stimuli(
-                    length=self.CALIBRATION_SAMPLES,
-                    saccades=self.CALIBRATION_SACCADES,
-                ),
-                "hor_channel": zeros(self.CALIBRATION_SAMPLES, dtype=uint16),
-                "ver_stimuli": zeros(self.CALIBRATION_SAMPLES, dtype=uint16),
-                "ver_channel": zeros(self.CALIBRATION_SAMPLES, dtype=uint16),
-            },
-            {
-                "test_type": TestType.HorizontalPursuit,
-                "angle": 30,
-                "hor_stimuli": pursuit_stimuli(
-                    length=self.PURSUIT_SAMPLES,
-                    speed=self.PURSUIT_VELOCITY,
-                ),
-                "hor_channel": zeros(self.SACCADIC_SAMPLES, dtype=uint16),
-                "ver_stimuli": zeros(self.SACCADIC_SAMPLES, dtype=uint16),
-                "ver_channel": zeros(self.SACCADIC_SAMPLES, dtype=uint16),
-            },
-            {
-                "test_type": TestType.HorizontalCalibration,
-                "angle": 30,
-                "hor_stimuli": saccadic_stimuli(
-                    length=self.CALIBRATION_SAMPLES,
-                    saccades=self.CALIBRATION_SACCADES,
-                ),
-                "hor_channel": zeros(self.CALIBRATION_SAMPLES, dtype=uint16),
-                "ver_stimuli": zeros(self.CALIBRATION_SAMPLES, dtype=uint16),
-                "ver_channel": zeros(self.CALIBRATION_SAMPLES, dtype=uint16),
-            },
-        ]
-
-    def start(self):
-        if self._protocol == Protocol.Saccadic:
-            self.initialize_saccadic_protocol()
-        elif self._protocol == Protocol.Antisaccadic:
-            self.initialize_antisaccadic_protocol()
-        elif self._protocol == Protocol.Pursuit:
-            self.initialize_pursuit_protocol()
-        else:
-            raise Exception("Invalid protocol")
+        self._session = session
+        self._tests = session.template.tests
 
         self._current_test = -1
         self._stimulator.open()
