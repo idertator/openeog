@@ -5,12 +5,11 @@ from PySide6.QtCore import QObject, QThreadPool, Signal
 
 from bsp.adc import Adquirer, BitalinoAdquirer
 from bsp.core.logging import log
-from bsp.core.models import Protocol, Session, Study, Test, TestType, Device
+from bsp.core.models import Device, Protocol, Session, Study, Test, TestType
 from bsp.settings import config
 
 from .plotter import Plotter
 from .screens import ScreensManager
-from .settings import SettingsDialog
 from .stimulator import Stimulator
 
 
@@ -96,7 +95,7 @@ class Recorder(QObject):
         self.next_test()
 
     @property
-    def acquirer_class(self) -> Type[Adquirer] | None :
+    def acquirer_class(self) -> Type[Adquirer] | None:
         if config.device_type == Device.Bitalino:
             return BitalinoAdquirer
 

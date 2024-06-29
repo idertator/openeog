@@ -4,10 +4,9 @@ from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QColor, QKeyEvent, QPainter, QPaintEvent, QResizeEvent
 from PySide6.QtWidgets import QWidget
 
-from .screens import ScreensManager
-from .settings import SettingsDialog
-
 from bsp.settings import config
+
+from .screens import ScreensManager
 
 
 class Stimulator(QWidget):
