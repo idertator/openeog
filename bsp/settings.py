@@ -114,7 +114,7 @@ class BSPConfig(QSettings):
 
     @device_address.setter
     def device_address(self, address: str) -> str:
-        return self.setValue("device_address", address)
+        return self.value("device_address", address)
 
     @property
     def device_type(self) -> str:
