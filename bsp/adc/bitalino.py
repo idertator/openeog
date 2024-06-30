@@ -3,6 +3,7 @@ import time
 
 import serial
 from PySide6.QtCore import Slot
+from bsp.core.logging import log
 
 from .base import Adquirer
 
@@ -13,12 +14,14 @@ INVALID_PARAMETER = "Invalid parameter."
 
 
 class BitalinoRecorder:
-    def __init__(self, address):
+    def __init__(self, address: str):
+        log.info(f"connecting to Bitalino through '{address}'")
         self.serial = serial.Serial(address, 115200)
         self.started = False
 
-        print(f"Trying to connect to Bitalino in {address} ...")
-        print(self.version())
+        log.info(f"trying to connect to Bitalino in {address} ...")
+        version = self.version()
+        log.info(f"connected to {version}")
 
     def start(self):
         if self.started is False:
@@ -26,6 +29,7 @@ class BitalinoRecorder:
             self.send(13)  # Setup Analog Channels 0 and 1
             self.started = True
         else:
+            log.error(DEVICE_NOT_IDLE)
             raise Exception(DEVICE_NOT_IDLE)
 
     def stop(self):
@@ -55,13 +59,19 @@ class BitalinoRecorder:
                     if x & 0x10:
                         x = x ^ 0x03
                     x = x ^ ((decoded[i] >> bit) & 0x01)
-            if crc == x & 0x0F:
-                hor = ((decoded[-2] & 0x0F) << 6) | (decoded[-3] >> 2)
-                ver = ((decoded[-3] & 0x03) << 8) | decoded[-4]
-                return hor, ver
-            else:
-                raise Exception(CONTACTING_DEVICE)
+
+            hor = ((decoded[-2] & 0x0F) << 6) | (decoded[-3] >> 2)
+            ver = ((decoded[-3] & 0x03) << 8) | decoded[-4]
+
+            if crc != (x & 0x0F):
+                log.debug("Wrong packet CRC")
+
+            return hor, ver
+            # log.debug(f"{raw=}")
+            # log.error(CONTACTING_DEVICE)
+            # raise Exception(CONTACTING_DEVICE)
         else:
+            log.error(DEVICE_NOT_IN_ACQUISITION)
             raise Exception(DEVICE_NOT_IN_ACQUISITION)
 
     def version(self) -> str:
