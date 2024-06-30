@@ -1,7 +1,9 @@
+from os.path import join
+
 from PySide6.QtGui import QAction, QIcon, QShowEvent
 from PySide6.QtWidgets import QMainWindow, QMessageBox
+
 from bsp.core import Session, log, save_study
-from os.path import join
 
 from . import resources  # noqa
 from .newrecord import NewRecordWizard
@@ -20,6 +22,7 @@ class MainWindow(QMainWindow):
 
         # Setup state
         self._recording = False
+        self._stopped = False
 
         # Setting toolbar
         self._toolbar = self.addToolBar("Main")
@@ -78,11 +81,16 @@ class MainWindow(QMainWindow):
         self.recorder.start(self._session)
 
     def on_stop_clicked(self):
+        self._stopped = True
+        self._recorder.stop()
         self._recording = False
         self._stop_action.setEnabled(False)
         self._play_action.setEnabled(True)
 
     def on_recording_finished(self):
+        if self._stopped:
+            return
+
         filepath = join(
             self._session.path,
             "{name}.bsp".format(

@@ -148,7 +148,7 @@ class BitalinoAcquirer(qc.QThread):
                     processed = 0
                     recorder.start()
 
-                    while processed < self.samples:
+                    while self.running and processed < self.samples:
                         hor, ver = recorder.read_data()
 
                         idx = processed % buffer_length

@@ -88,6 +88,11 @@ class Recorder(qc.QObject):
         self._acquirer.start()
         self.started.emit()
 
+    def stop(self):
+        if self._acquirer:
+            self._acquirer.finish()
+            self.stopped.emit()
+
     def on_stimulator_initialized(self):
         self.next_test()
 
