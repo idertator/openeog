@@ -30,7 +30,13 @@ class Recorder(QObject):
         self._screens = screens
         self._stimulator = stimulator
         self._plotter = plotter
-        self._acquirer: BitalinoAcquirer = None
+
+        self._acquirer = BitalinoAcquirer(
+            address=config.device_address,
+            parent=self,
+        )
+        self._acquirer.available.connect(self.on_samples_available)
+        self._acquirer.finished.connect(self.on_adquisition_finished)
 
         stimulus_screen = config.stimuli_monitor
         refresh_rate = self._screens.refresh_rate(stimulus_screen)
@@ -80,6 +86,7 @@ class Recorder(QObject):
         self._current_test = -1
         self._stimulator.open()
 
+        self._acquirer.start(qc.QThread.Priority.TimeCriticalPriority)
         self.started.emit()
 
     def on_stimulator_initialized(self):
@@ -93,15 +100,7 @@ class Recorder(QObject):
             test = self._tests[self._current_test]
             samples = len(test["hor_stimuli"])
             angle = test["angle"]
-
-            self._acquirer = BitalinoAcquirer(
-                address=config.device_address,
-                samples=samples,
-                buffer_length=self._buffer_length,
-                parent=self,
-            )
-            self._acquirer.available.connect(self.on_samples_available)
-            self._acquirer.finished.connect(self.on_adquisition_finished)
+            self._acquirer.acquire(samples)
 
             msg = "{test_type} a {angle}°".format(
                 test_type=test["test_type"].name,
@@ -111,12 +110,12 @@ class Recorder(QObject):
             self._stimulator.set_message(msg)
         else:
             self._stimulator.close()
+            self._acquirer.stop()
             self.finished.emit()
 
     def start_test(self):
         log.debug("Starting test")
         self._stimulator.set_ball_angle(0, 0)
-        self._acquirer.start(qc.QThread.Priority.TimeCriticalPriority)
 
     def on_samples_available(self, hor, ver):
         samples = len(hor)
@@ -150,9 +149,4 @@ class Recorder(QObject):
         )
 
     def on_adquisition_finished(self):
-        if self._acquirer is not None:
-            self._acquirer.available.disconnect(self.on_samples_available)
-            self._acquirer.finished.disconnect(self.on_adquisition_finished)
-            self._acquirer = None
-
         self.next_test()

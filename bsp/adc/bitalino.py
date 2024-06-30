@@ -23,6 +23,7 @@ class BitalinoSerialRecorder:
         self.initialized = False
         self.started = False
         self.serial: serial.Serial | None = None
+        self.connect()
 
     @classmethod
     def instance(cls, address: str) -> BitalinoSerialRecorder:
@@ -47,7 +48,6 @@ class BitalinoSerialRecorder:
 
     def start(self):
         log.debug("starting acquisition")
-        self.connect()
 
         if not self.started:
             self.send_command(195)  # 1000 Hz
@@ -122,46 +122,52 @@ class BitalinoAcquirer(qc.QThread):
     def __init__(
         self,
         address: str,
-        samples: int,
-        buffer_length: int = 8,
         parent=None,
     ):
         super().__init__(parent)
 
         self.address = address
+        self.running = True
+        self.samples = 0
+
+    def acquire(self, samples: int):
         self.samples = samples
-        self.processed = 0
-        self.buffer_length = buffer_length
-        self.horizontal_channel = np.zeros(self.buffer_length, dtype=np.uint16)
-        self.vertical_channel = np.zeros(self.buffer_length, dtype=np.uint16)
-
-    def send_data(self, n_seq: int, data: list) -> bool:
-        idx = n_seq % self.buffer_length
-        self.horizontal_channel[idx] = data[0]
-        self.vertical_channel[idx] = data[1]
-
-        if idx == self.buffer_length - 1:
-            self.available.emit(
-                self.horizontal_channel.copy(),
-                self.vertical_channel.copy(),
-            )
-            self.horizontal_channel *= 0
-            self.vertical_channel *= 0
-
-        self.processed += 1
-        return self.processed >= self.samples
 
     def run(self):
+        recorder = BitalinoSerialRecorder.instance(self.address)
+        buffer_length = 8
+        horizontal_channel = np.zeros(buffer_length, dtype=np.uint16)
+        vertical_channel = np.zeros(buffer_length, dtype=np.uint16)
+
         try:
-            recorder = BitalinoSerialRecorder.instance(self.address)
+            while self.running:
+                if self.samples:
+                    processed = 0
+                    recorder.start()
 
-            self.processed = 0
-            recorder.start()
+                    while processed < self.samples:
+                        hor, ver = recorder.read_data()
 
-            while self.processed < self.samples:
-                hor, ver = recorder.read_data()
-                self.send_data(self.processed, [hor, ver])
-                time.sleep(0.001)
+                        idx = processed % self.buffer_length
+                        horizontal_channel[idx] = hor
+                        vertical_channel[idx] = ver
+
+                        if idx == buffer_length - 1:
+                            self.available.emit(
+                                horizontal_channel.copy(),
+                                vertical_channel.copy(),
+                            )
+                            horizontal_channel *= 0
+                            vertical_channel *= 0
+
+                        processed += 1
+
+                        qc.QThread.sleep(0.001)
+
+                    recorder.stop()
+                    self.finished.emit()
+
+                qc.QThread.sleep(0.001)
 
         except Exception as err:
             log.error(err)
@@ -169,5 +175,3 @@ class BitalinoAcquirer(qc.QThread):
         finally:
             recorder.stop()
             recorder.close()
-
-            self.finished.emit()
