@@ -14,7 +14,7 @@ class Plotter(QWidget):
         super().__init__(parent)
 
         # TODO: Get this later from config
-        resolution = 10 # Bitalino Resolution 
+        resolution = 10  # Bitalino Resolution
 
         self.length = length
         self.resolution = resolution

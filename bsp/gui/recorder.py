@@ -1,7 +1,6 @@
 from datetime import datetime
 
 from PySide6 import QtCore as qc
-from PySide6.QtCore import QObject, Signal
 
 from bsp.adc import BitalinoAcquirer
 from bsp.core.logging import log
@@ -13,10 +12,10 @@ from .screens import ScreensManager
 from .stimulator import Stimulator
 
 
-class Recorder(QObject):
-    started = Signal()
-    stopped = Signal()
-    finished = Signal()
+class Recorder(qc.QObject):
+    started = qc.Signal()
+    stopped = qc.Signal()
+    finished = qc.Signal()
 
     def __init__(
         self,
@@ -48,6 +47,7 @@ class Recorder(QObject):
         self._session: Session | None = None
         self._tests = []
         self._samples_recorded = 0
+        self._already_finished = False
 
     def build_study(self) -> Study:
         study = Study(
@@ -76,17 +76,16 @@ class Recorder(QObject):
 
     def start(self, session: Session):
         if not session:
-            log.error("No session provided")
-            raise ValueError("No session provided")
+            log.error("no session provided")
+            raise ValueError("no session provided")
 
         self._session = session
         self._tests = session.template.tests
-        log.debug(f"{len(self._tests)=}")
 
         self._current_test = -1
         self._stimulator.open()
 
-        self._acquirer.start(qc.QThread.Priority.TimeCriticalPriority)
+        self._acquirer.start()
         self.started.emit()
 
     def on_stimulator_initialized(self):
@@ -98,9 +97,7 @@ class Recorder(QObject):
             self._samples_recorded = 0
 
             test = self._tests[self._current_test]
-            samples = len(test["hor_stimuli"])
             angle = test["angle"]
-            self._acquirer.acquire(samples)
 
             msg = "{test_type} a {angle}°".format(
                 test_type=test["test_type"].name,
@@ -108,14 +105,19 @@ class Recorder(QObject):
             )
             log.info(msg)
             self._stimulator.set_message(msg)
-        else:
+        elif not self._already_finished:
+            self._already_finished = True
             self._stimulator.close()
-            self._acquirer.stop()
+            self._acquirer.finish()
             self.finished.emit()
 
     def start_test(self):
-        log.debug("Starting test")
+        log.debug("starting test")
         self._stimulator.set_ball_angle(0, 0)
+
+        test = self._tests[self._current_test]
+        samples = len(test["hor_stimuli"])
+        self._acquirer.acquire(samples)
 
     def on_samples_available(self, hor, ver):
         samples = len(hor)

@@ -133,6 +133,9 @@ class BitalinoAcquirer(qc.QThread):
     def acquire(self, samples: int):
         self.samples = samples
 
+    def finish(self):
+        self.running = False
+
     def run(self):
         recorder = BitalinoSerialRecorder.instance(self.address)
         buffer_length = 8
@@ -148,7 +151,7 @@ class BitalinoAcquirer(qc.QThread):
                     while processed < self.samples:
                         hor, ver = recorder.read_data()
 
-                        idx = processed % self.buffer_length
+                        idx = processed % buffer_length
                         horizontal_channel[idx] = hor
                         vertical_channel[idx] = ver
 
@@ -162,12 +165,14 @@ class BitalinoAcquirer(qc.QThread):
 
                         processed += 1
 
-                        qc.QThread.sleep(0.001)
+                        qc.QThread.sleep(0.0005)
 
+                    self.samples = 0
+                    log.debug("Clearing samples")
                     recorder.stop()
                     self.finished.emit()
 
-                qc.QThread.sleep(0.001)
+                qc.QThread.sleep(0.0005)
 
         except Exception as err:
             log.error(err)
