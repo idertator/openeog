@@ -1,7 +1,5 @@
-from .base import Adquirer
-from .bitalino import BitalinoAdquirer
+from .bitalino import BitalinoAcquirer
 
 __all__ = [
-    "Adquirer",
-    "BitalinoAdquirer",
+    "BitalinoAcquirer",
 ]

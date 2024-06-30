@@ -1,11 +1,11 @@
 from datetime import datetime
-from typing import Type
 
-from PySide6.QtCore import QObject, QThreadPool, Signal
+from PySide6 import QtCore as qc
+from PySide6.QtCore import QObject, Signal
 
-from bsp.adc import Adquirer, BitalinoAdquirer
+from bsp.adc import BitalinoAcquirer
 from bsp.core.logging import log
-from bsp.core.models import Device, Protocol, Session, Study, Test, TestType
+from bsp.core.models import Session, Study, Test, TestType
 from bsp.settings import config
 
 from .plotter import Plotter
@@ -27,11 +27,10 @@ class Recorder(QObject):
     ):
         super().__init__(parent)
 
-        self._threadpool = QThreadPool()
         self._screens = screens
         self._stimulator = stimulator
         self._plotter = plotter
-        self._adquirer = None
+        self._acquirer: BitalinoAcquirer = None
 
         stimulus_screen = config.stimuli_monitor
         refresh_rate = self._screens.refresh_rate(stimulus_screen)
@@ -43,13 +42,12 @@ class Recorder(QObject):
         self._session: Session | None = None
         self._tests = []
         self._samples_recorded = 0
-        self._protocol = config.PROTOCOLS[0]["protocol"]
 
     def build_study(self) -> Study:
         study = Study(
             recorded_at=datetime.now(),
             tests=[Test(**test) for test in self._tests],
-            protocol=self._protocol,
+            protocol=self._session.protocol,
         )
 
         test: Test
@@ -70,14 +68,6 @@ class Recorder(QObject):
 
         return 0
 
-    @property
-    def protocol(self) -> Protocol:
-        return self._protocol
-
-    @protocol.setter
-    def protocol(self, protocol: Protocol):
-        self._protocol = protocol
-
     def start(self, session: Session):
         if not session:
             log.error("No session provided")
@@ -94,14 +84,6 @@ class Recorder(QObject):
     def on_stimulator_initialized(self):
         self.next_test()
 
-    @property
-    def acquirer_class(self) -> Type[Adquirer] | None:
-        if config.device_type == Device.Bitalino:
-            return BitalinoAdquirer
-
-        # return BiosignalsPluxAdquirer
-        return None
-
     def next_test(self):
         if self._current_test < len(self._tests) - 1:
             self._current_test += 1
@@ -111,14 +93,14 @@ class Recorder(QObject):
             samples = len(test["hor_stimuli"])
             angle = test["angle"]
 
-            self._adquirer = self.acquirer_class(
+            self._acquirer = BitalinoAcquirer(
                 address=config.device_address,
                 samples=samples,
                 buffer_length=self._buffer_length,
                 parent=self,
             )
-            self._adquirer.signals.available.connect(self.on_samples_available)
-            self._adquirer.signals.finished.connect(self.on_adquisition_finished)
+            self._acquirer.available.connect(self.on_samples_available)
+            self._acquirer.finished.connect(self.on_adquisition_finished)
 
             self._stimulator.set_message(
                 "{test_type} a {angle}°".format(
@@ -132,7 +114,7 @@ class Recorder(QObject):
 
     def start_test(self):
         self._stimulator.set_ball_angle(0, 0)
-        self._threadpool.start(self._adquirer)
+        self._acquirer.start(qc.QThread.Priority.TimeCriticalPriority)
 
     def on_samples_available(self, hor, ver):
         samples = len(hor)
@@ -166,7 +148,7 @@ class Recorder(QObject):
         )
 
     def on_adquisition_finished(self):
-        self._adquirer.signals.available.disconnect(self.on_samples_available)
-        self._adquirer.signals.finished.disconnect(self.on_adquisition_finished)
-        self._adquirer = None
+        self._acquirer.available.disconnect(self.on_samples_available)
+        self._acquirer.finished.disconnect(self.on_adquisition_finished)
+        self._acquirer = None
         self.next_test()

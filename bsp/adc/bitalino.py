@@ -1,11 +1,11 @@
 import struct
 import time
 
+import numpy as np
 import serial
-from PySide6.QtCore import Slot
-from bsp.core.logging import log
+from PySide6 import QtCore as qc
 
-from .base import Adquirer
+from bsp.core.logging import log
 
 CONTACTING_DEVICE = "The computer lost communication with the device."
 DEVICE_NOT_IDLE = "The device is not idle."
@@ -13,40 +13,90 @@ DEVICE_NOT_IN_ACQUISITION = "The device is not in acquisition mode."
 INVALID_PARAMETER = "Invalid parameter."
 
 
-class BitalinoRecorder:
-    def __init__(self, address: str):
-        log.info(f"connecting to Bitalino through '{address}'")
-        self.serial = serial.Serial(address, 115200)
+class BitalinoAcquirer(qc.QThread):
+    available = qc.Signal(np.ndarray, np.ndarray)
+    finished = qc.Signal()
+
+    def __init__(
+        self,
+        address: str,
+        samples: int,
+        buffer_length: int = 8,
+        parent=None,
+    ):
+        super().__init__(parent)
+
+        self.address = address
+        self.samples = samples
+        self.processed = 0
+        self.buffer_length = buffer_length
+        self.horizontal_channel = np.zeros(self.buffer_length, dtype=np.uint16)
+        self.vertical_channel = np.zeros(self.buffer_length, dtype=np.uint16)
         self.started = False
 
-        log.info(f"trying to connect to Bitalino in {address} ...")
-        version = self.version()
+    def send_data(self, n_seq: int, data: list) -> bool:
+        idx = n_seq % self.buffer_length
+        self.horizontal_channel[idx] = data[0]
+        self.vertical_channel[idx] = data[1]
+
+        if idx == self.buffer_length - 1:
+            self.available.emit(
+                self.horizontal_channel.copy(),
+                self.vertical_channel.copy(),
+            )
+            self.horizontal_channel *= 0
+            self.vertical_channel *= 0
+
+        self.processed += 1
+        return self.processed >= self.samples
+
+    @qc.Slot()
+    def run(self):
+        self.processed = 0
+        self.connect_to_bitalino()
+        self.start_acquisition()
+
+        while self.processed < self.samples:
+            hor, ver = self.read_data()
+            self.send_data(self.processed, [hor, ver])
+            time.sleep(0.0005)
+
+        self.stop_acquisition()
+        self.close_connection()
+        self.finished.emit()
+
+    def connect_to_bitalino(self):
+        log.info(f"connecting to Bitalino through '{self.address}'")
+        self.serial = serial.Serial(self.address, 115200)
+
+        log.info(f"trying to connect to Bitalino in {self.address} ...")
+        version = self.get_version()
         log.info(f"connected to {version}")
 
-    def start(self):
-        if self.started is False:
-            self.send(195)  # 1000 Hz
-            self.send(13)  # Setup Analog Channels 0 and 1
+    def start_acquisition(self):
+        if not self.started:
+            self.send_command(195)  # 1000 Hz
+            self.send_command(13)  # Setup Analog Channels 0 and 1
             self.started = True
         else:
             log.error(DEVICE_NOT_IDLE)
             raise Exception(DEVICE_NOT_IDLE)
 
-    def stop(self):
+    def stop_acquisition(self):
         if self.started:
-            self.send(0)
+            self.send_command(0)
         else:
-            self.send(255)
+            self.send_command(255)
         self.started = False
 
-    def close(self):
+    def close_connection(self):
         self.serial.close()
 
-    def send(self, data):
+    def send_command(self, data):
         time.sleep(0.1)
         self.serial.write(bytes([data]))
 
-    def read(self) -> tuple[int, int]:
+    def read_data(self) -> tuple[int, int]:
         if self.started:
             raw = self.serial.read(4)
             decoded = list(struct.unpack("B B B B ", raw))
@@ -67,16 +117,13 @@ class BitalinoRecorder:
                 log.debug("Wrong packet CRC")
 
             return hor, ver
-            # log.debug(f"{raw=}")
-            # log.error(CONTACTING_DEVICE)
-            # raise Exception(CONTACTING_DEVICE)
         else:
             log.error(DEVICE_NOT_IN_ACQUISITION)
             raise Exception(DEVICE_NOT_IN_ACQUISITION)
 
-    def version(self) -> str:
-        if self.started is False:
-            self.send(7)
+    def get_version(self) -> str:
+        if not self.started:
+            self.send_command(7)
             version_str = ""
             while True:
                 version_str += self.serial.read(1).decode("utf-8")
@@ -85,34 +132,3 @@ class BitalinoRecorder:
             return version_str[version_str.index("BITalino") : -1]
         else:
             raise Exception(DEVICE_NOT_IDLE)
-
-
-class BitalinoAdquirer(Adquirer):
-    def __init__(
-        self,
-        address: str,
-        samples: int,
-        buffer_length: int = 8,
-        parent=None,
-    ):
-        super().__init__(
-            address=address,
-            samples=samples,
-            buffer_length=buffer_length,
-            parent=parent,
-        )
-
-    @Slot()
-    def run(self):
-        self.processed = 0
-        self._recorder = BitalinoRecorder(self.address)
-        self._recorder.start()
-
-        while self.processed < self.samples:
-            hor, ver = self._recorder.read()
-            self.send_data(self.processed, [hor, ver])
-            time.sleep(0.0005)
-
-        self._recorder.stop()
-        self._recorder.close()
-        self.signals.finished.emit()
