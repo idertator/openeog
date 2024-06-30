@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from datetime import datetime
 
+from bsp.core.models import Protocol
 from bsp.core.calibration import calibration
 
 from .enums import TestType
@@ -86,6 +87,11 @@ class Study:
 
     @property
     def json(self) -> dict:
+        if isinstance(self._protocol, Protocol):
+            protocol = self._protocol.value
+        else:
+            protocol = self._protocol
+
         return {
             "version": self.VERSION,
             "recorded_at": self._recorded_at.timestamp(),
@@ -94,7 +100,7 @@ class Study:
             "hor_calibration_diff": float(self._hor_calibration_diff or 1.0),
             "ver_calibration": float(self._ver_calibration or 1.0),
             "ver_calibration_diff": float(self._ver_calibration_diff or 1.0),
-            "protocol": self._protocol.value,
+            "protocol": protocol,
         }
 
     @property

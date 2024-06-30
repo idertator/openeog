@@ -75,6 +75,7 @@ class Recorder(QObject):
 
         self._session = session
         self._tests = session.template.tests
+        log.debug(f"{len(self._tests)=}")
 
         self._current_test = -1
         self._stimulator.open()
@@ -102,17 +103,18 @@ class Recorder(QObject):
             self._acquirer.available.connect(self.on_samples_available)
             self._acquirer.finished.connect(self.on_adquisition_finished)
 
-            self._stimulator.set_message(
-                "{test_type} a {angle}°".format(
-                    test_type=test["test_type"].name,
-                    angle=angle,
-                ),
+            msg = "{test_type} a {angle}°".format(
+                test_type=test["test_type"].name,
+                angle=angle,
             )
+            log.info(msg)
+            self._stimulator.set_message(msg)
         else:
             self._stimulator.close()
             self.finished.emit()
 
     def start_test(self):
+        log.debug("Starting test")
         self._stimulator.set_ball_angle(0, 0)
         self._acquirer.start(qc.QThread.Priority.TimeCriticalPriority)
 
@@ -148,7 +150,9 @@ class Recorder(QObject):
         )
 
     def on_adquisition_finished(self):
-        self._acquirer.available.disconnect(self.on_samples_available)
-        self._acquirer.finished.disconnect(self.on_adquisition_finished)
-        self._acquirer = None
+        if self._acquirer is not None:
+            self._acquirer.available.disconnect(self.on_samples_available)
+            self._acquirer.finished.disconnect(self.on_adquisition_finished)
+            self._acquirer = None
+
         self.next_test()
