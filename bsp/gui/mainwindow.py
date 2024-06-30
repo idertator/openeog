@@ -40,20 +40,28 @@ class MainWindow(QMainWindow):
         )
         self.setCentralWidget(self._plotter)
 
-        self._stimulator = Stimulator(
-            screens=screens,
-        )
-
-        self._recorder = Recorder(
-            screens=screens,
-            stimulator=self._stimulator,
-            plotter=self._plotter,
-            parent=self,
-        )
-        self._recorder.finished.connect(self.on_recording_finished)
+        self._stimulator: Stimulator | None = None
+        self._recorder: Recorder | None = None
 
         self._new_record_wizard = None
         self._session: Session | None = None
+
+    @property
+    def recorder(self) -> Recorder:
+        if not self._recorder:
+            self._stimulator = Stimulator(
+                screens=self._screens,
+            )
+
+            self._recorder = Recorder(
+                screens=self._screens,
+                stimulator=self._stimulator,
+                plotter=self._plotter,
+                parent=self,
+            )
+            self._recorder.finished.connect(self.on_recording_finished)
+
+        return self._recorder
 
     def showEvent(self, event: QShowEvent):
         if not self._new_record_wizard:
@@ -67,7 +75,7 @@ class MainWindow(QMainWindow):
         self._stop_action.setEnabled(True)
         self._play_action.setEnabled(False)
 
-        self._recorder.start(self._session)
+        self.recorder.start(self._session)
 
     def on_stop_clicked(self):
         self._recording = False
@@ -82,7 +90,7 @@ class MainWindow(QMainWindow):
             ),
         )
 
-        study = self._recorder.build_study()
+        study = self.recorder.build_study()
         save_study(study, filepath)
 
         msg = f"Estudio almacenado satisfactoriamente en {filepath}"
