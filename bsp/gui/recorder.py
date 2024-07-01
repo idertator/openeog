@@ -108,10 +108,17 @@ class Recorder(qc.QObject):
             test = self._tests[self._current_test]
             angle = test["angle"]
 
-            msg = "{test_type} a {angle}°".format(
-                test_type=test["test_type"].name,
-                angle=angle,
-            )
+            if test.get("replica", False):
+                msg = "{test_type} a {angle}° (Replica)".format(
+                    test_type=test["test_type"].name,
+                    angle=angle,
+                )
+            else:
+                msg = "{test_type} a {angle}°".format(
+                    test_type=test["test_type"].name,
+                    angle=angle,
+                )
+
             log.info(msg)
             self._stimulator.set_message(msg)
         else:
