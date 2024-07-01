@@ -9,6 +9,7 @@ from .protocols import (
 from .sessions import Session
 from .studies import Study
 from .tests import Test
+from .hardware import Hardware
 
 __all__ = [
     "Annotation",
@@ -16,6 +17,7 @@ __all__ = [
     "AntisaccadicProtocolTemplate",
     "Device",
     "Direction",
+    "Hardware",
     "Protocol",
     "ProtocolTemplate",
     "PursuitProtocolTemplate",

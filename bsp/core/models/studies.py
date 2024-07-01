@@ -2,10 +2,11 @@ from __future__ import annotations
 
 from datetime import datetime
 
-from bsp.core.models import Protocol
 from bsp.core.calibration import calibration
+from bsp.core.models import Protocol
 
 from .enums import TestType
+from .hardware import Hardware
 from .tests import Test
 
 
@@ -17,10 +18,12 @@ class Study:
         recorded_at: datetime | None,
         tests: list[Test],
         protocol: Protocol,
+        hardware: Hardware | None = None,
         hor_calibration: float | None = None,
         hor_calibration_diff: float | None = None,
         ver_calibration: float | None = None,
         ver_calibration_diff: float | None = None,
+        errors: int = 0,
         **kwargs,
     ):
         self._recorded_at = recorded_at or datetime.now()
@@ -73,6 +76,9 @@ class Study:
         self._tests = tests
         self._protocol = protocol
 
+        self._hardware = hardware
+        self._errors = errors
+
     def __str__(self) -> str:
         return "Study recorded at {recorded_at} with {num_tests} tests".format(
             recorded_at=self._recorded_at.strftime("%Y-%m-%d %H:%M:%S"),
@@ -94,13 +100,15 @@ class Study:
 
         return {
             "version": self.VERSION,
+            "hardware": self._hardware.json if self._hardware else None,
             "recorded_at": self._recorded_at.timestamp(),
+            "errors": self._errors,
+            "protocol": protocol,
             "tests": [test.json for test in self._tests],
             "hor_calibration": float(self._hor_calibration or 1.0),
             "hor_calibration_diff": float(self._hor_calibration_diff or 1.0),
             "ver_calibration": float(self._ver_calibration or 1.0),
             "ver_calibration_diff": float(self._ver_calibration_diff or 1.0),
-            "protocol": protocol,
         }
 
     @property
@@ -118,3 +126,26 @@ class Study:
     @property
     def protocol(self) -> Protocol:
         return self._protocol
+
+    @property
+    def hardware(self) -> Hardware | None:
+        return self._hardware
+
+    @hardware.setter
+    def hardware(self, value: Hardware | None):
+        self._hardware = value
+
+    @property
+    def errors(self) -> int:
+        return self._errors
+
+    @errors.setter
+    def errors(self, value: int):
+        self._errors = value
+
+    @property
+    def samples_count(self) -> int:
+        total = 0
+        for test in self._tests:
+            total += test.length
+        return total

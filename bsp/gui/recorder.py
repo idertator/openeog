@@ -30,12 +30,13 @@ class Recorder(qc.QObject):
         self._stimulator = stimulator
         self._plotter = plotter
 
-        self._acquirer = BitalinoAcquirer(
+        self._acquirer: BitalinoAcquirer = BitalinoAcquirer(
             address=config.device_address,
             parent=self,
         )
-        self._acquirer.available.connect(self.on_samples_available)
-        self._acquirer.finished.connect(self.on_adquisition_finished)
+        self._acquirer.samples_available.connect(self.on_samples_available)
+        self._acquirer.test_finished.connect(self.on_test_finished)
+        self._acquirer.recording_finished.connect(self.on_recording_finished)
 
         stimulus_screen = config.stimuli_monitor
         refresh_rate = self._screens.refresh_rate(stimulus_screen)
@@ -48,10 +49,13 @@ class Recorder(qc.QObject):
         self._tests = []
         self._samples_recorded = 0
         self._already_finished = False
+        self._errors = 0
 
     def build_study(self) -> Study:
         study = Study(
             recorded_at=datetime.now(),
+            hardware=self._acquirer.hardware,
+            errors=self._errors,
             tests=[Test(**test) for test in self._tests],
             protocol=self._session.protocol,
         )
@@ -90,7 +94,7 @@ class Recorder(qc.QObject):
 
     def stop(self):
         if self._acquirer:
-            self._acquirer.finish()
+            self._acquirer.finish(stopped=True)
             self.stopped.emit()
 
     def on_stimulator_initialized(self):
@@ -110,14 +114,10 @@ class Recorder(qc.QObject):
             )
             log.info(msg)
             self._stimulator.set_message(msg)
-        elif not self._already_finished:
-            self._already_finished = True
-            self._stimulator.close()
-            self._acquirer.finish()
-            self.finished.emit()
+        else:
+            self._acquirer.finish(stopped=False)
 
     def start_test(self):
-        log.debug("starting test")
         self._stimulator.set_ball_angle(0, 0)
 
         test = self._tests[self._current_test]
@@ -155,5 +155,15 @@ class Recorder(qc.QObject):
             ver_stimulus=stimuli,
         )
 
-    def on_adquisition_finished(self):
+    def on_test_finished(self):
         self.next_test()
+
+    def on_recording_finished(self, stopped: bool, errors: int):
+        self._errors = errors
+        if not self._already_finished:
+            self._already_finished = True
+            self._stimulator.close()
+            self._acquirer.finish()
+
+            if not stopped:
+                self.finished.emit()

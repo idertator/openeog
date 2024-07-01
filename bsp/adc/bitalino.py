@@ -8,6 +8,7 @@ import serial
 from PySide6 import QtCore as qc
 
 from bsp.core.logging import log
+from bsp.core.models import Device, Hardware
 
 CONTACTING_DEVICE = "The computer lost communication with the device."
 DEVICE_NOT_IDLE = "The device is not idle."
@@ -77,7 +78,7 @@ class BitalinoSerialRecorder:
         time.sleep(0.1)
         self.serial.write(bytes([data]))
 
-    def read_data(self) -> tuple[int, int]:
+    def read_data(self) -> tuple[int, int, bool]:
         if self.started:
             raw = self.serial.read(4)
             decoded = list(struct.unpack("B B B B ", raw))
@@ -94,10 +95,11 @@ class BitalinoSerialRecorder:
             hor = ((decoded[-2] & 0x0F) << 6) | (decoded[-3] >> 2)
             ver = ((decoded[-3] & 0x03) << 8) | decoded[-4]
 
-            if crc != (x & 0x0F):
+            ok = crc == (x & 0x0F)
+            if not ok:
                 log.debug("Wrong packet CRC")
 
-            return hor, ver
+            return hor, ver, ok
         else:
             log.error(DEVICE_NOT_IN_ACQUISITION)
             raise Exception(DEVICE_NOT_IN_ACQUISITION)
@@ -116,8 +118,9 @@ class BitalinoSerialRecorder:
 
 
 class BitalinoAcquirer(qc.QThread):
-    available = qc.Signal(np.ndarray, np.ndarray)
-    finished = qc.Signal()
+    samples_available = qc.Signal(np.ndarray, np.ndarray)
+    test_finished = qc.Signal()
+    recording_finished = qc.Signal(bool, int)
 
     def __init__(
         self,
@@ -129,11 +132,20 @@ class BitalinoAcquirer(qc.QThread):
         self.address = address
         self.running = True
         self.samples = 0
+        self.stopped = False
+
+    @property
+    def hardware(self) -> Hardware:
+        return Hardware(
+            device=Device.Bitalino,
+            sampling_rate=1000,
+        )
 
     def acquire(self, samples: int):
         self.samples = samples
 
-    def finish(self):
+    def finish(self, stopped: bool = False):
+        self.stopped = stopped
         self.running = False
 
     def run(self):
@@ -141,6 +153,7 @@ class BitalinoAcquirer(qc.QThread):
         buffer_length = 8
         horizontal_channel = np.zeros(buffer_length, dtype=np.uint16)
         vertical_channel = np.zeros(buffer_length, dtype=np.uint16)
+        errors = 0
 
         try:
             while self.running:
@@ -149,14 +162,17 @@ class BitalinoAcquirer(qc.QThread):
                     recorder.start()
 
                     while self.running and processed < self.samples:
-                        hor, ver = recorder.read_data()
+                        hor, ver, ok = recorder.read_data()
+
+                        if not ok:
+                            errors += 1
 
                         idx = processed % buffer_length
                         horizontal_channel[idx] = hor
                         vertical_channel[idx] = ver
 
                         if idx == buffer_length - 1:
-                            self.available.emit(
+                            self.samples_available.emit(
                                 horizontal_channel.copy(),
                                 vertical_channel.copy(),
                             )
@@ -170,7 +186,7 @@ class BitalinoAcquirer(qc.QThread):
                     self.samples = 0
                     log.debug("Clearing samples")
                     recorder.stop()
-                    self.finished.emit()
+                    self.test_finished.emit()
 
                 qc.QThread.sleep(0.0005)
 
@@ -180,3 +196,4 @@ class BitalinoAcquirer(qc.QThread):
         finally:
             recorder.stop()
             recorder.close()
+            self.recording_finished.emit(self.stopped, errors)

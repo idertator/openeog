@@ -5,7 +5,7 @@ from zipfile import ZipFile
 
 from numpy import load, savez_compressed
 
-from .models import Protocol, Study, Test, TestType
+from .models import Device, Hardware, Protocol, Study, Test, TestType
 
 
 def save_study(study: Study, filepath: str):
@@ -43,6 +43,14 @@ def load_study(filepath: str) -> Study:
     with ZipFile(filepath, "r") as zip_file:
         manifest = loads(zip_file.read("manifest.json"))
 
+        if hardware := manifest.get("hardware"):
+            hardware = Hardware(
+                device=Device(hardware["device"]),
+                sampling_rate=hardware["sampling_rate"],
+            )
+        else:
+            hardware = None
+
         tests = []
         for idx, test in enumerate(manifest["tests"]):
             with zip_file.open(f"test{idx:02}.npz") as buff:
@@ -67,6 +75,9 @@ def load_study(filepath: str) -> Study:
 
         return Study(
             recorded_at=datetime.fromtimestamp(manifest["recorded_at"]),
+            protocol=Protocol(test.get("protocol", "saccadic")),
+            hardware=hardware,
+            errors=manifest.get("errors", 0),
             tests=tests,
             hor_calibration=float(manifest.get("hor_calibration", None) or 1.0),
             hor_calibration_diff=float(
@@ -76,5 +87,4 @@ def load_study(filepath: str) -> Study:
             ver_calibration_diff=float(
                 manifest.get("ver_calibration_diff", None) or 1.0
             ),
-            protocol=Protocol(test.get("protocol", "saccadic")),
         )

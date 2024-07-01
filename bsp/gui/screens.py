@@ -2,6 +2,8 @@ from PySide6.QtCore import QObject, QRect, QSize, Slot
 from PySide6.QtGui import QScreen
 from PySide6.QtWidgets import QApplication
 
+from bsp.core.logging import log
+
 
 class ScreensManager(QObject):
     def __init__(self, app: QApplication):
@@ -18,6 +20,8 @@ class ScreensManager(QObject):
             }
             for screen in self.app.screens()
         }
+
+        log.debug(self._screens)
 
         self.app.screenAdded.connect(self.on_screen_added)
         self.app.screenRemoved.connect(self.on_screen_removed)

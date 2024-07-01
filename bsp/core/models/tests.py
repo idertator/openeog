@@ -9,7 +9,7 @@ from .annotations import Annotation, Saccade
 from .enums import TestType
 
 
-class Test(object):
+class Test:
     def __init__(
         self,
         test_type: TestType,
@@ -58,10 +58,14 @@ class Test(object):
             "angle": self._angle,
             "fs": self._fs,
             "replica": self._replica,
-            "length": len(self.hor_stimuli),
+            "length": self.length,
             "hor_annotations": [a.json for a in self._hor_annotations],
             "ver_annotations": [a.json for a in self._ver_annotations],
         }
+
+    @property
+    def length(self) -> int:
+        return len(self.hor_stimuli)
 
     @property
     def test_type(self) -> TestType:

@@ -73,6 +73,10 @@ class MainWindow(QMainWindow):
 
         self._session = self._new_record_wizard.session
 
+    def _set_stopped_state(self):
+        self._stop_action.setEnabled(False)
+        self._play_action.setEnabled(True)
+
     def on_play_clicked(self):
         self._recording = True
         self._stop_action.setEnabled(True)
@@ -84,10 +88,11 @@ class MainWindow(QMainWindow):
         self._stopped = True
         self._recorder.stop()
         self._recording = False
-        self._stop_action.setEnabled(False)
-        self._play_action.setEnabled(True)
+        self._set_stopped_state()
 
     def on_recording_finished(self):
+        self._set_stopped_state()
+
         if self._stopped:
             return
 
@@ -101,7 +106,16 @@ class MainWindow(QMainWindow):
         study = self.recorder.build_study()
         save_study(study, filepath)
 
-        msg = f"Estudio almacenado satisfactoriamente en {filepath}"
+        if total_samples := study.samples_count:
+            error_rate = (study.errors / total_samples) * 100
+            msg = "Estudio almacenado satisfactoriamente en {filepath} con una tasa de error de {rate:.4f}%".format(
+                filepath=filepath,
+                rate=error_rate,
+            )
+        else:
+            msg = "Estudio almacenado satisfactoriamente en {filepath}".format(
+                filepath=filepath,
+            )
 
         log.info(msg)
         QMessageBox.information(self, "Información", msg)
