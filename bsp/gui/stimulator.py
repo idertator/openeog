@@ -10,7 +10,7 @@ from .screens import ScreensManager
 
 
 class Stimulator(QWidget):
-    MAX_DISTANCE_PERCENTAGE = 0.9
+    MAX_DISTANCE_PERCENTAGE = 0.95
     MAX_ANGLE = 60
 
     initialized = Signal()
@@ -26,17 +26,16 @@ class Stimulator(QWidget):
         self._screens = screens
 
         self._stimuli_screen = config.stimuli_monitor
-        physical_size = self._screens.physical_size(self._stimuli_screen)
 
-        self._width = physical_size.width()
-        self._height = physical_size.height()
+        self._width = config.stimuli_monitor_width
+        self._height = config.stimuli_monitor_height
 
         self._x_scale = float(self.width()) / float(self._width)
         self._y_scale = float(self.height()) / float(self._height)
 
         self._dpi_scale = screens.dpi(self._stimuli_screen) / 136
 
-        self._ball_ratio = ball_ratio * self._x_scale * self._dpi_scale
+        self._ball_ratio = config.ball_ratio
 
         self._msg = ""
         self._ball_position: tuple[int, int] | None = None
@@ -137,4 +136,4 @@ class Stimulator(QWidget):
     def subject_distance(self) -> int:
         """Distance from the subject to the screen in milimeters"""
         hor_distance = self._width * self.MAX_DISTANCE_PERCENTAGE
-        return (hor_distance / 2.0) / tan(radians(self.MAX_ANGLE / 2.0))
+        return (hor_distance / 2) / tan(radians(self.MAX_ANGLE / 2.0))

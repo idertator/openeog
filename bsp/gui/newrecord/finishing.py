@@ -6,6 +6,7 @@ from bsp.settings import config
 
 from .consts import SELECTOR_WIDTH
 
+
 class FinishingPage(QtWidgets.QWizardPage):
     def __init__(
         self,
@@ -57,6 +58,41 @@ class FinishingPage(QtWidgets.QWizardPage):
             self.on_stimuli_monitor_changed
         )
 
+        self._stimuli_monitor_width = QtWidgets.QSpinBox()
+        self._stimuli_monitor_width.setRange(0, 50000)
+        self._stimuli_monitor_width.setValue(config.stimuli_monitor_width)
+        self._stimuli_monitor_width.setSuffix(" mm")
+        self._stimuli_monitor_width.setFixedWidth(100)
+        self._stimuli_monitor_width.valueChanged.connect(
+            self.on_stimuli_monitor_width_changed
+        )
+
+        self._stimuli_monitor_middle_label = QtWidgets.QLabel("x")
+
+        self._stimuli_monitor_height = QtWidgets.QSpinBox()
+        self._stimuli_monitor_height.setRange(0, 50000)
+        self._stimuli_monitor_height.setValue(config.stimuli_monitor_height)
+        self._stimuli_monitor_height.setSuffix(" mm")
+        self._stimuli_monitor_height.setFixedWidth(100)
+        self._stimuli_monitor_height.valueChanged.connect(
+            self.on_stimuli_monitor_height_changed
+        )
+
+        self._stimuli_ball_ratio = QtWidgets.QSpinBox()
+        self._stimuli_ball_ratio.setRange(0, 128)
+        self._stimuli_ball_ratio.setValue(config.ball_ratio)
+        self._stimuli_ball_ratio.setSuffix(" px")
+        self._stimuli_ball_ratio.setFixedWidth(64)
+        self._stimuli_ball_ratio.valueChanged.connect(
+            self.on_stimuli_ball_ratio_changed
+        )
+
+        self._stimuli_monitor_layout = QtWidgets.QHBoxLayout()
+        self._stimuli_monitor_layout.addWidget(self._stimuli_monitor_width)
+        self._stimuli_monitor_layout.addWidget(self._stimuli_monitor_middle_label)
+        self._stimuli_monitor_layout.addWidget(self._stimuli_monitor_height)
+        self._stimuli_monitor_layout.addStretch()
+
         self._record_path_edit = QtWidgets.QLineEdit()
         self._record_path_edit.setText(config.record_path)
         self._record_path_edit.setReadOnly(True)
@@ -82,6 +118,8 @@ class FinishingPage(QtWidgets.QWizardPage):
         layout.addRow("Dispositivo", self._device_type)
         layout.addRow("Ruta del Dispositivo", self._device_address)
         layout.addRow("Pantalla de Estímulo", self._stimuli_monitor)
+        layout.addRow("Tamaño Pantalla de Estímulo", self._stimuli_monitor_layout)
+        layout.addRow("Tamaño del Estímulo", self._stimuli_ball_ratio)
         layout.addRow("Ruta del Registro", self._record_path_layout)
 
         self.setLayout(layout)
@@ -108,6 +146,15 @@ class FinishingPage(QtWidgets.QWizardPage):
 
     def on_stimuli_monitor_changed(self, screen: str):
         config.stimuli_monitor = screen
+
+    def on_stimuli_monitor_width_changed(self):
+        config.stimuli_monitor_width = self._stimuli_monitor_width.value()
+
+    def on_stimuli_monitor_height_changed(self):
+        config.stimuli_monitor_height = self._stimuli_monitor_height.value()
+
+    def on_stimuli_ball_ratio_changed(self):
+        config.ball_ratio = self._stimuli_ball_ratio.value()
 
     def on_device_type_changed(self, device_type: str):
         config.device_type = device_type

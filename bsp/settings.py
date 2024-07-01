@@ -133,6 +133,39 @@ class BSPConfig(QSettings):
         self.setValue("stimuli_monitor", value)
 
     @property
+    def stimuli_monitor_width(self) -> int:
+        try:
+            return int(self.value("stimuli_monitor_width", 0))
+        except ValueError:
+            return 0
+
+    @stimuli_monitor_width.setter
+    def stimuli_monitor_width(self, value: int):
+        self.setValue("stimuli_monitor_width", value)
+
+    @property
+    def stimuli_monitor_height(self) -> int:
+        try:
+            return int(self.value("stimuli_monitor_height", 0))
+        except ValueError:
+            return 0
+
+    @stimuli_monitor_height.setter
+    def stimuli_monitor_height(self, value: int):
+        self.setValue("stimuli_monitor_height", value)
+
+    @property
+    def ball_ratio(self) -> int:
+        try:
+            return int(self.value("ball_ratio", 16))
+        except ValueError:
+            return 16
+
+    @ball_ratio.setter
+    def ball_ratio(self, value: int):
+        self.setValue("ball_ratio", value)
+
+    @property
     def resolution(self) -> int:
         if self.device_type == "Bitalino":
             return 10
