@@ -66,6 +66,12 @@ class ProtocolsSaccadicPage(QtWidgets.QWizardPage):
         self._saccadic_30 = QtWidgets.QCheckBox(self)
         self._saccadic_30.toggled.connect(self.on_saccadic_check_changed)
 
+        self._saccadic_40 = QtWidgets.QCheckBox(self)
+        self._saccadic_40.toggled.connect(self.on_saccadic_check_changed)
+
+        self._saccadic_50 = QtWidgets.QCheckBox(self)
+        self._saccadic_50.toggled.connect(self.on_saccadic_check_changed)
+
         self._saccadic_60 = QtWidgets.QCheckBox(self)
         self._saccadic_60.toggled.connect(self.on_saccadic_check_changed)
 
@@ -81,6 +87,8 @@ class ProtocolsSaccadicPage(QtWidgets.QWizardPage):
         self._form_layout.addRow("Sacádica 10°", self._saccadic_10)
         self._form_layout.addRow("Sacádica 20°", self._saccadic_20)
         self._form_layout.addRow("Sacádica 30°", self._saccadic_30)
+        self._form_layout.addRow("Sacádica 40°", self._saccadic_40)
+        self._form_layout.addRow("Sacádica 50°", self._saccadic_50)
         self._form_layout.addRow("Sacádica 60°", self._saccadic_60)
 
         self.completeChanged.connect(self.on_complete_changed)
@@ -111,6 +119,8 @@ class ProtocolsSaccadicPage(QtWidgets.QWizardPage):
             saccadic_10=self._saccadic_10.isChecked(),
             saccadic_20=self._saccadic_20.isChecked(),
             saccadic_30=self._saccadic_30.isChecked(),
+            saccadic_40=self._saccadic_40.isChecked(),
+            saccadic_50=self._saccadic_50.isChecked(),
             saccadic_60=self._saccadic_60.isChecked(),
         )
 
@@ -123,6 +133,8 @@ class ProtocolsSaccadicPage(QtWidgets.QWizardPage):
                 self._saccadic_10.isChecked(),
                 self._saccadic_20.isChecked(),
                 self._saccadic_30.isChecked(),
+                self._saccadic_40.isChecked(),
+                self._saccadic_50.isChecked(),
                 self._saccadic_60.isChecked(),
             ]
         ):
@@ -142,6 +154,8 @@ class ProtocolsSaccadicPage(QtWidgets.QWizardPage):
             self._saccadic_10.setChecked(protocol_template.saccadic_10)
             self._saccadic_20.setChecked(protocol_template.saccadic_20)
             self._saccadic_30.setChecked(protocol_template.saccadic_30)
+            self._saccadic_40.setChecked(protocol_template.saccadic_40)
+            self._saccadic_50.setChecked(protocol_template.saccadic_50)
             self._saccadic_60.setChecked(protocol_template.saccadic_60)
 
         except ValueError as e:

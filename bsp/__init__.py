@@ -23,16 +23,6 @@ def main():
     window = MainWindow(screens)
     window.showMaximized()
 
-    # Código Sofi
-    # from .gui.protocols import AntisaccadicProtocolEditor
-    # window = AntisaccadicProtocolEditor()
-    # window.showMaximized()
-    #
-    # Código Alison
-    # from .gui.protocols import PursuitProtocolEditor
-    # window = PursuitProtocolEditor()
-    # window.showMaximized()
-    #
     sys.exit(app.exec())
 
 

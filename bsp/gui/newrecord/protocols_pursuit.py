@@ -60,6 +60,12 @@ class ProtocolsPursuitPage(QtWidgets.QWizardPage):
         self._pursuit_30 = QtWidgets.QCheckBox(self)
         self._pursuit_30.toggled.connect(self._on_pursuit_check_changed)
 
+        self._pursuit_40 = QtWidgets.QCheckBox(self)
+        self._pursuit_40.toggled.connect(self._on_pursuit_check_changed)
+
+        self._pursuit_50 = QtWidgets.QCheckBox(self)
+        self._pursuit_50.toggled.connect(self._on_pursuit_check_changed)
+
         self._pursuit_60 = QtWidgets.QCheckBox(self)
         self._pursuit_60.toggled.connect(self._on_pursuit_check_changed)
 
@@ -74,6 +80,8 @@ class ProtocolsPursuitPage(QtWidgets.QWizardPage):
         self._form_layout.addRow("Persecución 10°", self._pursuit_10)
         self._form_layout.addRow("Persecución 20°", self._pursuit_20)
         self._form_layout.addRow("Persecución 30°", self._pursuit_30)
+        self._form_layout.addRow("Persecución 40°", self._pursuit_40)
+        self._form_layout.addRow("Persecución 50°", self._pursuit_50)
         self._form_layout.addRow("Persecución 60°", self._pursuit_60)
 
         self.completeChanged.connect(self.on_complete_changed)
@@ -103,6 +111,8 @@ class ProtocolsPursuitPage(QtWidgets.QWizardPage):
             pursuit_10=self._pursuit_10.isChecked(),
             pursuit_20=self._pursuit_20.isChecked(),
             pursuit_30=self._pursuit_30.isChecked(),
+            pursuit_40=self._pursuit_40.isChecked(),
+            pursuit_50=self._pursuit_50.isChecked(),
             pursuit_60=self._pursuit_60.isChecked(),
         )
 
@@ -115,6 +125,8 @@ class ProtocolsPursuitPage(QtWidgets.QWizardPage):
                 self._pursuit_10.isChecked(),
                 self._pursuit_20.isChecked(),
                 self._pursuit_30.isChecked(),
+                self._pursuit_40.isChecked(),
+                self._pursuit_50.isChecked(),
                 self._pursuit_60.isChecked(),
             ]
         ):
@@ -133,6 +145,8 @@ class ProtocolsPursuitPage(QtWidgets.QWizardPage):
             self._pursuit_10.setChecked(protocol_template.pursuit_10)
             self._pursuit_20.setChecked(protocol_template.pursuit_20)
             self._pursuit_30.setChecked(protocol_template.pursuit_30)
+            self._pursuit_40.setChecked(protocol_template.pursuit_40)
+            self._pursuit_50.setChecked(protocol_template.pursuit_50)
             self._pursuit_60.setChecked(protocol_template.pursuit_60)
 
         except ValueError as e:

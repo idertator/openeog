@@ -66,6 +66,12 @@ class ProtocolsAntisaccadicPage(QtWidgets.QWizardPage):
         self._antisaccadic_30 = QtWidgets.QCheckBox(self)
         self._antisaccadic_30.toggled.connect(self.on_saccadic_check_changed)
 
+        self._antisaccadic_40 = QtWidgets.QCheckBox(self)
+        self._antisaccadic_40.toggled.connect(self.on_saccadic_check_changed)
+
+        self._antisaccadic_50 = QtWidgets.QCheckBox(self)
+        self._antisaccadic_50.toggled.connect(self.on_saccadic_check_changed)
+
         self._antisaccadic_60 = QtWidgets.QCheckBox(self)
         self._antisaccadic_60.toggled.connect(self.on_saccadic_check_changed)
 
@@ -83,6 +89,8 @@ class ProtocolsAntisaccadicPage(QtWidgets.QWizardPage):
         self._form_layout.addRow("Antisacádica 10°", self._antisaccadic_10)
         self._form_layout.addRow("Antisacádica 20°", self._antisaccadic_20)
         self._form_layout.addRow("Antisacádica 30°", self._antisaccadic_30)
+        self._form_layout.addRow("Antisacádica 40°", self._antisaccadic_40)
+        self._form_layout.addRow("Antisacádica 50°", self._antisaccadic_50)
         self._form_layout.addRow("Antisacádica 60°", self._antisaccadic_60)
 
         self.completeChanged.connect(self.on_complete_changed)
@@ -113,6 +121,8 @@ class ProtocolsAntisaccadicPage(QtWidgets.QWizardPage):
             antisaccadic_10=self._antisaccadic_10.isChecked(),
             antisaccadic_20=self._antisaccadic_20.isChecked(),
             antisaccadic_30=self._antisaccadic_30.isChecked(),
+            antisaccadic_40=self._antisaccadic_40.isChecked(),
+            antisaccadic_50=self._antisaccadic_50.isChecked(),
             antisaccadic_60=self._antisaccadic_60.isChecked(),
         )
 
@@ -125,6 +135,8 @@ class ProtocolsAntisaccadicPage(QtWidgets.QWizardPage):
                 self._antisaccadic_10.isChecked(),
                 self._antisaccadic_20.isChecked(),
                 self._antisaccadic_30.isChecked(),
+                self._antisaccadic_40.isChecked(),
+                self._antisaccadic_50.isChecked(),
                 self._antisaccadic_60.isChecked(),
             ]
         ):
@@ -146,6 +158,8 @@ class ProtocolsAntisaccadicPage(QtWidgets.QWizardPage):
             self._antisaccadic_10.setChecked(protocol_template.antisaccadic_10)
             self._antisaccadic_20.setChecked(protocol_template.antisaccadic_20)
             self._antisaccadic_30.setChecked(protocol_template.antisaccadic_30)
+            self._antisaccadic_40.setChecked(protocol_template.antisaccadic_40)
+            self._antisaccadic_50.setChecked(protocol_template.antisaccadic_50)
             self._antisaccadic_60.setChecked(protocol_template.antisaccadic_60)
 
         except ValueError as e:
