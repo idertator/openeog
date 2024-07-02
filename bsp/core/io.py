@@ -45,8 +45,19 @@ def load_study(filepath: str) -> Study:
 
         if hardware := manifest.get("hardware"):
             hardware = Hardware(
-                device=Device(hardware["device"]),
-                sampling_rate=hardware["sampling_rate"],
+                acquisition_device=Device(hardware["acquisition_device"]),
+                acquisition_sampling_rate=hardware["acquisition_sampling_rate"],
+                stimuli_monitor=hardware["stimuli_monitor"],
+                stimuli_refresh_rate=hardware["stimuli_refresh_rate"],
+                stimuli_monitor_width=hardware["stimuli_monitor_width"],
+                stimuli_monitor_height=hardware["stimuli_monitor_height"],
+                stimuli_monitor_resolution_width=hardware[
+                    "stimuli_monitor_resolution_width"
+                ],
+                stimuli_monitor_resolution_height=hardware[
+                    "stimuli_monitor_resolution_height"
+                ],
+                stimuli_ball_radius=hardware["stimuli_ball_radius"],
             )
         else:
             hardware = None

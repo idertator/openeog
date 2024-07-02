@@ -4,7 +4,7 @@ from PySide6 import QtCore as qc
 
 from bsp.adc import BitalinoAcquirer
 from bsp.core.logging import log
-from bsp.core.models import Session, Study, Test, TestType
+from bsp.core.models import Hardware, Session, Study, Test, TestType
 from bsp.settings import config
 
 from .plotter import Plotter
@@ -51,10 +51,26 @@ class Recorder(qc.QObject):
         self._already_finished = False
         self._errors = 0
 
+    @property
+    def hardware(self) -> Hardware:
+        stimuli_monitor = config.stimuli_monitor
+        stimuli_screen_size = self._screens.screen_size(stimuli_monitor)
+        return Hardware(
+            acquisition_device=self._acquirer.device,
+            acquisition_sampling_rate=self._acquirer.sampling_rate,
+            stimuli_monitor=stimuli_monitor,
+            stimuli_monitor_refresh_rate=self._screens.refresh_rate(stimuli_monitor),
+            stimuli_monitor_width=config.stimuli_monitor_width,
+            stimuli_monitor_height=config.stimuli_monitor_height,
+            stimuli_monitor_resolution_width=stimuli_screen_size.width(),
+            stimuli_monitor_resolution_height=stimuli_screen_size.height(),
+            stimuli_ball_radius=config.stimuli_ball_radius,
+        )
+
     def build_study(self) -> Study:
         study = Study(
             recorded_at=datetime.now(),
-            hardware=self._acquirer.hardware,
+            hardware=self.hardware,
             errors=self._errors,
             tests=[Test(**test) for test in self._tests],
             protocol=self._session.protocol,

@@ -8,7 +8,7 @@ import serial
 from PySide6 import QtCore as qc
 
 from bsp.core.logging import log
-from bsp.core.models import Device, Hardware
+from bsp.core.models import Device
 
 CONTACTING_DEVICE = "The computer lost communication with the device."
 DEVICE_NOT_IDLE = "The device is not idle."
@@ -135,11 +135,12 @@ class BitalinoAcquirer(qc.QThread):
         self.stopped = False
 
     @property
-    def hardware(self) -> Hardware:
-        return Hardware(
-            device=Device.Bitalino,
-            sampling_rate=1000,
-        )
+    def device(self) -> Device:
+        return Device.Bitalino
+
+    @property
+    def sampling_rate(self) -> int:
+        return 1000
 
     def acquire(self, samples: int):
         self.samples = samples

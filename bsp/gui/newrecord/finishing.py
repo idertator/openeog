@@ -78,13 +78,13 @@ class FinishingPage(QtWidgets.QWizardPage):
             self.on_stimuli_monitor_height_changed
         )
 
-        self._stimuli_ball_ratio = QtWidgets.QSpinBox()
-        self._stimuli_ball_ratio.setRange(0, 128)
-        self._stimuli_ball_ratio.setValue(config.ball_ratio)
-        self._stimuli_ball_ratio.setSuffix(" px")
-        self._stimuli_ball_ratio.setFixedWidth(64)
-        self._stimuli_ball_ratio.valueChanged.connect(
-            self.on_stimuli_ball_ratio_changed
+        self._stimuli_ball_radius = QtWidgets.QSpinBox()
+        self._stimuli_ball_radius.setRange(0, 128)
+        self._stimuli_ball_radius.setValue(config.stimuli_ball_radius)
+        self._stimuli_ball_radius.setSuffix(" px")
+        self._stimuli_ball_radius.setFixedWidth(64)
+        self._stimuli_ball_radius.valueChanged.connect(
+            self.on_stimuli_ball_radius_changed
         )
 
         self._stimuli_monitor_layout = QtWidgets.QHBoxLayout()
@@ -119,7 +119,7 @@ class FinishingPage(QtWidgets.QWizardPage):
         layout.addRow("Ruta del Dispositivo", self._device_address)
         layout.addRow("Pantalla de Estímulo", self._stimuli_monitor)
         layout.addRow("Tamaño Pantalla de Estímulo", self._stimuli_monitor_layout)
-        layout.addRow("Tamaño del Estímulo", self._stimuli_ball_ratio)
+        layout.addRow("Tamaño del Estímulo", self._stimuli_ball_radius)
         layout.addRow("Ruta del Registro", self._record_path_layout)
 
         self.setLayout(layout)
@@ -153,8 +153,8 @@ class FinishingPage(QtWidgets.QWizardPage):
     def on_stimuli_monitor_height_changed(self):
         config.stimuli_monitor_height = self._stimuli_monitor_height.value()
 
-    def on_stimuli_ball_ratio_changed(self):
-        config.ball_ratio = self._stimuli_ball_ratio.value()
+    def on_stimuli_ball_radius_changed(self):
+        config.stimuli_ball_radius = self._stimuli_ball_radius.value()
 
     def on_device_type_changed(self, device_type: str):
         config.device_type = device_type

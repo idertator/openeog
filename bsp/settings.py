@@ -155,15 +155,15 @@ class BSPConfig(QSettings):
         self.setValue("stimuli_monitor_height", value)
 
     @property
-    def ball_ratio(self) -> int:
+    def stimuli_ball_radius(self) -> int:
         try:
-            return int(self.value("ball_ratio", 16))
+            return int(self.value("stimuli_ball_radius", 16))
         except ValueError:
             return 16
 
-    @ball_ratio.setter
-    def ball_ratio(self, value: int):
-        self.setValue("ball_ratio", value)
+    @stimuli_ball_radius.setter
+    def stimuli_ball_radius(self, value: int):
+        self.setValue("stimuli_ball_radius", value)
 
     @property
     def resolution(self) -> int:

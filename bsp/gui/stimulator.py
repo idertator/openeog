@@ -20,7 +20,7 @@ class Stimulator(QWidget):
     def __init__(
         self,
         screens: ScreensManager,
-        ball_ratio: float = 60,  # in mm
+        ball_ratdius: float = 60,  # in mm
     ):
         super().__init__()
         self._screens = screens
@@ -35,7 +35,7 @@ class Stimulator(QWidget):
 
         self._dpi_scale = screens.dpi(self._stimuli_screen) / 136
 
-        self._ball_ratio = config.ball_ratio
+        self._ball_radius = config.stimuli_ball_radius
 
         self._msg = ""
         self._ball_position: tuple[int, int] | None = None
@@ -72,8 +72,8 @@ class Stimulator(QWidget):
             painter.drawEllipse(
                 self._ball_position[0],
                 self._ball_position[1],
-                self._ball_ratio,
-                self._ball_ratio,
+                self._ball_radius,
+                self._ball_radius,
             )
 
         painter.end()
