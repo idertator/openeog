@@ -2,10 +2,9 @@ from __future__ import annotations
 
 from datetime import datetime
 
-from bsp.core.calibration import calibration
 from bsp.core.models import Protocol
 
-from .enums import TestType
+from .conditions import Conditions
 from .hardware import Hardware
 from .tests import Test
 
@@ -16,56 +15,20 @@ class Study:
     def __init__(
         self,
         recorded_at: datetime | None,
-        tests: list[Test],
         protocol: Protocol,
+        tests: list[Test],
         hardware: Hardware | None = None,
+        conditions: Conditions | None = None,
         hor_calibration: float | None = None,
         hor_calibration_diff: float | None = None,
         ver_calibration: float | None = None,
         ver_calibration_diff: float | None = None,
-        errors: int = 0,
         **kwargs,
     ):
         self._recorded_at = recorded_at or datetime.now()
 
-        if hor_calibration is None:
-            initial_calibration = None
-            final_calibration = None
-            for test in tests:
-                if test.test_type == TestType.HorizontalCalibration:
-                    if initial_calibration is None:
-                        initial_calibration = test
-                    final_calibration = test
-
-            if initial_calibration and final_calibration:
-                assert initial_calibration.angle == final_calibration.angle
-
-            hor_calibration, hor_calibration_diff = calibration(
-                initial=initial_calibration.hor_channel,
-                final=final_calibration.hor_channel,
-                angle=initial_calibration.angle,
-            )
-
         self._hor_calibration = hor_calibration or 1.0
         self._hor_calibration_diff = hor_calibration_diff
-
-        if ver_calibration is None:
-            initial_calibration = None
-            final_calibration = None
-            for test in tests:
-                if test.test_type == TestType.VerticalCalibration:
-                    if initial_calibration is None:
-                        initial_calibration = test
-                    final_calibration = test
-
-            if initial_calibration and final_calibration:
-                assert initial_calibration.angle == final_calibration.angle
-
-                ver_calibration, ver_calibration_diff = calibration(
-                    initial=initial_calibration.ver_channel,
-                    final=final_calibration.ver_channel,
-                    angle=initial_calibration.angle,
-                )
 
         self._ver_calibration = ver_calibration or 1.0
         self._ver_calibration_diff = ver_calibration_diff
@@ -77,7 +40,7 @@ class Study:
         self._protocol = protocol
 
         self._hardware = hardware
-        self._errors = errors
+        self._conditions = conditions
 
     def __str__(self) -> str:
         return "Study recorded at {recorded_at} with {num_tests} tests".format(
@@ -101,8 +64,8 @@ class Study:
         return {
             "version": self.VERSION,
             "hardware": self._hardware.json if self._hardware else None,
+            "conditions": self._conditions.json if self._conditions else None,
             "recorded_at": self._recorded_at.timestamp(),
-            "errors": self._errors,
             "protocol": protocol,
             "tests": [test.json for test in self._tests],
             "hor_calibration": float(self._hor_calibration or 1.0),
@@ -136,12 +99,12 @@ class Study:
         self._hardware = value
 
     @property
-    def errors(self) -> int:
-        return self._errors
+    def conditions(self) -> Conditions:
+        return self._conditions
 
-    @errors.setter
-    def errors(self, value: int):
-        self._errors = value
+    @conditions.setter
+    def conditions(self, value: Conditions | None):
+        self._conditions = value
 
     @property
     def samples_count(self) -> int:
@@ -149,3 +112,9 @@ class Study:
         for test in self._tests:
             total += test.length
         return total
+
+    @property
+    def error_rate(self) -> float:
+        if self.samples_count and self.conditions:
+            return (self.conditions.errors / self.samples_count) * 100.0
+        return 0.0

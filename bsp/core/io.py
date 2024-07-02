@@ -5,7 +5,7 @@ from zipfile import ZipFile
 
 from numpy import load, savez_compressed
 
-from .models import Device, Hardware, Protocol, Study, Test, TestType
+from .models import Conditions, Device, Hardware, Protocol, Study, Test, TestType
 
 
 def save_study(study: Study, filepath: str):
@@ -43,24 +43,34 @@ def load_study(filepath: str) -> Study:
     with ZipFile(filepath, "r") as zip_file:
         manifest = loads(zip_file.read("manifest.json"))
 
-        if hardware := manifest.get("hardware"):
+        if hardware_manifest := manifest.get("hardware"):
             hardware = Hardware(
-                acquisition_device=Device(hardware["acquisition_device"]),
-                acquisition_sampling_rate=hardware["acquisition_sampling_rate"],
-                stimuli_monitor=hardware["stimuli_monitor"],
-                stimuli_refresh_rate=hardware["stimuli_refresh_rate"],
-                stimuli_monitor_width=hardware["stimuli_monitor_width"],
-                stimuli_monitor_height=hardware["stimuli_monitor_height"],
-                stimuli_monitor_resolution_width=hardware[
+                acquisition_device=Device(hardware_manifest["acquisition_device"]),
+                acquisition_sampling_rate=hardware_manifest[
+                    "acquisition_sampling_rate"
+                ],
+                stimuli_monitor=hardware_manifest["stimuli_monitor"],
+                stimuli_refresh_rate=hardware_manifest["stimuli_refresh_rate"],
+                stimuli_monitor_width=hardware_manifest["stimuli_monitor_width"],
+                stimuli_monitor_height=hardware_manifest["stimuli_monitor_height"],
+                stimuli_monitor_resolution_width=hardware_manifest[
                     "stimuli_monitor_resolution_width"
                 ],
-                stimuli_monitor_resolution_height=hardware[
+                stimuli_monitor_resolution_height=hardware_manifest[
                     "stimuli_monitor_resolution_height"
                 ],
-                stimuli_ball_radius=hardware["stimuli_ball_radius"],
+                stimuli_ball_radius=hardware_manifest["stimuli_ball_radius"],
             )
         else:
             hardware = None
+
+        if conditions_manifest := manifest.get("conditions"):
+            conditions = Conditions(
+                light_intensity=conditions_manifest["light_intensity"],
+                errors=conditions_manifest.get("errors", 0),
+            )
+        else:
+            conditions = None
 
         tests = []
         for idx, test in enumerate(manifest["tests"]):
@@ -88,7 +98,7 @@ def load_study(filepath: str) -> Study:
             recorded_at=datetime.fromtimestamp(manifest["recorded_at"]),
             protocol=Protocol(test.get("protocol", "saccadic")),
             hardware=hardware,
-            errors=manifest.get("errors", 0),
+            conditions=conditions,
             tests=tests,
             hor_calibration=float(manifest.get("hor_calibration", None) or 1.0),
             hor_calibration_diff=float(

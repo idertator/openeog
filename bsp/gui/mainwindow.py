@@ -106,8 +106,7 @@ class MainWindow(QMainWindow):
         study = self.recorder.build_study()
         save_study(study, filepath)
 
-        if total_samples := study.samples_count:
-            error_rate = (study.errors / total_samples) * 100
+        if error_rate := study.error_rate:
             msg = "Estudio almacenado satisfactoriamente en {filepath} con una tasa de error de {rate:.4f}%".format(
                 filepath=filepath,
                 rate=error_rate,

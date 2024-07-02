@@ -120,6 +120,7 @@ class NewRecordWizard(QtWidgets.QWizard):
             device=config.device_type,
             address=config.device_address,
             stimuli_monitor=config.stimuli_monitor,
+            light_intensity=self._finishing_page.light_intensity,
         )
 
     def on_current_id_changed(self, id):

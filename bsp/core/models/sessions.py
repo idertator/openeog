@@ -13,3 +13,4 @@ class Session:
     device: Device
     address: str
     stimuli_monitor: str
+    light_intensity: float = 0.0

@@ -4,7 +4,7 @@ from PySide6 import QtCore as qc
 
 from bsp.adc import BitalinoAcquirer
 from bsp.core.logging import log
-from bsp.core.models import Hardware, Session, Study, Test, TestType
+from bsp.core.models import Conditions, Hardware, Protocol, Session, Study, Test
 from bsp.settings import config
 
 from .plotter import Plotter
@@ -52,6 +52,10 @@ class Recorder(qc.QObject):
         self._errors = 0
 
     @property
+    def protocol(self) -> Protocol:
+        return self._session.protocol
+
+    @property
     def hardware(self) -> Hardware:
         stimuli_monitor = config.stimuli_monitor
         stimuli_screen_size = self._screens.screen_size(stimuli_monitor)
@@ -67,21 +71,21 @@ class Recorder(qc.QObject):
             stimuli_ball_radius=config.stimuli_ball_radius,
         )
 
-    def build_study(self) -> Study:
-        study = Study(
-            recorded_at=datetime.now(),
-            hardware=self.hardware,
+    @property
+    def conditions(self) -> Conditions:
+        return Conditions(
+            light_intensity=self._session.light_intensity,
             errors=self._errors,
-            tests=[Test(**test) for test in self._tests],
-            protocol=self._session.protocol,
         )
 
-        test: Test
-        for test in study:
-            if test.test_type == TestType.HorizontalSaccadic:
-                test.annotate()
-
-        return study
+    def build_study(self) -> Study:
+        return Study(
+            recorded_at=datetime.now(),
+            protocol=self.protocol,
+            tests=[Test(**test) for test in self._tests],
+            hardware=self.hardware,
+            conditions=self.conditions,
+        )
 
     @property
     def current_hor_position(self) -> int:

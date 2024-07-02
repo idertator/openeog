@@ -1,5 +1,7 @@
 from .annotations import Annotation, Saccade
+from .conditions import Conditions
 from .enums import AnnotationType, Device, Direction, Protocol, Size, TestType
+from .hardware import Hardware
 from .protocols import (
     AntisaccadicProtocolTemplate,
     ProtocolTemplate,
@@ -9,12 +11,12 @@ from .protocols import (
 from .sessions import Session
 from .studies import Study
 from .tests import Test
-from .hardware import Hardware
 
 __all__ = [
     "Annotation",
     "AnnotationType",
     "AntisaccadicProtocolTemplate",
+    "Conditions",
     "Device",
     "Direction",
     "Hardware",

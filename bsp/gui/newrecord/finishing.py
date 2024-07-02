@@ -1,6 +1,5 @@
 from PySide6 import QtWidgets
 
-from bsp.core.logging import log
 from bsp.gui.screens import ScreensManager
 from bsp.settings import config
 
@@ -93,6 +92,13 @@ class FinishingPage(QtWidgets.QWizardPage):
         self._stimuli_monitor_layout.addWidget(self._stimuli_monitor_height)
         self._stimuli_monitor_layout.addStretch()
 
+        self._light_intensity = QtWidgets.QDoubleSpinBox()
+        self._light_intensity.setRange(0, 500000)
+        self._light_intensity.setDecimals(2)
+        self._light_intensity.setValue(self._light_intensity)
+        self._light_intensity.setSuffix(" lux")
+        self._light_intensity.setFixedWidth(64)
+
         self._record_path_edit = QtWidgets.QLineEdit()
         self._record_path_edit.setText(config.record_path)
         self._record_path_edit.setReadOnly(True)
@@ -120,6 +126,7 @@ class FinishingPage(QtWidgets.QWizardPage):
         layout.addRow("Pantalla de Estímulo", self._stimuli_monitor)
         layout.addRow("Tamaño Pantalla de Estímulo", self._stimuli_monitor_layout)
         layout.addRow("Tamaño del Estímulo", self._stimuli_ball_radius)
+        layout.addRow("Intensidad de Luz", self._light_intensity)
         layout.addRow("Ruta del Registro", self._record_path_layout)
 
         self.setLayout(layout)
@@ -136,6 +143,10 @@ class FinishingPage(QtWidgets.QWizardPage):
     @property
     def record_name(self) -> str:
         return self._record_name.text()
+
+    @property
+    def light_intensity(self) -> float:
+        return self._light_intensity.value()
 
     def on_record_name_changed(self):
         self.completeChanged.emit()
