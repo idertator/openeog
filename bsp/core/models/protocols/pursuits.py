@@ -14,7 +14,7 @@ from .base import ProtocolTemplate
 
 @dataclass
 class PursuitProtocolTemplate(ProtocolTemplate):
-    pursuit_length: int
+    pursuit_length: float  # in seconds
     pursuit_speed: float
     include_replicas: bool = False
     pursuit_10: bool = False
@@ -113,7 +113,7 @@ class PursuitProtocolTemplate(ProtocolTemplate):
             }
         )
 
-        pursuit_length = int(self.pursuit_length * 1000)
+        pursuit_length = self.pursuit_length
 
         if self.pursuit_10:
             result.append(

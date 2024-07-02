@@ -47,23 +47,33 @@ def saccadic_stimuli(
 
 
 def pursuit_stimuli(
-    length: int,
-    speed: float = 1.5,
+    length: float,
+    speed: float = 30.0,
+    sampling_rate: float = 1000.0,
 ) -> np.ndarray:
     """Generate a pursuit stimulus
 
     Args:
-        length (int): Length of the stimulus
-        speed (float, optional): Speed of the stimulus in °/s. Defaults to 2.0.
-        angle (int, optional): Angle of the stimulus. Defaults to 60.
+        length (float): Length of the stimulus in seconds.
+        speed (float, optional): Speed of the stimulus in °/s. Defaults to 30.0.
+        sampling_rate (float, optional): Sampling frequency in Hz. Defaults to 1000.0.
 
     Returns:
-        ndarray: Pursuit stimulus
+        ndarray: Pursuit stimulus.
     """
-    num_cycles = (speed * 1000) / 360
-    x = np.linspace(0, num_cycles * 2 * np.pi, length)
+    # Calculate the number of samples
+    num_samples = int(length * sampling_rate)
 
-    return np.sin(x)
+    # Calculate the number of cycles
+    num_cycles = (speed * length) / 360
+
+    # Generate the x values for the sine wave
+    x = np.linspace(0, num_cycles * 2 * np.pi, num_samples)
+
+    # Generate the sine wave with the given amplitude
+    y = np.sin(x)
+
+    return y
 
 
 class SaccadicStimuliTransitions:
