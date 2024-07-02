@@ -81,7 +81,7 @@ class FinishingPage(QtWidgets.QWizardPage):
         self._stimuli_ball_radius.setRange(0, 128)
         self._stimuli_ball_radius.setValue(config.stimuli_ball_radius)
         self._stimuli_ball_radius.setSuffix(" px")
-        self._stimuli_ball_radius.setFixedWidth(64)
+        self._stimuli_ball_radius.setFixedWidth(100)
         self._stimuli_ball_radius.valueChanged.connect(
             self.on_stimuli_ball_radius_changed
         )
@@ -95,9 +95,9 @@ class FinishingPage(QtWidgets.QWizardPage):
         self._light_intensity = QtWidgets.QDoubleSpinBox()
         self._light_intensity.setRange(0, 500000)
         self._light_intensity.setDecimals(2)
-        self._light_intensity.setValue(self._light_intensity)
+        self._light_intensity.setValue(0.0)
         self._light_intensity.setSuffix(" lux")
-        self._light_intensity.setFixedWidth(64)
+        self._light_intensity.setFixedWidth(100)
 
         self._record_path_edit = QtWidgets.QLineEdit()
         self._record_path_edit.setText(config.record_path)
