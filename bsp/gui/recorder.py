@@ -1,8 +1,9 @@
 from datetime import datetime
 
+import numpy as np
 from PySide6 import QtCore as qc
 
-from bsp.adc import BitalinoAcquirer
+from bsp.adc import BitalinoAcquirer, SynthAcquirer
 from bsp.core.logging import log
 from bsp.core.models import Conditions, Hardware, Protocol, Session, Study, Test
 from bsp.settings import config
@@ -30,10 +31,19 @@ class Recorder(qc.QObject):
         self._stimulator = stimulator
         self._plotter = plotter
 
-        self._acquirer: BitalinoAcquirer = BitalinoAcquirer(
-            address=config.device_address,
-            parent=self,
-        )
+        match config.device_type:
+            case "Bitalino":
+                self._acquirer: BitalinoAcquirer = BitalinoAcquirer(
+                    address=config.device_address,
+                    parent=self,
+                )
+
+            case "Synth":
+                self._acquirer: SynthAcquirer = SynthAcquirer()
+
+            case _:
+                raise ValueError(f"Unsupported device: {config.device_type}")
+
         self._acquirer.samples_available.connect(self.on_samples_available)
         self._acquirer.test_finished.connect(self.on_test_finished)
         self._acquirer.recording_finished.connect(self.on_recording_finished)
@@ -151,7 +161,11 @@ class Recorder(qc.QObject):
         samples = len(test["hor_stimuli"])
         self._acquirer.acquire(samples)
 
-    def on_samples_available(self, hor, ver):
+    def on_samples_available(
+        self,
+        hor: np.ndarray,
+        ver: np.ndarray,
+    ):
         samples = len(hor)
         start = self._samples_recorded
         end = start + samples

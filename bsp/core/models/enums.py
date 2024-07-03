@@ -2,6 +2,7 @@ from enum import Enum
 
 
 class Device(str, Enum):
+    Synth = "Synth"
     BiosignalsPlux = "BiosignalsPlux"
     Bitalino = "Bitalino"
 
