@@ -1,5 +1,7 @@
 import numpy as np
 
+from bsp.core.logging import log
+
 from .models import Direction
 
 

@@ -4,6 +4,7 @@ from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QColor, QKeyEvent, QPainter, QPaintEvent, QResizeEvent
 from PySide6.QtWidgets import QWidget
 
+from bsp.core.logging import log
 from bsp.settings import config
 
 from .screens import ScreensManager
@@ -120,12 +121,14 @@ class Stimulator(QWidget):
 
         center = self.rect().center()
 
-        self._ball_position = (
+        new_ball_position = (
             int(center.x() + (delta_h * self._x_scale)),
             int(center.y() + (delta_v * self._y_scale)),
         )
 
-        self.update()
+        if new_ball_position != self._ball_position:
+            self._ball_position = new_ball_position
+            self.update()
 
     def set_message(self, msg: str):
         self._msg = msg

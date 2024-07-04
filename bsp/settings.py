@@ -14,6 +14,7 @@ _DEFAULT_PROTOCOLS_DIR = _DEFAULT_DATA_DIR / "Protocols"
 class BSPConfig(QSettings):
     DEVICE_TYPES = [
         # "BiosignalsPlux",
+        "Synth",
         "Bitalino",
     ]
 
@@ -118,7 +119,7 @@ class BSPConfig(QSettings):
 
     @property
     def device_type(self) -> str:
-        return self.value("device_type", "BiosignalsPlux")
+        return self.value("device_type", "Bitalino")
 
     @device_type.setter
     def device_type(self, value: str):
