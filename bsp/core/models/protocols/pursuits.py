@@ -125,9 +125,9 @@ class PursuitProtocolTemplate(ProtocolTemplate):
                         length=pursuit_length,
                         speed=self.pursuit_speed,
                     ),
-                    "hor_channel": np.zeros(pursuit_length, dtype=np.uint16),
-                    "ver_stimuli": np.zeros(pursuit_length, dtype=np.uint16),
-                    "ver_channel": np.zeros(pursuit_length, dtype=np.uint16),
+                    "hor_channel": np.zeros(pursuit_length * 100, dtype=np.uint16),
+                    "ver_stimuli": np.zeros(pursuit_length * 100, dtype=np.uint16),
+                    "ver_channel": np.zeros(pursuit_length * 100, dtype=np.uint16),
                 }
             )
 
@@ -141,9 +141,9 @@ class PursuitProtocolTemplate(ProtocolTemplate):
                             length=pursuit_length,
                             speed=self.pursuit_speed,
                         ),
-                        "hor_channel": np.zeros(pursuit_length, dtype=np.uint16),
-                        "ver_stimuli": np.zeros(pursuit_length, dtype=np.uint16),
-                        "ver_channel": np.zeros(pursuit_length, dtype=np.uint16),
+                        "hor_channel": np.zeros(pursuit_length * 100, dtype=np.uint16),
+                        "ver_stimuli": np.zeros(pursuit_length * 100, dtype=np.uint16),
+                        "ver_channel": np.zeros(pursuit_length * 100, dtype=np.uint16),
                     }
                 )
 
@@ -157,9 +157,9 @@ class PursuitProtocolTemplate(ProtocolTemplate):
                         length=pursuit_length,
                         speed=self.pursuit_speed,
                     ),
-                    "hor_channel": np.zeros(pursuit_length, dtype=np.uint16),
-                    "ver_stimuli": np.zeros(pursuit_length, dtype=np.uint16),
-                    "ver_channel": np.zeros(pursuit_length, dtype=np.uint16),
+                    "hor_channel": np.zeros(pursuit_length * 100, dtype=np.uint16),
+                    "ver_stimuli": np.zeros(pursuit_length * 100, dtype=np.uint16),
+                    "ver_channel": np.zeros(pursuit_length * 100, dtype=np.uint16),
                 }
             )
 
@@ -173,9 +173,9 @@ class PursuitProtocolTemplate(ProtocolTemplate):
                             length=pursuit_length,
                             speed=self.pursuit_speed,
                         ),
-                        "hor_channel": np.zeros(pursuit_length, dtype=np.uint16),
-                        "ver_stimuli": np.zeros(pursuit_length, dtype=np.uint16),
-                        "ver_channel": np.zeros(pursuit_length, dtype=np.uint16),
+                        "hor_channel": np.zeros(pursuit_length * 100, dtype=np.uint16),
+                        "ver_stimuli": np.zeros(pursuit_length * 100, dtype=np.uint16),
+                        "ver_channel": np.zeros(pursuit_length * 100, dtype=np.uint16),
                     }
                 )
 
@@ -189,9 +189,9 @@ class PursuitProtocolTemplate(ProtocolTemplate):
                         length=pursuit_length,
                         speed=self.pursuit_speed,
                     ),
-                    "hor_channel": np.zeros(pursuit_length, dtype=np.uint16),
-                    "ver_stimuli": np.zeros(pursuit_length, dtype=np.uint16),
-                    "ver_channel": np.zeros(pursuit_length, dtype=np.uint16),
+                    "hor_channel": np.zeros(pursuit_length * 100, dtype=np.uint16),
+                    "ver_stimuli": np.zeros(pursuit_length * 100, dtype=np.uint16),
+                    "ver_channel": np.zeros(pursuit_length * 100, dtype=np.uint16),
                 }
             )
 
@@ -205,9 +205,9 @@ class PursuitProtocolTemplate(ProtocolTemplate):
                             length=pursuit_length,
                             speed=self.pursuit_speed,
                         ),
-                        "hor_channel": np.zeros(pursuit_length, dtype=np.uint16),
-                        "ver_stimuli": np.zeros(pursuit_length, dtype=np.uint16),
-                        "ver_channel": np.zeros(pursuit_length, dtype=np.uint16),
+                        "hor_channel": np.zeros(pursuit_length * 100, dtype=np.uint16),
+                        "ver_stimuli": np.zeros(pursuit_length * 100, dtype=np.uint16),
+                        "ver_channel": np.zeros(pursuit_length * 100, dtype=np.uint16),
                     }
                 )
 
@@ -221,9 +221,9 @@ class PursuitProtocolTemplate(ProtocolTemplate):
                         length=pursuit_length,
                         speed=self.pursuit_speed,
                     ),
-                    "hor_channel": np.zeros(pursuit_length, dtype=np.uint16),
-                    "ver_stimuli": np.zeros(pursuit_length, dtype=np.uint16),
-                    "ver_channel": np.zeros(pursuit_length, dtype=np.uint16),
+                    "hor_channel": np.zeros(pursuit_length * 100, dtype=np.uint16),
+                    "ver_stimuli": np.zeros(pursuit_length * 100, dtype=np.uint16),
+                    "ver_channel": np.zeros(pursuit_length * 100, dtype=np.uint16),
                 }
             )
 
@@ -237,9 +237,9 @@ class PursuitProtocolTemplate(ProtocolTemplate):
                             length=pursuit_length,
                             speed=self.pursuit_speed,
                         ),
-                        "hor_channel": np.zeros(pursuit_length, dtype=np.uint16),
-                        "ver_stimuli": np.zeros(pursuit_length, dtype=np.uint16),
-                        "ver_channel": np.zeros(pursuit_length, dtype=np.uint16),
+                        "hor_channel": np.zeros(pursuit_length * 100, dtype=np.uint16),
+                        "ver_stimuli": np.zeros(pursuit_length * 100, dtype=np.uint16),
+                        "ver_channel": np.zeros(pursuit_length * 100, dtype=np.uint16),
                     }
                 )
 
@@ -253,9 +253,9 @@ class PursuitProtocolTemplate(ProtocolTemplate):
                         length=pursuit_length,
                         speed=self.pursuit_speed,
                     ),
-                    "hor_channel": np.zeros(pursuit_length, dtype=np.uint16),
-                    "ver_stimuli": np.zeros(pursuit_length, dtype=np.uint16),
-                    "ver_channel": np.zeros(pursuit_length, dtype=np.uint16),
+                    "hor_channel": np.zeros(pursuit_length * 100, dtype=np.uint16),
+                    "ver_stimuli": np.zeros(pursuit_length * 100, dtype=np.uint16),
+                    "ver_channel": np.zeros(pursuit_length * 100, dtype=np.uint16),
                 }
             )
 
@@ -269,9 +269,9 @@ class PursuitProtocolTemplate(ProtocolTemplate):
                             length=pursuit_length,
                             speed=self.pursuit_speed,
                         ),
-                        "hor_channel": np.zeros(pursuit_length, dtype=np.uint16),
-                        "ver_stimuli": np.zeros(pursuit_length, dtype=np.uint16),
-                        "ver_channel": np.zeros(pursuit_length, dtype=np.uint16),
+                        "hor_channel": np.zeros(pursuit_length * 100, dtype=np.uint16),
+                        "ver_stimuli": np.zeros(pursuit_length * 100, dtype=np.uint16),
+                        "ver_channel": np.zeros(pursuit_length * 100, dtype=np.uint16),
                     }
                 )
 
@@ -285,9 +285,9 @@ class PursuitProtocolTemplate(ProtocolTemplate):
                         length=pursuit_length,
                         speed=self.pursuit_speed,
                     ),
-                    "hor_channel": np.zeros(pursuit_length, dtype=np.uint16),
-                    "ver_stimuli": np.zeros(pursuit_length, dtype=np.uint16),
-                    "ver_channel": np.zeros(pursuit_length, dtype=np.uint16),
+                    "hor_channel": np.zeros(pursuit_length * 100, dtype=np.uint16),
+                    "ver_stimuli": np.zeros(pursuit_length * 100, dtype=np.uint16),
+                    "ver_channel": np.zeros(pursuit_length * 100, dtype=np.uint16),
                 }
             )
 
@@ -301,9 +301,9 @@ class PursuitProtocolTemplate(ProtocolTemplate):
                             length=pursuit_length,
                             speed=self.pursuit_speed,
                         ),
-                        "hor_channel": np.zeros(pursuit_length, dtype=np.uint16),
-                        "ver_stimuli": np.zeros(pursuit_length, dtype=np.uint16),
-                        "ver_channel": np.zeros(pursuit_length, dtype=np.uint16),
+                        "hor_channel": np.zeros(pursuit_length * 100, dtype=np.uint16),
+                        "ver_stimuli": np.zeros(pursuit_length * 100, dtype=np.uint16),
+                        "ver_channel": np.zeros(pursuit_length * 100, dtype=np.uint16),
                     }
                 )
 
