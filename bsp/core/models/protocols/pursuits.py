@@ -64,7 +64,7 @@ class PursuitProtocolTemplate(ProtocolTemplate):
         if not isinstance(pursuit_speed, (int, float)):
             raise ValueError("Variabilidad sacádica inválida")
 
-        if pursuit_speed < 0.1 or pursuit_speed > 10.0:
+        if pursuit_speed < 0.1 or pursuit_speed > 100.0:
             raise ValueError("Variabilidad sacádica inválida")
 
         return cls(**json)

@@ -46,7 +46,7 @@ class ProtocolsPursuitPage(QtWidgets.QWizardPage):
         self._pursuit_speed = QtWidgets.QDoubleSpinBox(self)
         self._pursuit_speed.setFixedWidth(SELECTOR_WIDTH)
         self._pursuit_speed.setMinimum(0.1)
-        self._pursuit_speed.setMaximum(10.0)
+        self._pursuit_speed.setMaximum(100.0)
         self._pursuit_speed.setSuffix("°/segundo")
 
         self._pursuit_replicas = QtWidgets.QCheckBox(self)
