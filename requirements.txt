@@ -10,7 +10,7 @@ scikit-learn
 tablib
 tablib[xlsx]
 
-setuptools
+
 jupyterlab
 notebook
 matplotlib
@@ -18,3 +18,7 @@ matplotlib
 pyserial
 
 termcolor
+
+# Setup Tools
+setuptools
+build
