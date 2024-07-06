@@ -1,24 +1,22 @@
+# Core
+setuptools
+
+# GUI
 PySide6
 PySide6-Addons
 PySide6-Essentials
 PySide6-stubs
 pyqtgraph
 
+# Processing
 numpy==1.26.4
 scipy
 scikit-learn
 tablib
 tablib[xlsx]
 
-
-jupyterlab
-notebook
-matplotlib
-
-pyserial
-
+# Utilities
 termcolor
 
-# Setup Tools
-setuptools
-build
+# Recorder Specific
+pyserial

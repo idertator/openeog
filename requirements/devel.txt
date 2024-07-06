@@ -1,0 +1,10 @@
+-r base.txt
+
+# Research Tooks
+jupyterlab
+notebook
+matplotlib
+
+# Build Tools
+build
+pre-commit

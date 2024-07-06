@@ -25,16 +25,16 @@ installer:
 	makeself ./install openeog-${VERSION}.run "Open EOG" ./install.sh
 	rm install/*.tar.gz
 
-install_requirements:
+install-requirements:
 	( \
  	  source .venv/bin/activate; \
-  	  uv pip install -r requirements.txt; \
+  	  uv pip install -r requirements/devel.txt; \
 	)
 
-update_requirements:
+update-requirements:
 	( \
  	  source .venv/bin/activate; \
-  	  uv pip install --upgrade -r requirements.txt; \
+  	  uv pip install --upgrade -r requirements/devel.txt; \
 	)
 
 notebook:
