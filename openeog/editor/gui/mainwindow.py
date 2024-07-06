@@ -1,4 +1,4 @@
-from os.path import dirname
+from os.path import basename, dirname
 
 from PySide6 import QtGui as qg
 from PySide6 import QtWidgets as qw
@@ -117,7 +117,11 @@ class MainWindow(qw.QMainWindow):
         )
         if filename:
             config.record_path = dirname(filename)
+            study_name = basename(filename)
+
             self.study = load_study(filename)
+
+            self.setWindowTitle(f"OpenEOG Editor - {study_name}")
 
     def _on_test_changed_index(self, index: int):
         self.test = self.study[index]
