@@ -2,5 +2,7 @@
 <RCC version="1.0">
     <qresource>
         <file alias="open.svg">icons/open.svg</file>
+        <file alias="horizontal.svg">icons/horizontal.svg</file>
+        <file alias="vertical.svg">icons/vertical.svg</file>
     </qresource>
 </RCC>

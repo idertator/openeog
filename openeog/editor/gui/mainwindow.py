@@ -9,6 +9,7 @@ from openeog.core.logging import log
 from openeog.settings import config
 
 from . import resources  # noqa
+from .visualizer import Visualizer
 
 
 class MainWindow(qw.QMainWindow):
@@ -61,7 +62,9 @@ class MainWindow(qw.QMainWindow):
         self._right_toolbar.addWidget(self._tests_container)
         self._right_toolbar.setVisible(False)
 
-        self.setCentralWidget(qw.QWidget())
+        self._visualizer = Visualizer()
+        self._visualizer.setVisible(False)
+        self.setCentralWidget(self._visualizer)
 
     @property
     def study(self) -> models.Study | None:
@@ -95,6 +98,13 @@ class MainWindow(qw.QMainWindow):
 
     @test.setter
     def test(self, value: models.Test | None):
+        if value:
+            self._visualizer.plot(value)
+            self._visualizer.setVisible(True)
+        else:
+            self._visualizer.plot(None)
+            self._visualizer.setVisible(False)
+
         self._test = value
         log.info("Set test: %s", self.test)
 

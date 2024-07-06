@@ -48,4 +48,4 @@ skip-magic-trailing-comma = false
 line-ending = "auto"
 
 [lint.per-file-ignores]
-"resources.py" = ["E501"]
+"**/resources.py" = ["E501"]

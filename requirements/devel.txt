@@ -3,7 +3,6 @@
 # Research Tooks
 jupyterlab
 notebook
-matplotlib
 
 # Build Tools
 build
