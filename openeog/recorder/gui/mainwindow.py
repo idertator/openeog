@@ -18,7 +18,7 @@ class MainWindow(QMainWindow):
         super().__init__()
         self._screens = screens
 
-        self.setWindowTitle("EOG Recorder")
+        self.setWindowTitle("OpenEOG Recorder")
 
         # Setup state
         self._recording = False

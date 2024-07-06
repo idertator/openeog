@@ -4,14 +4,14 @@ from PySide6 import QtWidgets
 
 from openeog.core import log
 
-from .gui import MainWindow, ScreensManager
+from .gui import MainWindow
 
-VERSION = "1.1.0"
+VERSION = "1.0.0"
 
 
 def main():
     log.info(
-        "Starting OpenEOG Recorder {version}".format(
+        "Starting OpenEOG Editor {version}".format(
             version=VERSION,
         )
     )
@@ -20,11 +20,9 @@ def main():
     app.setOrganizationDomain("diatax")
     app.setApplicationName("OpenEOG")
     app.setApplicationVersion(VERSION)
-    app.setApplicationDisplayName("OpenEOG Recorder")
+    app.setApplicationDisplayName("OpenEOG Editor")
 
-    screens = ScreensManager(app)
-
-    window = MainWindow(screens)
+    window = MainWindow()
     window.showMaximized()
 
     sys.exit(app.exec())

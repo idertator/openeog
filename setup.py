@@ -19,7 +19,10 @@ setup(
     author="Roberto Antonio Becerra García",
     author_email="idertator@gmail.com",
     entry_points={
-        "gui_scripts": ["openeog-recorder = openeog.recorder:main"],
+        "gui_scripts": [
+            "openeog-recorder = openeog.recorder:main",
+            "openeog-editor = openeog.editor:main",
+        ],
     },
     packages=[
         "openeog",
