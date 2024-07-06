@@ -2,6 +2,7 @@ PySide6
 PySide6-Addons
 PySide6-Essentials
 PySide6-stubs
+pyqtgraph
 
 numpy==1.26.4
 scipy
