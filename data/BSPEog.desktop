@@ -1,9 +1,9 @@
 [Desktop Entry]
 Type=Application
 Encoding=UTF-8
-Name=BSPEog
+Name=OpenEOG
 Comment=Electrooculographic Signals Recording App
-Exec=sh -c "python3 /usr/local/bin/bsp"
-Icon=BSPEog.png
+Exec=sh -c "python3 /usr/local/bin/openeog-recorder"
+Icon=OpenEOG-Recorder.png
 Terminal=false
 Categories=Science;
