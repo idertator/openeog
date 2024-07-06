@@ -3,9 +3,9 @@ from datetime import datetime
 import numpy as np
 from PySide6 import QtCore as qc
 
-from openeog.adc import BitalinoAcquirer, SynthAcquirer
 from openeog.core.logging import log
 from openeog.core.models import Conditions, Hardware, Protocol, Session, Study, Test
+from openeog.recorder.adc import BitalinoAcquirer, SynthAcquirer
 from openeog.settings import config
 
 from .plotter import Plotter

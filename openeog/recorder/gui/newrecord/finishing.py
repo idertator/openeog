@@ -1,6 +1,6 @@
 from PySide6 import QtWidgets
 
-from openeog.gui.screens import ScreensManager
+from openeog.recorder.gui.screens import ScreensManager
 from openeog.settings import config
 
 from .consts import SELECTOR_WIDTH

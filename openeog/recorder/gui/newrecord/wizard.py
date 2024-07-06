@@ -4,7 +4,7 @@ from PySide6 import QtCore, QtGui, QtWidgets
 
 from openeog.core import Protocol, log
 from openeog.core.models import Session
-from openeog.gui.screens import ScreensManager
+from openeog.recorder.gui.screens import ScreensManager
 from openeog.settings import config
 
 from .finishing import FinishingPage

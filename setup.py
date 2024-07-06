@@ -19,18 +19,18 @@ setup(
     author="Roberto Antonio Becerra García",
     author_email="idertator@gmail.com",
     entry_points={
-        "gui_scripts": ["openeog-recorder = openeog:main"],
+        "gui_scripts": ["openeog-recorder = openeog.recorder:main"],
     },
     packages=[
         "openeog",
-        "openeog.adc",
         "openeog.core",
         "openeog.core.biomarkers",
         "openeog.core.models",
         "openeog.core.models.annotations",
         "openeog.core.models.protocols",
-        "openeog.gui",
-        "openeog.gui.newrecord",
+        "openeog.recorder.adc",
+        "openeog.recorder.gui",
+        "openeog.recorder.gui.newrecord",
     ],
     data_files=[
         ("", ["requirements.txt", "README.md"]),

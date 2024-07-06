@@ -16,7 +16,7 @@ tags::
 	ctags -R .
 
 art:
-	pyside6-rcc res/resources.qrc -o openeog/gui/resources.py
+	pyside6-rcc res/recorder.qrc -o openeog/recorder/gui/resources.py
 
 installer:
 	python3 setup.py sdist
