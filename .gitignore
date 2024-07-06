@@ -177,6 +177,7 @@ $RECYCLE.BIN/
 
 # End of https://www.gitignore.io/api/linux,macos,python,windows
 
+.ruff_cache/
 .venv/
 venv/
 tags
@@ -189,4 +190,3 @@ tags
 # Releases
 *.tar.gz
 *.run
-
