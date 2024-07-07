@@ -82,6 +82,11 @@ class Visualizer(qw.QWidget):
                 211 if self.vertical_visible else 111, title="Canal Horizontal"
             )
             self.ax1.plot(time, self.test.hor_channel_raw, label="Horizontal")
+            self.ax1.plot(
+                time,
+                self.test.hor_stimuli_raw,
+                label="Horizontal",
+            )
             self.ax1.set_ylabel("Amplitude")
             self.ax1.grid(True)
 
@@ -89,6 +94,11 @@ class Visualizer(qw.QWidget):
             ax_number = 212 if self.horizontal_visible else 111
             self.ax2 = self.figure.add_subplot(ax_number, title="Canal Vertical")
             self.ax2.plot(time, self.test.ver_channel_raw, label="Vertical")
+            self.ax2.plot(
+                time,
+                self.test.ver_stimuli_raw,
+                label="Vertical",
+            )
             self.ax2.set_ylabel("Amplitude")
             self.ax2.set_xlabel("Time (s)")
             self.ax2.grid(True)
