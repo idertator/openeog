@@ -16,8 +16,22 @@ setup(
     version="1.2.0",
     description="Electrooculographic Recording and Records Processing Platform",
     long_description=readme(),
-    author="Roberto Antonio Becerra García",
-    author_email="idertator@gmail.com",
+    author=", ".join(
+        [
+            "Roberto A. Becerra",
+            "Gonzalo Joya",
+            "Alison Mendoza",
+            "Sofia Fernández",
+        ]
+    ),
+    author_email=", ".join(
+        [
+            "idertator@uma.es",
+            "gjoya@uma.es",
+            "rominaabb29@gmail.com",
+            "sofiafernandezblasco@gmail.com",
+        ]
+    ),
     entry_points={
         "gui_scripts": [
             "openeog-recorder = openeog.recorder:main",
