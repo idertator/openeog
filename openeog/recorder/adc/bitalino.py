@@ -165,6 +165,11 @@ class BitalinoAcquirer(qc.QThread):
                     while self.running and processed < self.samples:
                         hor, ver, ok = recorder.read_data()
 
+                        if not processed:
+                            log.debug(
+                                f"Captured first packet at 🕒 {time.time_ns()} ns"
+                            )
+
                         if not ok:
                             errors += 1
 

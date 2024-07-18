@@ -1,4 +1,5 @@
 from math import radians, tan
+import time
 
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QColor, QKeyEvent, QPainter, QPaintEvent, QResizeEvent
@@ -7,6 +8,8 @@ from PySide6.QtWidgets import QWidget
 from openeog.settings import config
 
 from .screens import ScreensManager
+
+from openeog.core.logging import log
 
 
 class Stimulator(QWidget):
@@ -41,6 +44,8 @@ class Stimulator(QWidget):
         self._ball_position: tuple[int, int] | None = None
         self._subject_distance: int = 0  # in mm
         self._initialized = False
+
+        self._first_stimuli_drawn = True
 
     def paintEvent(self, event: QPaintEvent):
         painter = QPainter(self)
@@ -78,6 +83,10 @@ class Stimulator(QWidget):
 
         painter.end()
 
+        if not self._msg and self._first_stimuli_drawn is False:
+            log.debug(f"Draw first stimuli at 🕒 {time.time_ns()} ns")
+            self._first_stimuli_drawn = True
+
     def resizeEvent(self, event: QResizeEvent):
         self._x_scale = float(event.size().width()) / float(self._width)
         self._y_scale = float(event.size().height()) / float(self._height)
@@ -90,6 +99,7 @@ class Stimulator(QWidget):
         elif event.key() == Qt.Key_Space:
             if not self._initialized:
                 self._initialized = True
+                self._first_stimuli_drawn = False
                 self.initialized.emit()
             else:
                 self.started.emit()
