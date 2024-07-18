@@ -6,11 +6,6 @@ def readme():
         return f.read()
 
 
-def requirements():
-    with open("requirements.txt", "rt") as f:
-        return f.read().strip().split("\n")
-
-
 setup(
     name="openeog",
     version="1.2.0",
