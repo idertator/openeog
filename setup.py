@@ -6,11 +6,6 @@ def readme():
         return f.read()
 
 
-def requirements():
-    with open("requirements.txt", "rt") as f:
-        return f.read().strip().split("\n")
-
-
 setup(
     name="openeog",
     version="1.2.0",
@@ -56,7 +51,21 @@ setup(
         ("share/applications", ["data/OpenEOG-Recorder.desktop"]),
         ("share/applications", ["data/OpenEOG-Editor.desktop"]),
     ],
-    install_requires=requirements(),
+    install_requires=[
+        "setuptools",
+        "PySide6",
+        "PySide6-Addons",
+        "PySide6-Essentials",
+        "PySide6-stubs",
+        "matplotlib",
+        "numpy==1.26.4",
+        "scipy",
+        "scikit-learn",
+        "tablib",
+        "tablib[xlsx]",
+        "termcolor",
+        "pyserial",
+    ],
     classifiers=[
         "Development Status :: 3 - Alpha",
         "Environment :: X11 Applications :: Qt",
