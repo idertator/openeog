@@ -315,9 +315,9 @@ class PursuitProtocolTemplate(ProtocolTemplate):
                     length=calibration_length,
                     saccades=self.calibration_count,
                 ),
-                "hor_channel": np.zeros(calibration_length * 1000, dtype=np.uint16),
-                "ver_stimuli": np.zeros(calibration_length * 1000, dtype=np.uint16),
-                "ver_channel": np.zeros(calibration_length * 1000, dtype=np.uint16),
+                "hor_channel": np.zeros(calibration_length, dtype=np.uint16),
+                "ver_stimuli": np.zeros(calibration_length, dtype=np.uint16),
+                "ver_channel": np.zeros(calibration_length, dtype=np.uint16),
             }
         )
 

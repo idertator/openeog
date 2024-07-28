@@ -5,6 +5,8 @@ from zipfile import ZipFile
 
 from numpy import load, savez_compressed
 
+from openeog.core.logging import log
+
 from .models import Conditions, Device, Hardware, Protocol, Study, Test, TestType
 
 
@@ -98,7 +100,7 @@ def load_study(filepath: str) -> Study:
                     )
                 )
 
-        return Study(
+        study = Study(
             recorded_at=datetime.fromtimestamp(manifest["recorded_at"]),
             protocol=Protocol(test.get("protocol", "saccadic")),
             hardware=hardware,
@@ -113,3 +115,7 @@ def load_study(filepath: str) -> Study:
                 manifest.get("ver_calibration_diff", None) or 1.0
             ),
         )
+
+        log.debug(f"Loaded study with {study.error_rate:.4f}% error rate")
+
+        return study
