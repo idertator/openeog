@@ -3,7 +3,11 @@
 # Research Tooks
 jupyterlab
 notebook
+ipython
 
 # Build Tools
 build
 pre-commit
+
+# Extra Tools
+tqdm
