@@ -1,5 +1,6 @@
 #!env python
 
+import numpy as np
 from pathlib import Path
 from openeog.core.logging import log
 from openeog.core.io import load_study, save_study
@@ -71,34 +72,54 @@ PURSUIT_STUDIES = [
     "Prueba_Persecucion_35.oeog",
 ]
 
-OUTPUT_PATH = "processed_timing_fixed"
+OUTPUT_PATH = "fixed"
 
 
-def process_study(study: Study):
+def fix_timing(test: Test, cut_samples: int):
+    test._hor_channel = test._hor_channel[cut_samples:]
+    test._hor_stimuli = test._hor_stimuli[:-cut_samples]
+
+
+def clear_vertical_channel(test: Test):
+    length = len(test._hor_stimuli)
+    test._ver_channel = np.zeros(length)
+    test._ver_stimuli = np.zeros(length)
+
+
+def denoise(test: Test):
+    test._hor_channel = denoise_35(test._hor_channel)
+
+
+def fix_test_diferences(test: Test):
+    length = len(test._hor_stimuli)
+    test._hor_channel = test._hor_channel[:length]
+    test._ver_channel = test._ver_channel[:length]
+
+    log.debug(f"{length}")
+    log.debug(f"{len(test._hor_channel)=}")
+    log.debug(f"{len(test._hor_stimuli)=}")
+    log.debug(f"{len(test._ver_channel)=}")
+    log.debug(f"{len(test._ver_stimuli)=}")
+
+
+def process_study(study: Study, pursuit: bool = False):
     test: Test
+    last_index = len(study) - 1
     for index, test in enumerate(study):
         log.debug(f"Procesando test {index} / {len(study) - 1}")
 
         # Fixing timing
         if index == 0:
-            hor_channel_cutted = test._hor_channel[222:]
-            hor_stimuli_cutted = test._hor_stimuli[:-222]
-            ver_channel_cutted = test._ver_channel[222:]
-            ver_stimuli_cutted = test._ver_stimuli[:-222]
+            fix_timing(test, 222)
         else:
-            hor_channel_cutted = test._hor_channel[194:]
-            hor_stimuli_cutted = test._hor_stimuli[:-194]
-            ver_channel_cutted = test._ver_channel[194:]
-            ver_stimuli_cutted = test._ver_stimuli[:-194]
+            fix_timing(test, 194)
 
-        # Denoising
-        hor_channel_processed = denoise_35(hor_channel_cutted)
-        test._hor_channel = hor_channel_processed
-        test._hor_stimuli = hor_stimuli_cutted
+        clear_vertical_channel(test)
 
-        ver_channel_processed = denoise_35(ver_channel_cutted)
-        test._ver_channel = ver_channel_processed
-        test._ver_stimuli = ver_stimuli_cutted
+        if pursuit and index == last_index:
+            fix_test_diferences(test)
+
+        denoise(test)
 
 
 if __name__ == "__main__":
@@ -129,7 +150,7 @@ if __name__ == "__main__":
         fullpath = PURSUIT_PATH / filename
         if fullpath.exists():
             study = load_study(fullpath)
-            process_study(study)
+            process_study(study, pursuit=True)
 
             output_path = PURSUIT_OUTPUT_PATH / filename
             save_study(study, output_path)
