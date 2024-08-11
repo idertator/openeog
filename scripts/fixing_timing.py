@@ -1,5 +1,4 @@
 #!env python
-import numpy as np
 
 from pathlib import Path
 from openeog.core.logging import log
@@ -8,7 +7,7 @@ from openeog.core.models import Study, Test
 from openeog.core.denoising import denoise_35
 from tqdm import tqdm
 
-BASE_PATH = "/Users/sofiafernandez/Desktop/TFG/Registros/july2024/"
+BASE_PATH = "/Users/idertator/Registros/july2024"
 ANTISACCADIC_PATH = Path(BASE_PATH) / "antisaccades"
 PURSUIT_PATH = Path(BASE_PATH) / "pursuits"
 
@@ -17,7 +16,7 @@ ANTISACCADIC_STUDIES = [
     "Prueba_Antisacadica_02.oeog",
     "Prueba_Antisacadica_04.oeog",
     "Prueba_Antisacadica_05.oeog",
-    "Prueba_Antisacadica_06.oeog", # He añadido esta prueba porque es de un sujeto de 98 interesante de estudiar
+    "Prueba_Antisacadica_06.oeog",  # He añadido esta prueba porque es de un sujeto de 98 interesante de estudiar
     "Prueba_Antisacadica_07.oeog",
     "Prueba_Antisacadica_08.oeog",
     "Prueba_Antisacadica_09.oeog",
@@ -78,12 +77,10 @@ OUTPUT_PATH = "processed_timing_fixed"
 def process_study(study: Study):
     test: Test
     for index, test in enumerate(study):
-        print(f"Procesando test {index} / {len(study) - 1}")
-
-        samples = len(test._hor_stimuli)
+        log.debug(f"Procesando test {index} / {len(study) - 1}")
 
         # Fixing timing
-        if  index == 0:
+        if index == 0:
             hor_channel_cutted = test._hor_channel[222:]
             hor_stimuli_cutted = test._hor_stimuli[:-222]
             ver_channel_cutted = test._ver_channel[222:]
@@ -102,6 +99,7 @@ def process_study(study: Study):
         ver_channel_processed = denoise_35(ver_channel_cutted)
         test._ver_channel = ver_channel_processed
         test._ver_stimuli = ver_stimuli_cutted
+
 
 if __name__ == "__main__":
     ANTISACCADIC_OUTPUT_PATH = ANTISACCADIC_PATH / OUTPUT_PATH
