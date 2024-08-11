@@ -6,6 +6,7 @@ from openeog.core.logging import log
 from openeog.core.io import load_study, save_study
 from openeog.core.models import Study, Test
 from openeog.core.denoising import denoise_35
+from openeog.core.calibration import calibrate
 from tqdm import tqdm
 
 BASE_PATH = "/Users/idertator/Registros/july2024"
@@ -95,18 +96,12 @@ def fix_test_diferences(test: Test):
     test._hor_channel = test._hor_channel[:length]
     test._ver_channel = test._ver_channel[:length]
 
-    log.debug(f"{length}")
-    log.debug(f"{len(test._hor_channel)=}")
-    log.debug(f"{len(test._hor_stimuli)=}")
-    log.debug(f"{len(test._ver_channel)=}")
-    log.debug(f"{len(test._ver_stimuli)=}")
-
 
 def process_study(study: Study, pursuit: bool = False):
     test: Test
     last_index = len(study) - 1
     for index, test in enumerate(study):
-        log.debug(f"Procesando test {index} / {len(study) - 1}")
+        # log.debug(f"Procesando test {index} / {len(study) - 1}")
 
         # Fixing timing
         if index == 0:
@@ -121,6 +116,9 @@ def process_study(study: Study, pursuit: bool = False):
 
         denoise(test)
 
+    dif = calibrate(study)
+    print(f"Calibration difference: {dif:.4f}")
+
 
 if __name__ == "__main__":
     ANTISACCADIC_OUTPUT_PATH = ANTISACCADIC_PATH / OUTPUT_PATH
@@ -131,6 +129,7 @@ if __name__ == "__main__":
         ANTISACCADIC_STUDIES,
         desc="Processing antisaccadic studies",
     ):
+        print(f"Processing study {filename}")
         fullpath = ANTISACCADIC_PATH / filename
         if fullpath.exists():
             study = load_study(fullpath)
@@ -138,6 +137,8 @@ if __name__ == "__main__":
 
             output_path = ANTISACCADIC_OUTPUT_PATH / filename
             save_study(study, output_path)
+
+        print()
 
     PURSUIT_OUTPUT_PATH = PURSUIT_PATH / OUTPUT_PATH
     if not PURSUIT_OUTPUT_PATH.exists():
@@ -147,6 +148,7 @@ if __name__ == "__main__":
         PURSUIT_STUDIES,
         desc="Processing pursuit studies",
     ):
+        print(f"Processing study {filename}")
         fullpath = PURSUIT_PATH / filename
         if fullpath.exists():
             study = load_study(fullpath)
@@ -154,3 +156,5 @@ if __name__ == "__main__":
 
             output_path = PURSUIT_OUTPUT_PATH / filename
             save_study(study, output_path)
+
+        print()

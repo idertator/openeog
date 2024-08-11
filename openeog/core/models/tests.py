@@ -2,7 +2,6 @@ from functools import cached_property
 
 import numpy as np
 
-from openeog.core.denoising import denoise
 from openeog.core.saccades import saccades
 
 from .annotations import Annotation, Saccade
@@ -93,7 +92,7 @@ class Test:
     def hor_channel(self) -> np.ndarray:
         scaled = self._hor_channel.astype(np.single) * self._hor_calibration
         centered = scaled - scaled.mean()
-        return denoise(centered)
+        return centered
 
     @property
     def hor_channel_raw(self) -> np.ndarray:
@@ -113,7 +112,7 @@ class Test:
     def ver_channel(self) -> np.ndarray:
         scaled = self._ver_channel.astype(np.single) * self._hor_calibration
         centered = scaled - scaled.mean()
-        return denoise(centered)
+        return centered
 
     @property
     def ver_channel_raw(self) -> np.ndarray:

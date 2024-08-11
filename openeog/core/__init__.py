@@ -1,4 +1,4 @@
-from .calibration import calibration
+from .calibration import calibrate
 from .denoising import denoise
 from .differentiation import differentiate
 from .impulses import impulses
@@ -14,7 +14,7 @@ __all__ = [
     "Study",
     "Test",
     "TestType",
-    "calibration",
+    "calibrate",
     "denoise",
     "differentiate",
     "impulses",
