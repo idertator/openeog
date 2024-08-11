@@ -48,7 +48,7 @@ class Visualizer(qw.QWidget):
         super().__init__(parent)
         self.test = None
         self.horizontal_visible = True
-        self.vertical_visible = True
+        self.vertical_visible = False
         self._setup_gui()
 
     def _setup_gui(self):
@@ -75,16 +75,21 @@ class Visualizer(qw.QWidget):
             self.canvas.draw()
             return
 
-        time = np.arange(0, len(self.test.hor_channel_raw)) / self.test.fs
+        time = np.arange(0, len(self.test.hor_channel)) / self.test.fs
 
         if self.horizontal_visible:
             self.ax1 = self.figure.add_subplot(
-                211 if self.vertical_visible else 111, title="Canal Horizontal"
+                211 if self.vertical_visible else 111,
+                title="Canal Horizontal",
             )
-            self.ax1.plot(time, self.test.hor_channel_raw, label="Horizontal")
             self.ax1.plot(
                 time,
-                self.test.hor_stimuli_raw,
+                self.test.hor_channel,
+                label="Horizontal",
+            )
+            self.ax1.plot(
+                time,
+                self.test.hor_stimuli,
                 label="Horizontal",
             )
             self.ax1.set_ylabel("Amplitude")
@@ -92,11 +97,18 @@ class Visualizer(qw.QWidget):
 
         if self.vertical_visible:
             ax_number = 212 if self.horizontal_visible else 111
-            self.ax2 = self.figure.add_subplot(ax_number, title="Canal Vertical")
-            self.ax2.plot(time, self.test.ver_channel_raw, label="Vertical")
+            self.ax2 = self.figure.add_subplot(
+                ax_number,
+                title="Canal Vertical",
+            )
             self.ax2.plot(
                 time,
-                self.test.ver_stimuli_raw,
+                self.test.ver_channel,
+                label="Vertical",
+            )
+            self.ax2.plot(
+                time,
+                self.test.ver_stimuli,
                 label="Vertical",
             )
             self.ax2.set_ylabel("Amplitude")

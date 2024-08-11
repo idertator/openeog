@@ -80,8 +80,13 @@ class Test:
 
     @cached_property
     def hor_stimuli(self) -> np.ndarray:
-        normalized = (self._hor_stimuli - 32768) / 20000
-        scaled = normalized.astype(np.single) * (self.angle / 2)
+        converted = self._hor_stimuli.astype(np.single)
+        centered = converted - converted.mean()
+        max_value = abs(centered).max()
+        min_value = abs(centered).min()
+        amplitude = max_value - min_value
+        scaled = (centered / amplitude) * (self.angle / 2)
+
         return scaled
 
     @property
@@ -100,8 +105,13 @@ class Test:
 
     @cached_property
     def ver_stimuli(self) -> np.ndarray:
-        normalized = (self._ver_stimuli - 32768) / 20000
-        scaled = normalized.astype(np.single) * (self.angle / 2)
+        converted = self._ver_stimuli.astype(np.single)
+        centered = converted - converted.mean()
+        max_value = abs(centered).max()
+        min_value = abs(centered).min()
+        amplitude = max_value - min_value
+        scaled = (centered / amplitude) * (self.angle / 2)
+
         return scaled
 
     @property
