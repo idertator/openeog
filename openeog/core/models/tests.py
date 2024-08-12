@@ -29,9 +29,9 @@ class Test:
         self._replica = replica
 
         self._hor_stimuli = hor_stimuli
-        self._hor_channel = hor_channel
+        self._hor_channel = hor_channel  # In muV
         self._ver_stimuli = ver_stimuli
-        self._ver_channel = ver_channel
+        self._ver_channel = ver_channel  # In muV
         self._hor_annotations = hor_annotations
         self._ver_annotations = ver_annotations
 
@@ -95,12 +95,14 @@ class Test:
 
     @cached_property
     def hor_channel(self) -> np.ndarray:
+        # In Degrees
         scaled = self._hor_channel.astype(np.single) * self._hor_calibration
         centered = scaled - scaled.mean()
         return centered
 
     @property
     def hor_channel_raw(self) -> np.ndarray:
+        # In muV
         return self._hor_channel
 
     @cached_property
