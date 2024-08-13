@@ -2,6 +2,7 @@
 
 from pathlib import Path
 
+import tablib
 from tqdm import tqdm
 
 from openeog.core.io import load_study, save_study
@@ -21,11 +22,11 @@ from openeog.core.saccades import saccades
 
 class PursuitBiomarkers:
     def __init__(
-        self,
-        test: Test,
-        to_cut: int = 100,
-        invert_signal: bool = False,
-        **kwargs,
+            self,
+            test: Test,
+            to_cut: int = 100,
+            invert_signal: bool = False,
+            **kwargs,
     ):
         """Constructor
 
@@ -39,20 +40,21 @@ class PursuitBiomarkers:
         """
         self.angle = test.angle
         self.horizontal_channel = None
-        self.horizontal_cutted = None
+        self.stimuli_channel = None
+        # self.horizontal_cutted = None
 
         if invert_signal:
             self.horizontal_channel = test.hor_channel.copy()[to_cut:-to_cut] * -1
-            self.horizontal_cutted = test.hor_channel_raw.copy()[to_cut:-to_cut] * -1
+            # self.horizontal_cutted = test.hor_channel_raw.copy()[to_cut:-to_cut] * -1
         else:
             self.horizontal_channel = test.hor_channel.copy()[to_cut:-to_cut]
-            self.horizontal_cutted = test.hor_channel_raw.copy()[to_cut:-to_cut]
-        amplitude = self.horizontal_channel.max() - self.horizontal_channel.min()
+            # self.horizontal_cutted = test.hor_channel_raw.copy()[to_cut:-to_cut]
+        # amplitude = self.horizontal_channel.max() - self.horizontal_channel.min()
 
         self.stimuli_channel = test.hor_stimuli.copy()[to_cut:-to_cut]
-        self.stimuli_channel -= self.stimuli_channel.mean()
-        self.stimuli_channel *= amplitude * 2
-        self.stimuli_cutted = test.hor_stimuli_raw.copy()[to_cut:-to_cut]
+        # self.stimuli_channel -= self.stimuli_channel.mean()
+        # self.stimuli_channel *= amplitude * 2
+        # self.stimuli_cutted = test.hor_stimuli_raw.copy()[to_cut:-to_cut]
 
     @property
     def waveform_mse(self) -> tuple[int, float]:
@@ -78,17 +80,17 @@ class PursuitBiomarkers:
         Returns:
             float: latency (in seconds)
         """
-        #centered_channel = helpers.center_signal(self.horizontal_cutted)
-        #centered_stimuli = helpers.center_signal(self.stimuli_cutted)
-        #scaled_channel = helpers.scale_signal(centered_channel, self.angle)
-        #scaled_stim_channel = helpers.scale_signal(centered_stimuli, self.angle)
+        # centered_channel = helpers.center_signal(self.horizontal_cutted)
+        # centered_stimuli = helpers.center_signal(self.stimuli_cutted)
+        # scaled_channel = helpers.scale_signal(centered_channel, self.angle)
+        # scaled_stim_channel = helpers.scale_signal(centered_stimuli, self.angle)
 
-        #denoised_channel = denoise_35(scaled_channel)
+        # denoised_channel = denoise_35(scaled_channel)
 
-        #peaks_channel = signal.find_peaks_cwt(abs(denoised_channel), 1000)[:-1]
+        # peaks_channel = signal.find_peaks_cwt(abs(denoised_channel), 1000)[:-1]
 
-        peaks_channel = signal.find_peaks_cwt(abs(self.hor_channel), 1000)[:-1]
-        peaks_stim_channel = signal.find_peaks_cwt(abs(scaled_stim_channel), 1000)[:-1]
+        peaks_channel = signal.find_peaks_cwt(abs(self.horizontal_channel), 1000)[:-1]
+        peaks_stim_channel = signal.find_peaks_cwt(abs(self.stimuli_channel), 1000)[:-1]
 
         displacements = peaks_stim_channel - peaks_channel
 
@@ -127,13 +129,13 @@ class PursuitBiomarkers:
         Returns:
             float: velocity (in degrees per second)
         """
-        ch_filtered = medfilt(self.horizontal_channel, 201)
-        ch_f_vel = differentiate(ch_filtered)
+        # ch_filtered = medfilt(self.horizontal_channel, 201)
+        ch_f_vel = differentiate(self.horizontal_channel)
         mean_pursuit = abs(ch_f_vel.mean())
         return mean_pursuit
 
     @property
-    def velocity_gain(self) -> float:
+    def velocity_ratio(self) -> float:
         """Velocity Gain
 
         Returns:
@@ -170,15 +172,15 @@ class PursuitBiomarkers:
             "latency_mean": self.latency_mean,
             "corrective_saccades_count": self.corrective_saccades_count,
             "velocity_mean": self.velocity_mean,
-            "velocity_gain": self.velocity_gain,
+            "velocity_gain": self.velocity_ratio,
             "spectral_coherence": self.spectral_coherence,
         }
 
-    def save_to(self, filename: str):
-        raise NotImplementedError()
+    # def save_to(self, filename: str):
+    #    raise NotImplementedError()
 
 
-BASE_PATH = "/Users/idertator/Registros/july2024"
+BASE_PATH = "/Users/alison/universidad/TFG/july2024-fixed"
 PURSUIT_PATH = Path(BASE_PATH) / "pursuits"
 
 # TODO: Eliminar los que tengan error de calbración >= 50%
@@ -186,7 +188,6 @@ PURSUIT_PATH = Path(BASE_PATH) / "pursuits"
 PURSUIT_STUDIES = [
     "Prueba_Persecucion_01.oeog",
     "Prueba_Persecucion_02.oeog",
-    "Prueba_Persecucion_03.oeog",
     "Prueba_Persecucion_06.oeog",
     "Prueba_Persecucion_07.oeog",
     "Prueba_Persecucion_08.oeog",
@@ -198,10 +199,8 @@ PURSUIT_STUDIES = [
     "Prueba_Persecucion_14.oeog",
     "Prueba_Persecucion_15.oeog",
     "Prueba_Persecucion_18.oeog",
-    "Prueba_Persecucion_19.oeog",
     "Prueba_Persecucion_20.oeog",
     "Prueba_Persecucion_21.oeog",
-    "Prueba_Persecucion_22.oeog",
     "Prueba_Persecucion_24.oeog",
     "Prueba_Persecucion_25.oeog",
     "Prueba_Persecucion_26.oeog",
@@ -210,7 +209,6 @@ PURSUIT_STUDIES = [
     "Prueba_Persecucion_30.oeog",
     "Prueba_Persecucion_31.oeog",
     "Prueba_Persecucion_32.oeog",
-    "Prueba_Persecucion_33.oeog",
     "Prueba_Persecucion_34.oeog",
     "Prueba_Persecucion_35.oeog",
 ]
@@ -219,7 +217,32 @@ OUTPUT_PATH = "pursuits_biomarkers.xlsx"
 
 
 def process_study(study: Study, pursuit: bool = False):
-    pass
+    test: Test
+    pursuit_tests = []
+    i = 1
+    while i < 3:
+        pursuit_tests[i - 1] = PursuitBiomarkers(study[i], 100, False)
+    return pursuit_tests
+
+
+def save_to(pursuit_biomarker: [PursuitBiomarkers], file_name: str):
+    with open(file_name, 'wb') as f:
+        data = tablib.Dataset(headers=['Wave Form MSE',
+                                       'Latency Mean',
+                                       'Corrective Saccades Count',
+                                       'Velocity Mean',
+                                       'Velocity Rate',
+                                       'Spectral Coherence'])
+        for i in pursuit_biomarker:
+            for j in [(pursuit_biomarker[i].waveform_mse,
+                       pursuit_biomarker[i].latency_mean,
+                       pursuit_biomarker[i].corrective_saccades_count,
+                       pursuit_biomarker[i].velocity_mean,
+                       pursuit_biomarker[i].velocity_ratio,
+                       pursuit_biomarker[i].spectral_coherence)]:
+                data.append(j)
+
+        f.write(data.export('xlsx'))
 
 
 if __name__ == "__main__":
@@ -228,14 +251,14 @@ if __name__ == "__main__":
         PURSUIT_OUTPUT_PATH.mkdir(parents=True)
 
     for filename in tqdm(
-        PURSUIT_STUDIES,
-        desc="Processing pursuit studies",
+            PURSUIT_STUDIES,
+            desc="Processing pursuit studies",
     ):
         print(f"Processing study {filename}")
         fullpath = PURSUIT_PATH / filename
         if fullpath.exists():
             study = load_study(fullpath)
-            process_study(study, pursuit=True)
+            save_to(process_study(study, pursuit=True), filename)
 
             output_path = PURSUIT_OUTPUT_PATH / filename
             save_study(study, output_path)
