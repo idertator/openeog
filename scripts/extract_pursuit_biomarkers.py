@@ -220,8 +220,9 @@ def process_study(study: Study, pursuit: bool = False):
     test: Test
     pursuit_tests = []
     i = 1
-    while i < 3:
-        pursuit_tests[i - 1] = PursuitBiomarkers(study[i], 100, False)
+    while i < len(study):
+        pursuit_tests.append(PursuitBiomarkers(study[i], 100, False))
+        i += 1
     return pursuit_tests
 
 
@@ -231,15 +232,15 @@ def save_to(pursuit_biomarker: [PursuitBiomarkers], file_name: str):
                                        'Latency Mean',
                                        'Corrective Saccades Count',
                                        'Velocity Mean',
-                                       'Velocity Rate',
+                                       'Velocity Ratio',
                                        'Spectral Coherence'])
         for i in pursuit_biomarker:
-            for j in [(pursuit_biomarker[i].waveform_mse,
-                       pursuit_biomarker[i].latency_mean,
-                       pursuit_biomarker[i].corrective_saccades_count,
-                       pursuit_biomarker[i].velocity_mean,
-                       pursuit_biomarker[i].velocity_ratio,
-                       pursuit_biomarker[i].spectral_coherence)]:
+            for j in [(i.waveform_mse,
+                       i.latency_mean,
+                       i.corrective_saccades_count,
+                       i.velocity_mean,
+                       i.velocity_ratio,
+                       i.spectral_coherence)]:
                 data.append(j)
 
         f.write(data.export('xlsx'))
@@ -258,7 +259,7 @@ if __name__ == "__main__":
         fullpath = PURSUIT_PATH / filename
         if fullpath.exists():
             study = load_study(fullpath)
-            save_to(process_study(study, pursuit=True), filename)
+            save_to(process_study(study, pursuit=True), OUTPUT_PATH)
 
             output_path = PURSUIT_OUTPUT_PATH / filename
             save_study(study, output_path)
