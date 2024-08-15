@@ -87,10 +87,13 @@ class PursuitBiomarkers:
 
         # denoised_channel = denoise_35(scaled_channel)
 
-        # peaks_channel = signal.find_peaks_cwt(abs(denoised_channel), 1000)[:-1]
+        #peaks_channel = signal.find_peaks_cwt(abs(denoised_channel), 1000)[:-1]
 
         peaks_channel = signal.find_peaks_cwt(abs(self.horizontal_channel), 1000)[:-1]
         peaks_stim_channel = signal.find_peaks_cwt(abs(self.stimuli_channel), 1000)[:-1]
+
+        print("Forma de array1:", peaks_channel.shape)
+        print("Forma de array2:", peaks_stim_channel.shape)
 
         displacements = peaks_stim_channel - peaks_channel
 
@@ -261,7 +264,7 @@ if __name__ == "__main__":
             study = load_study(fullpath)
             save_to(process_study(study, pursuit=True), OUTPUT_PATH)
 
-            output_path = PURSUIT_OUTPUT_PATH / filename
-            save_study(study, output_path)
+            #output_path = PURSUIT_OUTPUT_PATH / filename
+            #save_study(study, output_path)
 
         print()
