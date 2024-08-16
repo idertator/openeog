@@ -230,24 +230,24 @@ def process_study(study: Study, pursuit: bool = False):
 
 
 def save_to(pursuit_biomarker: [PursuitBiomarkers], file_name: str):
+    data = tablib.Dataset(headers=['Wave Form MSE',
+                                   'Latency Mean',
+                                   'Corrective Saccades Count',
+                                   'Velocity Mean',
+                                   'Velocity Ratio',
+                                   'Spectral Coherence'])
+    for i in pursuit_biomarker:
+        row = [i.waveform_mse[1],
+                i.latency_mean,
+                i.corrective_saccades_count,
+                i.velocity_mean,
+                i.velocity_ratio,
+                i.spectral_coherence]
+        print(row)
+        data.append(row)
     with open(file_name, 'wb') as f:
-        data = tablib.Dataset(headers=['Wave Form MSE',
-                                       'Latency Mean',
-                                       'Corrective Saccades Count',
-                                       'Velocity Mean',
-                                       'Velocity Ratio',
-                                       'Spectral Coherence'])
-        for i in pursuit_biomarker:
-            for j in [(i.waveform_mse,
-                       i.latency_mean,
-                       i.corrective_saccades_count,
-                       i.velocity_mean,
-                       i.velocity_ratio,
-                       i.spectral_coherence)]:
-                data.append(j)
-
         f.write(data.export('xlsx'))
-
+    print(file_name)
 
 if __name__ == "__main__":
     PURSUIT_OUTPUT_PATH = PURSUIT_PATH
