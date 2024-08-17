@@ -20,6 +20,20 @@ from openeog.core.models import Saccade, Test
 from openeog.core.saccades import saccades
 
 
+def to_match(peaks_channel: np.ndarray, peaks_stim: np.ndarray) -> np.ndarray:
+    res = np.zeros(len(peaks_stim))
+    for i in range(0, len(peaks_stim)):
+        min_difference = abs(peaks_stim[i] - peaks_channel[0])
+        close_value = peaks_channel[0]
+        for j in range(0, len(peaks_channel)):
+            difference = abs(peaks_stim[i] - peaks_channel[j])
+            if difference < min_difference:
+                close_value = peaks_channel[j]
+                min_difference = difference
+        res[i] = close_value
+    return res
+
+
 class PursuitBiomarkers:
     def __init__(
             self,
@@ -87,7 +101,7 @@ class PursuitBiomarkers:
 
         # denoised_channel = denoise_35(scaled_channel)
 
-        #peaks_channel = signal.find_peaks_cwt(abs(denoised_channel), 1000)[:-1]
+        # peaks_channel = signal.find_peaks_cwt(abs(denoised_channel), 1000)[:-1]
 
         peaks_channel = signal.find_peaks_cwt(abs(self.horizontal_channel), 1000)[:-1]
         peaks_stim_channel = signal.find_peaks_cwt(abs(self.stimuli_channel), 1000)[:-1]
@@ -95,7 +109,11 @@ class PursuitBiomarkers:
         print("Forma de hor_channel:", peaks_channel.shape)
         print("Forma de stim_channel:", peaks_stim_channel.shape)
 
-        displacements = peaks_stim_channel - peaks_channel
+        if len(peaks_channel) == len(peaks_stim_channel):
+            displacements = peaks_stim_channel - peaks_channel
+        else:
+            peaks_channel_adj = to_match(peaks_channel, peaks_stim_channel)
+            displacements = peaks_stim_channel - peaks_channel_adj
 
         latency_res = int(round(displacements.mean(), 0))
 
@@ -190,30 +208,30 @@ PURSUIT_PATH = Path(BASE_PATH) / "pursuits"
 
 PURSUIT_STUDIES = [
     "Prueba_Persecucion_01.oeog",
-    #"Prueba_Persecucion_02.oeog",
-    #"Prueba_Persecucion_06.oeog",
+    "Prueba_Persecucion_02.oeog",
+    "Prueba_Persecucion_06.oeog",
     "Prueba_Persecucion_07.oeog",
-    #"Prueba_Persecucion_08.oeog",
+    "Prueba_Persecucion_08.oeog",
     "Prueba_Persecucion_09.oeog",
-    #"Prueba_Persecucion_10.oeog",
-    #"Prueba_Persecucion_11.oeog",
-    #"Prueba_Persecucion_12.oeog",
-    #"Prueba_Persecucion_13.oeog",
-    #"Prueba_Persecucion_14.oeog",
-    #"Prueba_Persecucion_15.oeog",
-    #"Prueba_Persecucion_18.oeog",
-    #"Prueba_Persecucion_20.oeog",
-    #"Prueba_Persecucion_21.oeog",
-    #"Prueba_Persecucion_24.oeog",
-    #"Prueba_Persecucion_25.oeog",
-    #"Prueba_Persecucion_26.oeog",
-    #"Prueba_Persecucion_27.oeog",
-    #"Prueba_Persecucion_29.oeog",
-    #"Prueba_Persecucion_30.oeog",
-    #"Prueba_Persecucion_31.oeog",
-    #"Prueba_Persecucion_32.oeog",
-    #"Prueba_Persecucion_34.oeog",
-    #"Prueba_Persecucion_35.oeog",
+    "Prueba_Persecucion_10.oeog",
+    "Prueba_Persecucion_11.oeog",
+    "Prueba_Persecucion_12.oeog",
+    "Prueba_Persecucion_13.oeog",
+    "Prueba_Persecucion_14.oeog",
+    "Prueba_Persecucion_15.oeog",
+    "Prueba_Persecucion_18.oeog",
+    "Prueba_Persecucion_20.oeog",
+    "Prueba_Persecucion_21.oeog",
+    "Prueba_Persecucion_24.oeog",
+    "Prueba_Persecucion_25.oeog",
+    "Prueba_Persecucion_26.oeog",
+    "Prueba_Persecucion_27.oeog",
+    "Prueba_Persecucion_29.oeog",
+    "Prueba_Persecucion_30.oeog",
+    "Prueba_Persecucion_31.oeog",
+    "Prueba_Persecucion_32.oeog",
+    "Prueba_Persecucion_34.oeog",
+    "Prueba_Persecucion_35.oeog",
 ]
 
 OUTPUT_PATH = 'pursuits_biomarkers.xlsx'
@@ -223,7 +241,7 @@ def process_study(study: Study, pursuit: bool = False):
     test: Test
     pursuit_tests = []
     i = 1
-    while i < len(study)-1:
+    while i < len(study) - 1:
         pursuit_tests.append(PursuitBiomarkers(study[i], 100, False))
         i += 1
     return pursuit_tests
@@ -238,20 +256,19 @@ def save_to(pursuit_biomarker: [PursuitBiomarkers], file_name: str):
                                    'Spectral Coherence'])
     for i in pursuit_biomarker:
         row = [i.waveform_mse[1],
-                i.latency_mean,
-                i.corrective_saccades_count,
-                i.velocity_mean,
-                i.velocity_ratio,
-                i.spectral_coherence]
-        print(row)
+               i.latency_mean,
+               i.corrective_saccades_count,
+               i.velocity_mean,
+               i.velocity_ratio,
+               i.spectral_coherence]
         data.append(row)
     with open(file_name, 'wb') as f:
         f.write(data.export('xlsx'))
-    print(file_name)
+
 
 if __name__ == "__main__":
     PURSUIT_OUTPUT_PATH = PURSUIT_PATH
-    #PURSUIT_OUTPUT_PATH = PURSUIT_PATH / OUTPUT_PATH
+    # PURSUIT_OUTPUT_PATH = PURSUIT_PATH / OUTPUT_PATH
     if not PURSUIT_OUTPUT_PATH.exists():
         PURSUIT_OUTPUT_PATH.mkdir(parents=True)
 
@@ -265,7 +282,7 @@ if __name__ == "__main__":
             study = load_study(fullpath)
             save_to(process_study(study, pursuit=True), OUTPUT_PATH)
 
-            #output_path = PURSUIT_OUTPUT_PATH / filename
-            #save_study(study, output_path)
+            # output_path = PURSUIT_OUTPUT_PATH / filename
+            # save_study(study, output_path)
 
         print()
