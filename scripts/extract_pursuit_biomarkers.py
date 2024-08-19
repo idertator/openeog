@@ -106,8 +106,8 @@ class PursuitBiomarkers:
         peaks_channel = signal.find_peaks_cwt(abs(self.horizontal_channel), 1000)[:-1]
         peaks_stim_channel = signal.find_peaks_cwt(abs(self.stimuli_channel), 1000)[:-1]
 
-        print("Forma de hor_channel:", peaks_channel.shape)
-        print("Forma de stim_channel:", peaks_stim_channel.shape)
+        #print("Forma de hor_channel:", peaks_channel.shape)
+        #print("Forma de stim_channel:", peaks_stim_channel.shape)
 
         if len(peaks_channel) == len(peaks_stim_channel):
             displacements = peaks_stim_channel - peaks_channel
@@ -262,6 +262,7 @@ def save_to(pursuit_biomarker: [PursuitBiomarkers], file_name: str):
                i.velocity_ratio,
                i.spectral_coherence]
         data.append(row)
+
     with open(file_name, 'wb') as f:
         f.write(data.export('xlsx'))
 
@@ -271,7 +272,7 @@ if __name__ == "__main__":
     # PURSUIT_OUTPUT_PATH = PURSUIT_PATH / OUTPUT_PATH
     if not PURSUIT_OUTPUT_PATH.exists():
         PURSUIT_OUTPUT_PATH.mkdir(parents=True)
-
+    res = []
     for filename in tqdm(
             PURSUIT_STUDIES,
             desc="Processing pursuit studies",
@@ -280,9 +281,13 @@ if __name__ == "__main__":
         fullpath = PURSUIT_PATH / filename
         if fullpath.exists():
             study = load_study(fullpath)
-            save_to(process_study(study, pursuit=True), OUTPUT_PATH)
+            pursuits_res = process_study(study, pursuit=True)
+            for i in range(2):
+                res.append(pursuits_res[i])
+
+    save_to(res, OUTPUT_PATH)
 
             # output_path = PURSUIT_OUTPUT_PATH / filename
             # save_study(study, output_path)
 
-        print()
+    print()
