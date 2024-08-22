@@ -157,10 +157,10 @@ class PursuitBiomarkers:
 
     @property
     def velocity_ratio(self) -> float:
-        """Velocity Gain
+        """Velocity Ratio
 
         Returns:
-            float: velocity gain
+            float: velocity Ratio
         """
         mean_ch = self.velocity_mean
         stimuli_vel = differentiate(self.stimuli_channel)
