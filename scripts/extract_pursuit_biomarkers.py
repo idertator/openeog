@@ -177,7 +177,8 @@ class PursuitBiomarkers:
             float: spectral coherence
         """
         freqs, c = coherence(self.stimuli_channel, self.horizontal_channel, fs=1000.0)
-        coherence_factor = (1 - c)[:10].mean()
+        #coherence_factor = (1 - c)[:10].mean()
+        coherence_factor = c[:10].mean()
 
         return coherence_factor
 
